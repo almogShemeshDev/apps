@@ -1,60 +1,15 @@
+import 'dotenv/config'
 import express from 'express'
 import Anthropic from '@anthropic-ai/sdk'
-import axios from 'axios'
 import xml2js from 'xml2js'
 import cors from 'cors'
 
 const app = express()
-app.use(express.json())
+app.use(express.json({ limit: '10mb' }))
 app.use(cors())
 
 const client = new Anthropic()
 
-function extractUsername(url) {
-  const match = url.match(/collection\/user\/([^?/]+)/)
-  return match ? match[1] : null
-}
-
-async function fetchBGGCollection(username) {
-  const apiUrl = `https://boardgamegeek.com/xmlapi2/collection?username=${username}&own=1&stats=1&subtype=boardgame`
-
-  let response = await axios.get(apiUrl)
-
-  // BGG may return 202 if the request is queued — retry after delay
-  if (response.status === 202) {
-    await new Promise(r => setTimeout(r, 4000))
-    response = await axios.get(apiUrl)
-  }
-
-  if (response.status === 202) {
-    await new Promise(r => setTimeout(r, 4000))
-    response = await axios.get(apiUrl)
-  }
-
-  const parsed = await xml2js.parseStringPromise(response.data, { explicitArray: false })
-  const items = parsed.items?.item
-
-  if (!items) return []
-
-  const list = Array.isArray(items) ? items : [items]
-
-  return list.map(item => {
-    const name = item.name?._ || item.name || 'Unknown'
-    const stats = item.stats || {}
-    return {
-      name,
-      year: item.yearpublished || '?',
-      minPlayers: stats['@_minplayers'] || '?',
-      maxPlayers: stats['@_maxplayers'] || '?',
-      minPlaytime: stats['@_minplaytime'] || '?',
-      maxPlaytime: stats['@_maxplaytime'] || '?',
-      rating: item.stats?.rating?.average?.['@_value']
-        ? parseFloat(item.stats.rating.average['@_value']).toFixed(1)
-        : '?',
-      numPlays: item.numplays || '0',
-    }
-  }).sort((a, b) => a.name.localeCompare(b.name))
-}
 
 function buildSystemPrompt(games) {
   const gameList = games.map(g =>
@@ -78,26 +33,66 @@ Only recommend games from their collection above. Be conversational, friendly, a
 // In-memory sessions: sessionId -> { games, messages }
 const sessions = new Map()
 
-app.post('/api/collection', async (req, res) => {
-  const { url } = req.body
-  if (!url) return res.status(400).json({ error: 'URL required' })
 
-  const username = extractUsername(url)
-  if (!username) return res.status(400).json({ error: 'Could not extract username from URL' })
+async function parseGames(xml) {
+  // Sanitize bare & that aren't part of valid XML entities (e.g. game names with & in them)
+  const cleanXml = xml.replace(/&(?!(?:amp|lt|gt|apos|quot|#\d+|#x[0-9a-fA-F]+);)/g, '&amp;')
+
+  const parsed = await xml2js.parseStringPromise(cleanXml, { explicitArray: false })
+
+  // BGG v2 API returns a "please wait" message on first request (202 Accepted)
+  if (parsed.message) {
+    throw new Error('BGG is still processing your collection — refresh the BGG link, wait a few seconds, then copy and paste the XML again.')
+  }
+
+  const root = parsed.items || parsed.ITEMS
+  if (!root) return []
+  const items = root.item || root.ITEM
+  if (!items) return []
+  const list = Array.isArray(items) ? items : [items]
+  console.log(`Parsed ${list.length} games from BGG XML`)
+  return list.map(item => {
+    const name = item.name?._ || (typeof item.name === 'string' ? item.name : null)
+    const stats = item.stats || {}
+    const sa = stats.$ || {}
+    const avg = stats.rating?.average?.$?.value
+    return {
+      name: name || 'Unknown',
+      year: item.yearpublished?._ || item.yearpublished || '?',
+      minPlayers: sa.minplayers || '?',
+      maxPlayers: sa.maxplayers || '?',
+      minPlaytime: sa.minplaytime || '?',
+      maxPlaytime: sa.maxplaytime || '?',
+      rating: avg && avg !== 'N/A' ? parseFloat(avg).toFixed(1) : '?',
+      numPlays: item.numplays || '0',
+    }
+  }).sort((a, b) => a.name.localeCompare(b.name))
+}
+
+app.post('/api/collection', async (req, res) => {
+  const { username, xml: rawXml } = req.body || {}
+  if (!username || !rawXml) return res.status(400).json({ error: 'username and xml required' })
 
   try {
-    const games = await fetchBGGCollection(username)
-    if (games.length === 0) {
-      return res.status(404).json({ error: `No owned games found for user "${username}"` })
+    // Strip browser-prepended text — only keep from the first '<' onward
+    const xmlStart = rawXml.indexOf('<')
+    const xml = xmlStart > 0 ? rawXml.slice(xmlStart) : rawXml
+
+    if (xml.includes('<errors>') || xml.includes('<error>')) {
+      const msg = xml.match(/<message>([^<]*)<\/message>/)?.[1] || 'BGG returned an error'
+      return res.status(400).json({ error: msg })
     }
+
+    const games = await parseGames(xml)
+    if (!games.length) return res.status(404).json({ error: 'No owned games found — make sure you copied the full XML and that your BGG collection is set to public' })
 
     const sessionId = `${username}-${Date.now()}`
     sessions.set(sessionId, { games, messages: [] })
 
-    res.json({ sessionId, username, gameCount: games.length })
+    res.json({ sessionId, gameCount: games.length })
   } catch (err) {
-    console.error('BGG fetch error:', err.message)
-    res.status(500).json({ error: 'Failed to fetch collection from BoardGameGeek' })
+    console.error('Collection error:', err.message)
+    res.status(500).json({ error: err.message || 'Failed to parse collection' })
   }
 })
 

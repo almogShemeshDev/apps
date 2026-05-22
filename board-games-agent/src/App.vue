@@ -4,19 +4,41 @@
     <div v-if="!sessionId" class="setup">
       <div class="logo">🎲</div>
       <h1>Board Game Agent</h1>
-      <p class="subtitle">Paste your BoardGameGeek collection URL to get started</p>
 
-      <div class="input-row">
-        <input
-          v-model="collectionUrl"
-          type="text"
-          placeholder="https://boardgamegeek.com/collection/user/yourname"
+      <div v-if="!showPaste" class="form">
+        <p class="subtitle">Enter your BoardGameGeek username</p>
+        <div class="input-row">
+          <input
+            v-model="bggUsername"
+            type="text"
+            placeholder="BGG username"
+            :disabled="loading"
+            @keydown.enter="goToStep2"
+          />
+          <button @click="goToStep2" :disabled="!bggUsername.trim()">Next</button>
+        </div>
+      </div>
+
+      <div v-else class="form">
+        <p class="subtitle">
+          Open this link in your browser (you're already logged in to BGG). Wait until you see
+          a page full of XML data — not a "please wait" message — then
+          select all (<kbd>Ctrl+A</kbd>), copy (<kbd>Ctrl+C</kbd>), and paste below:
+        </p>
+        <a :href="bggXmlUrl" target="_blank" class="bgg-link">{{ bggXmlUrl }}</a>
+        <textarea
+          v-model="xmlPaste"
+          class="large"
+          placeholder="Paste your collection XML here…"
+          rows="6"
           :disabled="loading"
-          @keydown.enter="loadCollection"
-        />
-        <button @click="loadCollection" :disabled="loading || !collectionUrl.trim()">
-          {{ loading ? 'Loading…' : 'Load' }}
-        </button>
+        ></textarea>
+        <div class="input-row">
+          <button class="secondary" @click="showPaste = false">Back</button>
+          <button @click="loadCollection" :disabled="loading || !xmlPaste.trim()">
+            {{ loading ? 'Loading…' : 'Load my games' }}
+          </button>
+        </div>
       </div>
 
       <p v-if="error" class="error">{{ error }}</p>
@@ -59,9 +81,11 @@
 </template>
 
 <script setup>
-import { ref, nextTick } from 'vue'
+import { ref, computed, nextTick } from 'vue'
 
-const collectionUrl = ref('')
+const bggUsername = ref('')
+const xmlPaste = ref('')
+const showPaste = ref(false)
 const sessionId = ref(null)
 const username = ref('')
 const gameCount = ref(0)
@@ -72,8 +96,18 @@ const thinking = ref(false)
 const error = ref('')
 const messagesEl = ref(null)
 
+const bggXmlUrl = computed(() =>
+  `https://boardgamegeek.com/xmlapi2/collection?username=${bggUsername.value}&own=1&stats=1&subtype=boardgame`
+)
+
+function goToStep2() {
+  if (!bggUsername.value.trim()) return
+  error.value = ''
+  showPaste.value = true
+}
+
 async function loadCollection() {
-  if (!collectionUrl.value.trim()) return
+  if (!xmlPaste.value.trim()) return
   loading.value = true
   error.value = ''
 
@@ -81,18 +115,20 @@ async function loadCollection() {
     const res = await fetch('/api/collection', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ url: collectionUrl.value.trim() }),
+      body: JSON.stringify({ username: bggUsername.value.trim(), xml: xmlPaste.value }),
     })
-    const data = await res.json()
+    const text = await res.text()
+    let data
+    try { data = JSON.parse(text) } catch { throw new Error(`Server error: ${text || 'empty response'}`) }
     if (!res.ok) throw new Error(data.error || 'Failed to load collection')
 
     sessionId.value = data.sessionId
-    username.value = data.username
+    username.value = bggUsername.value.trim()
     gameCount.value = data.gameCount
 
     messages.value = [{
       role: 'assistant',
-      content: `I've loaded **${data.gameCount} games** from **${data.username}**'s collection. What are you in the mood for tonight? Tell me how many players you have and I'll help you pick something great!`,
+      content: `I've loaded **${data.gameCount} games** from **${bggUsername.value.trim()}**'s collection. What are you in the mood for tonight? Tell me how many players you have and I'll help you pick something great!`,
     }]
   } catch (err) {
     error.value = err.message
@@ -138,7 +174,9 @@ async function scrollToBottom() {
 function reset() {
   sessionId.value = null
   messages.value = []
-  collectionUrl.value = ''
+  bggUsername.value = ''
+  xmlPaste.value = ''
+  showPaste.value = false
   userInput.value = ''
   error.value = ''
 }
@@ -182,6 +220,33 @@ h1 {
   color: #888;
   font-size: 0.95rem;
   max-width: 400px;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  width: 100%;
+  max-width: 480px;
+}
+
+.bgg-link {
+  color: #5865f2;
+  font-size: 0.8rem;
+  word-break: break-all;
+  text-align: left;
+}
+
+textarea.large {
+  min-height: 120px;
+  font-size: 0.8rem;
+  font-family: monospace;
+}
+
+button.secondary {
+  background: #1a1a24;
+  border: 1px solid #2e2e42;
+  flex: 0 0 auto;
 }
 
 .input-row {
