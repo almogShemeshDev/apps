@@ -13,9 +13,11 @@
             type="text"
             placeholder="BGG username"
             :disabled="loading"
-            @keydown.enter="goToStep2"
+            @keydown.enter="goToStep1Next"
           />
-          <button @click="goToStep2" :disabled="!bggUsername.trim()">Next</button>
+          <button @click="goToStep1Next" :disabled="!bggUsername.trim() || loading">
+            {{ loading ? 'Loading…' : 'Next' }}
+          </button>
         </div>
       </div>
 
@@ -81,11 +83,12 @@
 </template>
 
 <script setup>
-import { ref, computed, nextTick } from 'vue'
+import { ref, computed, nextTick, onMounted } from 'vue'
 
 const bggUsername = ref('')
 const xmlPaste = ref('')
 const showPaste = ref(false)
+const canAutoFetch = ref(false)
 const sessionId = ref(null)
 const username = ref('')
 const gameCount = ref(0)
@@ -100,10 +103,48 @@ const bggXmlUrl = computed(() =>
   `https://boardgamegeek.com/xmlapi2/collection?username=${bggUsername.value}&own=1&stats=1&subtype=boardgame`
 )
 
-function goToStep2() {
+onMounted(async () => {
+  try {
+    const res = await fetch('/api/config')
+    const data = await res.json()
+    canAutoFetch.value = data.canAutoFetch
+  } catch {}
+})
+
+async function goToStep1Next() {
   if (!bggUsername.value.trim()) return
   error.value = ''
-  showPaste.value = true
+
+  if (!canAutoFetch.value) {
+    showPaste.value = true
+    return
+  }
+
+  loading.value = true
+  try {
+    const res = await fetch('/api/fetch-collection', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username: bggUsername.value.trim() }),
+    })
+    const data = await res.json()
+    if (res.ok) return finishLoad(data)
+    error.value = data.error || 'Failed to load collection'
+  } catch (err) {
+    error.value = err.message
+  } finally {
+    loading.value = false
+  }
+}
+
+function finishLoad(data) {
+  sessionId.value = data.sessionId
+  username.value = bggUsername.value.trim()
+  gameCount.value = data.gameCount
+  messages.value = [{
+    role: 'assistant',
+    content: `I've loaded **${data.gameCount} games** from **${bggUsername.value.trim()}**'s collection. What are you in the mood for tonight? Tell me how many players you have and I'll help you pick something great!`,
+  }]
 }
 
 async function loadCollection() {
@@ -121,15 +162,7 @@ async function loadCollection() {
     let data
     try { data = JSON.parse(text) } catch { throw new Error(`Server error: ${text || 'empty response'}`) }
     if (!res.ok) throw new Error(data.error || 'Failed to load collection')
-
-    sessionId.value = data.sessionId
-    username.value = bggUsername.value.trim()
-    gameCount.value = data.gameCount
-
-    messages.value = [{
-      role: 'assistant',
-      content: `I've loaded **${data.gameCount} games** from **${bggUsername.value.trim()}**'s collection. What are you in the mood for tonight? Tell me how many players you have and I'll help you pick something great!`,
-    }]
+    finishLoad(data)
   } catch (err) {
     error.value = err.message
   } finally {
@@ -179,6 +212,8 @@ function reset() {
   showPaste.value = false
   userInput.value = ''
   error.value = ''
+  // re-check auto-fetch capability on reset
+  fetch('/api/config').then(r => r.json()).then(d => { canAutoFetch.value = d.canAutoFetch }).catch(() => {})
 }
 
 function formatMessage(text) {

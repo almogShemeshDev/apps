@@ -3,6 +3,7 @@ import express from 'express'
 import Anthropic from '@anthropic-ai/sdk'
 import xml2js from 'xml2js'
 import cors from 'cors'
+import https from 'https'
 
 const app = express()
 app.use(express.json({ limit: '10mb' }))
@@ -33,6 +34,41 @@ Only recommend games from their collection above. Be conversational, friendly, a
 // In-memory sessions: sessionId -> { games, messages }
 const sessions = new Map()
 
+function httpRequest(options, body = null) {
+  return new Promise((resolve, reject) => {
+    const req = https.request(options, res => {
+      let data = ''
+      res.on('data', chunk => data += chunk)
+      res.on('end', () => resolve({ status: res.statusCode, headers: res.headers, body: data }))
+    })
+    req.on('error', reject)
+    req.setTimeout(15000, () => { req.destroy(); reject(new Error('Request timed out')) })
+    if (body) req.write(body)
+    req.end()
+  })
+}
+
+async function fetchBGGCollection(username) {
+  const cookie = process.env.BGG_COOKIE
+  if (!cookie) throw new Error('BGG_COOKIE not set in .env')
+
+  const path = `/xmlapi2/collection?username=${encodeURIComponent(username)}&own=1&stats=1&subtype=boardgame`
+  const headers = { Cookie: cookie, 'User-Agent': 'Mozilla/5.0' }
+
+  let res = await httpRequest({ hostname: 'boardgamegeek.com', path, method: 'GET', headers })
+
+  // BGG queues large collections and returns 202 — retry up to twice
+  for (let i = 0; i < 2 && res.status === 202; i++) {
+    await new Promise(r => setTimeout(r, 3500))
+    res = await httpRequest({ hostname: 'boardgamegeek.com', path, method: 'GET', headers })
+  }
+
+  if (res.status === 401 || res.status === 403) throw new Error('BGG rejected the cookie — it may have expired, update BGG_COOKIE in .env')
+  if (res.status === 202) throw new Error('BGG is still processing your collection — try again in a few seconds')
+  if (res.status !== 200) throw new Error(`BGG returned HTTP ${res.status}`)
+
+  return res.body
+}
 
 async function parseGames(xml) {
   // Sanitize bare & that aren't part of valid XML entities (e.g. game names with & in them)
@@ -69,6 +105,35 @@ async function parseGames(xml) {
   }).sort((a, b) => a.name.localeCompare(b.name))
 }
 
+app.get('/api/config', (_req, res) => {
+  res.json({ canAutoFetch: !!process.env.BGG_COOKIE })
+})
+
+app.post('/api/fetch-collection', async (req, res) => {
+  const { username } = req.body || {}
+  if (!username) return res.status(400).json({ error: 'username required' })
+
+  try {
+    const xml = await fetchBGGCollection(username)
+
+    if (xml.includes('<errors>') || xml.includes('<error>')) {
+      const msg = xml.match(/<message>([^<]*)<\/message>/)?.[1] || 'BGG returned an error'
+      return res.status(400).json({ error: msg })
+    }
+
+    const games = await parseGames(xml)
+    if (!games.length) return res.status(404).json({ error: 'No owned games found for that username' })
+
+    const sessionId = `${username}-${Date.now()}`
+    sessions.set(sessionId, { games, messages: [] })
+    res.json({ sessionId, gameCount: games.length })
+  } catch (err) {
+    console.error('Fetch-collection error:', err.message)
+    res.status(500).json({ error: err.message })
+  }
+})
+
+// Manual paste fallback
 app.post('/api/collection', async (req, res) => {
   const { username, xml: rawXml } = req.body || {}
   if (!username || !rawXml) return res.status(400).json({ error: 'username and xml required' })
