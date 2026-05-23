@@ -2,7 +2,7 @@ name: Deploy Mage Knight Player Aid
 
 on:
   push:
-    branches: [mage-knight-player-aid]
+    branches: [main, master]
     paths: [mage-knight-player-aid/**]
 
 permissions:
