@@ -29,9 +29,13 @@ jobs:
         working-directory: mage-knight-player-aid
       - run: npm run build
         working-directory: mage-knight-player-aid
+      - name: Arrange site structure
+        run: |
+          mkdir -p _site/mage-knight-player-aid
+          cp -r mage-knight-player-aid/dist/. _site/mage-knight-player-aid/
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: mage-knight-player-aid/dist
+          path: _site
 
   deploy:
     needs: build

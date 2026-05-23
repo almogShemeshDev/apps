@@ -3,5 +3,5 @@ import vue from '@vitejs/plugin-vue'
 
 export default defineConfig({
   plugins: [vue()],
-  base: '/apps/',
+  base: '/apps/mage-knight-player-aid/',
 })
