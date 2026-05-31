@@ -1,9 +1,11 @@
-name: Deploy Mage Knight Player Aid
+name: Deploy Apps
 
 on:
   push:
     branches: [main, master]
-    paths: [mage-knight-player-aid/**]
+    paths:
+      - mage-knight-player-aid/**
+      - milky-way/**
   workflow_dispatch:
 
 permissions:
@@ -23,16 +25,24 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: npm
-          cache-dependency-path: mage-knight-player-aid/package-lock.json
+
       - run: npm ci
         working-directory: mage-knight-player-aid
       - run: npm run build
         working-directory: mage-knight-player-aid
+
+      - run: npm ci
+        working-directory: milky-way
+      - run: npm run build
+        working-directory: milky-way
+
       - name: Arrange site structure
         run: |
           mkdir -p _site/mage-knight-player-aid
+          mkdir -p _site/milky-way
           cp -r mage-knight-player-aid/dist/. _site/mage-knight-player-aid/
+          cp -r milky-way/dist/. _site/milky-way/
+
       - uses: actions/upload-pages-artifact@v3
         with:
           path: _site
