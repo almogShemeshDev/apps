@@ -44,7 +44,7 @@ const discardCount = computed(() => game.card.value.discard)
     </div>
 
     <div class="must-stop-alert" v-if="game.mustStop.value">
-      None of your locked fruits appeared — you must stop this turn.
+      None of your locked fruits appeared — opponents gain the dice results and you may pass your turn.
     </div>
 
     <div class="fruits" v-if="!game.mustStop.value">

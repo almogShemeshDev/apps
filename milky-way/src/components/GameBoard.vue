@@ -76,7 +76,7 @@ const isLastCard = computed(() => game.state.cardIdx === 5)
               :disabled="!canStop"
               @click="game.stop()"
             >
-              ⏹ Stop &amp; Keep
+              {{ game.mustStop.value ? '↩ Pass Turn' : '⏹ Stop &amp; Keep' }}
             </button>
             <button
               class="btn-continue"
