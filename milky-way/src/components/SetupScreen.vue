@@ -1,6 +1,5 @@
 <script setup>
 import { ref, computed, inject } from 'vue'
-import { CARDS } from '../game.js'
 
 const game = inject('game')
 const names = ref(['', ''])
@@ -58,30 +57,23 @@ function start() {
         </div>
         <div class="rule">
           <span class="rule-icon">✅</span>
-          <span>Select at least one fruit <em>type</em> to keep. The card limits how many dice you may take.</span>
+          <span>Select a fruit type to keep — you collect <em>all</em> dice showing that fruit.</span>
         </div>
         <div class="rule">
-          <span class="rule-icon">🎯</span>
-          <span><strong>Stop</strong> to lock in your fruits, or <strong>Continue</strong> to the next card for another roll.</span>
+          <span class="rule-icon">⏹</span>
+          <span><strong>Stop</strong>: keep your collected dice. Unselected dice go to all opponents.</span>
         </div>
         <div class="rule">
-          <span class="rule-icon">🎁</span>
-          <span>Discarded dice go to <em>all other players</em> — pushing your luck helps your opponents too!</span>
+          <span class="rule-icon">▶</span>
+          <span><strong>Continue</strong>: save your current dice and re-roll only the leftover dice — but you're locked to the same fruit type!</span>
+        </div>
+        <div class="rule">
+          <span class="rule-icon">💀</span>
+          <span>If you continue and your locked fruit doesn't appear, opponents gain all those dice and your turn ends.</span>
         </div>
         <div class="rule">
           <span class="rule-icon">🏆</span>
-          <span>After 6 rounds, whoever collected the most of each fruit wins that "project". Most project wins = overall winner.</span>
-        </div>
-      </div>
-
-      <div class="card-table">
-        <div class="ct-header">
-          <span>Card</span><span>You Keep</span><span>Others Get</span>
-        </div>
-        <div v-for="c in CARDS" :key="c.id" class="ct-row">
-          <span class="ct-id">{{ c.id }}</span>
-          <span class="ct-keep">{{ c.keep }} 🟢</span>
-          <span class="ct-discard">{{ c.discard > 0 ? `${c.discard} 🔴` : '—' }}</span>
+          <span>After 6 rounds, whoever collected the most of each fruit wins that type. Most type wins = overall winner.</span>
         </div>
       </div>
     </div>
