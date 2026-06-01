@@ -1,6 +1,5 @@
 <script setup>
 import { computed, inject } from 'vue'
-import CardPath from './CardPath.vue'
 import DiceArea from './DiceArea.vue'
 import FruitSelector from './FruitSelector.vue'
 import PlayerScores from './PlayerScores.vue'
@@ -14,9 +13,8 @@ const canContinue = computed(() =>
   game.state.rolled &&
   game.state.selectedFruits.length > 0 &&
   !game.mustStop.value &&
-  game.state.cardIdx < 5
+  game.nonSelectedDiceCount.value > 0
 )
-const isLastCard = computed(() => game.state.cardIdx === 5)
 </script>
 
 <template>
@@ -32,15 +30,10 @@ const isLastCard = computed(() => game.state.cardIdx === 5)
         <span class="turn-label">Active Player</span>
         <span class="player-name">{{ game.activePlayer.value?.name }}</span>
       </div>
-      <div class="card-info">
-        <span class="turn-label">Card</span>
-        <span class="card-num">{{ game.state.cardIdx + 1 }} / 6</span>
+      <div class="dice-info">
+        <span class="turn-label">Dice in Play</span>
+        <span class="dice-num">{{ game.state.rolled ? game.state.dice.length : 6 }}</span>
       </div>
-    </div>
-
-    <!-- Card path -->
-    <div class="section">
-      <CardPath />
     </div>
 
     <!-- Main layout: dice+actions | scores -->
@@ -48,10 +41,7 @@ const isLastCard = computed(() => game.state.cardIdx === 5)
       <div class="left-col">
         <!-- Dice -->
         <div class="panel dice-panel">
-          <div class="panel-title">
-            Dice Roll
-            <span v-if="game.state.rolled" class="roll-hint">Card {{ game.state.cardIdx + 1 }}: keep {{ game.card.value.keep }}, give {{ game.card.value.discard }}</span>
-          </div>
+          <div class="panel-title">Dice Roll</div>
           <DiceArea />
         </div>
 
@@ -83,7 +73,7 @@ const isLastCard = computed(() => game.state.cardIdx === 5)
               :disabled="!canContinue"
               @click="game.continueNext()"
             >
-              {{ isLastCard ? '(last card)' : 'Continue →' }}
+              Continue →
             </button>
           </template>
         </div>
@@ -127,7 +117,7 @@ const isLastCard = computed(() => game.state.cardIdx === 5)
   overflow: hidden;
 }
 
-.round-info, .player-info, .card-info {
+.round-info, .player-info, .dice-info {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -135,7 +125,7 @@ const isLastCard = computed(() => game.state.cardIdx === 5)
   flex: 1;
   border-right: 1px solid var(--border);
 }
-.card-info { border-right: none; }
+.dice-info { border-right: none; }
 
 .round-label, .turn-label {
   font-size: 0.7rem;
@@ -163,17 +153,10 @@ const isLastCard = computed(() => game.state.cardIdx === 5)
   white-space: nowrap;
 }
 
-.card-num {
+.dice-num {
   font-size: 1.4rem;
   font-weight: 700;
   color: var(--purple);
-}
-
-.section {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 14px 16px;
 }
 
 .main-layout {
@@ -206,17 +189,6 @@ const isLastCard = computed(() => game.state.cardIdx === 5)
   letter-spacing: 1px;
   color: var(--dim);
   margin-bottom: 14px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.roll-hint {
-  text-transform: none;
-  letter-spacing: 0;
-  font-size: 0.78rem;
-  color: var(--gold);
-  font-weight: 600;
 }
 
 .dice-panel { min-height: 120px; }

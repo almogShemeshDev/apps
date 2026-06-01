@@ -12,35 +12,42 @@ const fruitOptions = computed(() =>
     const count = game.diceGroups.value[fruit] || 0
     const selected = game.state.selectedFruits.includes(fruit)
     const lockedOut = isCommitted.value && !committed.value.includes(fruit)
-    const selectable = game.canSelectFruit(fruit)
-    return { fruit, count, selected, selectable, lockedOut }
+    return { fruit, count, selected, lockedOut }
   })
 )
 
-const keepLimit = computed(() => game.card.value.keep)
-const keptCount = computed(() => game.selectedDiceCount.value)
-const discardCount = computed(() => game.card.value.discard)
+const savedEntries = computed(() =>
+  FRUITS
+    .map(f => ({ fruit: f, count: game.state.savedFruitCounts[f] }))
+    .filter(e => e.count > 0)
+)
+
+const nonSelectedCount = computed(() => game.nonSelectedDiceCount.value)
 </script>
 
 <template>
   <div class="fruit-selector">
+    <!-- Saved dice from previous continues -->
+    <div class="saved-banner" v-if="savedEntries.length > 0">
+      <span class="sb-label">Saved</span>
+      <span class="sb-fruits">
+        <span v-for="e in savedEntries" :key="e.fruit" class="sb-entry">
+          {{ FRUIT_EMOJI[e.fruit] }}×{{ e.count }}
+        </span>
+      </span>
+    </div>
+
     <!-- Commitment banner -->
     <div class="commit-banner" v-if="isCommitted">
       <span class="cb-label">Locked to</span>
       <span class="cb-fruits">
         <span v-for="f in committed" :key="f">{{ FRUIT_EMOJI[f] }}</span>
       </span>
-      <span class="cb-note">only these types allowed until you stop</span>
+      <span class="cb-note">only these types allowed</span>
     </div>
 
     <div class="selector-label" v-if="!game.mustStop.value">
-      <span>Select fruit types to keep</span>
-      <span class="limit">
-        <span class="kept" :class="{ full: keptCount >= keepLimit }">{{ keptCount }}</span>
-        <span class="sep">/</span>
-        <span class="max">{{ keepLimit }}</span>
-        <span class="dice-word">dice</span>
-      </span>
+      Select fruit type to keep
     </div>
 
     <div class="must-stop-alert" v-if="game.mustStop.value">
@@ -55,11 +62,10 @@ const discardCount = computed(() => game.card.value.discard)
         :class="{
           selected: opt.selected,
           empty: !opt.count,
-          blocked: !opt.selectable && !opt.selected && !opt.lockedOut,
           'locked-out': opt.lockedOut,
         }"
         :style="opt.count && !opt.lockedOut ? { '--fc': FRUIT_COLOR[opt.fruit] } : {}"
-        :disabled="!opt.count || (!opt.selectable && !opt.selected)"
+        :disabled="!opt.count || opt.lockedOut"
         @click="game.toggleFruit(opt.fruit)"
       >
         <span class="emoji">{{ FRUIT_EMOJI[opt.fruit] }}</span>
@@ -69,9 +75,9 @@ const discardCount = computed(() => game.card.value.discard)
       </button>
     </div>
 
-    <div class="discard-info" v-if="discardCount > 0 && game.state.rolled && !game.mustStop.value">
-      <span class="di-label">Others receive:</span>
-      <span class="di-count">{{ discardCount }} dice worth of unselected fruits</span>
+    <div class="discard-info" v-if="nonSelectedCount > 0 && game.state.rolled && !game.mustStop.value">
+      <span class="di-label">Others receive if you stop:</span>
+      <span class="di-count">{{ nonSelectedCount }} dice</span>
     </div>
   </div>
 </template>
@@ -84,24 +90,9 @@ const discardCount = computed(() => game.card.value.discard)
 }
 
 .selector-label {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
   font-size: 0.85rem;
   color: var(--dim);
 }
-
-.limit {
-  display: flex;
-  align-items: baseline;
-  gap: 3px;
-  font-weight: 600;
-}
-
-.kept { color: var(--green); font-size: 1.1rem; }
-.kept.full { color: var(--gold); }
-.sep, .max { color: var(--dim); }
-.dice-word { color: var(--dim); font-size: 0.8rem; margin-left: 2px; }
 
 .fruits {
   display: flex;
@@ -123,7 +114,7 @@ const discardCount = computed(() => game.card.value.discard)
   position: relative;
 }
 
-.fruit-btn:not(.empty):not(.blocked):hover {
+.fruit-btn:not(.empty):not(.locked-out):hover {
   border-color: color-mix(in srgb, var(--fc) 60%, var(--border));
 }
 
@@ -136,11 +127,6 @@ const discardCount = computed(() => game.card.value.discard)
 .fruit-btn.empty {
   opacity: 0.3;
   cursor: default;
-}
-
-.fruit-btn.blocked {
-  opacity: 0.4;
-  cursor: not-allowed;
 }
 
 .fruit-btn.locked-out {
@@ -179,6 +165,20 @@ const discardCount = computed(() => game.card.value.discard)
 }
 .di-label { color: var(--red); font-weight: 600; }
 .di-count { color: var(--dim); }
+
+.saved-banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: color-mix(in srgb, var(--green) 8%, var(--card-bg));
+  border: 1px solid color-mix(in srgb, var(--green) 30%, var(--border));
+  border-radius: 8px;
+  font-size: 0.82rem;
+}
+.sb-label { color: var(--green); font-weight: 700; }
+.sb-fruits { display: flex; gap: 6px; }
+.sb-entry { font-size: 1rem; font-weight: 600; }
 
 .commit-banner {
   display: flex;

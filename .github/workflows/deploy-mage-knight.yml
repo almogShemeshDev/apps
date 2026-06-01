@@ -6,6 +6,7 @@ on:
     paths:
       - mage-knight-player-aid/**
       - milky-way/**
+      - .github/workflows/**
   workflow_dispatch:
 
 permissions:
