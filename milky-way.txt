@@ -1,0 +1,20 @@
+❯ let's start a new project next to board-games-agent, mage-knight-player-aid, etc...
+  project name: milky-way
+  type: a board game contains dice rolling yahtzee style and push your luck
+  
+  setup:
+  6 cards as a path
+
+  rules:
+  each player rolls 6 dice on start of their turn
+  must decide to keep at least 1 kind of product from the dice results: banana, cacao, strewberry, grapefruit, carrot.
+  now he may choose: 1. keep the amount of product he rolled and keep them, giving to all player the rest.
+  2. continue to roll all different kind of dice result but this time must discard 1 die and give to other players the result.
+  
+  doing that for the rest of the 5 cards, 6 in total in a round. while each card specify how many dice they must discard on each step (card)
+  
+  cards: 1 - keep all. 2 - keep 4 discard 2. 3 - keep 2 discard 4. 4 - keep 5, discard 1. 5 - keep 4 discard 2. 6 - keep 3 discard 3.
+  
+  scoring:
+  each player sum his score for each fruit every round, by what he collected as an active player and gain by opponents discard.
+  the winner is the player who won the majority on th most projects after 6 rounds. 

@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ניהול חנות</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .admin-layout { display:flex; min-height:calc(100vh - 70px); }
+    .sidebar {
+      width: 240px;
+      background: var(--surface);
+      border-left: 1px solid var(--border);
+      padding: 1.5rem 1rem;
+      flex-shrink: 0;
+    }
+    .sidebar h3 { color:var(--muted); font-size:0.75rem; letter-spacing:1px; text-transform:uppercase; margin-bottom:0.8rem; padding:0 0.5rem; }
+    .sidebar-link {
+      display:flex; align-items:center; gap:0.6rem;
+      padding:0.7rem 0.8rem; border-radius:10px;
+      color:var(--muted); text-decoration:none; font-weight:500;
+      margin-bottom:0.3rem; transition:all 0.2s; cursor:pointer;
+      background:none; border:none; width:100%; text-align:right;
+      font-family:'Heebo',sans-serif; font-size:0.95rem;
+    }
+    .sidebar-link:hover, .sidebar-link.active { background:var(--card); color:var(--text); }
+    .sidebar-link.active { color:var(--accent); border-right:3px solid var(--accent); }
+    .admin-content { flex:1; padding:2rem; overflow-y:auto; }
+    .admin-section { display:none; }
+    .admin-section.active { display:block; }
+
+    .stats-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:1rem; margin-bottom:2rem; }
+    .stat-card {
+      background:var(--card); border:1px solid var(--border); border-radius:var(--radius);
+      padding:1.5rem; text-align:center;
+    }
+    .stat-card .stat-icon { font-size:2.5rem; margin-bottom:0.5rem; }
+    .stat-card .stat-value { font-size:2rem; font-weight:900; color:var(--neon); }
+    .stat-card .stat-label { color:var(--muted); font-size:0.85rem; margin-top:0.3rem; }
+
+    .orders-table { width:100%; border-collapse:collapse; }
+    .orders-table th, .orders-table td {
+      padding:1rem; text-align:right; border-bottom:1px solid var(--border); font-size:0.9rem;
+    }
+    .orders-table th { color:var(--muted); font-size:0.8rem; font-weight:600; }
+    .orders-table tr:hover { background:rgba(255,255,255,0.02); }
+
+    .status-badge {
+      display:inline-block; padding:0.3rem 0.8rem; border-radius:50px;
+      font-size:0.78rem; font-weight:600;
+    }
+    .status-pending { background:rgba(245,158,11,0.15); color:#f59e0b; }
+    .status-shipped { background:rgba(6,182,212,0.15); color:#06b6d4; }
+    .status-done { background:rgba(16,185,129,0.15); color:#10b981; }
+
+    .setting-row { display:flex; align-items:center; gap:1rem; margin-bottom:1rem; flex-wrap:wrap; }
+    .setting-row label { min-width:140px; font-weight:600; color:var(--muted); font-size:0.9rem; }
+    .setting-row input, .setting-row select, .setting-row textarea {
+      flex:1; min-width:200px;
+      background:var(--surface); border:1px solid var(--border); color:var(--text);
+      padding:0.65rem 1rem; border-radius:10px; font-family:'Heebo',sans-serif; font-size:0.95rem;
+    }
+    .setting-row input:focus, .setting-row textarea:focus { outline:none; border-color:var(--accent); }
+    textarea { resize:vertical; min-height:80px; }
+
+    .color-preview {
+      width:40px; height:40px; border-radius:8px; border:2px solid var(--border);
+      flex-shrink:0; transition:background 0.3s;
+    }
+
+    .product-manage-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:1rem; }
+    .product-manage-card {
+      background:var(--card); border:1px solid var(--border); border-radius:var(--radius); padding:1rem;
+    }
+    .product-manage-card .pm-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem; }
+    .pm-emoji { font-size:2rem; }
+    .pm-name { font-weight:700; font-size:0.95rem; margin-bottom:0.3rem; }
+    .pm-price { color:var(--neon); font-weight:700; }
+    .pm-actions { display:flex; gap:0.5rem; margin-top:0.8rem; }
+    .pm-btn {
+      flex:1; padding:0.4rem; border-radius:7px; font-family:'Heebo',sans-serif;
+      font-size:0.82rem; font-weight:600; cursor:pointer; border:1px solid var(--border);
+      background:var(--surface); color:var(--text); transition:all 0.2s;
+    }
+    .pm-btn:hover { border-color:var(--accent); color:var(--accent); }
+    .pm-btn.danger:hover { border-color:var(--danger); color:var(--danger); }
+
+    .modal-overlay {
+      display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7);
+      z-index:200; align-items:center; justify-content:center;
+    }
+    .modal-overlay.open { display:flex; }
+    .modal {
+      background:var(--card); border:1px solid var(--border); border-radius:var(--radius);
+      padding:2rem; max-width:480px; width:90%; max-height:90vh; overflow-y:auto;
+    }
+    .modal h3 { font-size:1.3rem; font-weight:800; margin-bottom:1.5rem; }
+    .modal .form-group { margin-bottom:1rem; }
+    .modal .form-group label { display:block; font-weight:600; color:var(--muted); margin-bottom:0.3rem; font-size:0.85rem; }
+    .modal .form-group input, .modal .form-group select, .modal .form-group textarea {
+      width:100%; background:var(--surface); border:1px solid var(--border);
+      color:var(--text); padding:0.65rem 1rem; border-radius:10px;
+      font-family:'Heebo',sans-serif; font-size:0.95rem;
+    }
+    .modal-actions { display:flex; gap:1rem; margin-top:1.5rem; }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-logo" id="store-name-display" href="../index.html">⚡ TechZone</a>
+  <div class="nav-links">
+    <a href="../index.html" target="_blank">👁️ צפה בחנות</a>
+    <a href="../cart.html" class="cart-btn">🛒 <span id="cart-badge" style="display:none"></span></a>
+  </div>
+</nav>
+
+<div class="admin-layout">
+  <div class="sidebar">
+    <h3>ניהול</h3>
+    <button class="sidebar-link active" onclick="showSection('dashboard')">📊 לוח בקרה</button>
+    <button class="sidebar-link" onclick="showSection('orders')">📦 הזמנות</button>
+    <button class="sidebar-link" onclick="showSection('products')">🛍️ מוצרים</button>
+    <button class="sidebar-link" onclick="showSection('settings')">⚙️ הגדרות חנות</button>
+    <div style="height:1px;background:var(--border);margin:1rem 0"></div>
+    <h3>קישורים</h3>
+    <a class="sidebar-link" href="../index.html" target="_blank">🌐 פתח חנות</a>
+  </div>
+
+  <div class="admin-content">
+
+    <!-- DASHBOARD -->
+    <div class="admin-section active" id="section-dashboard">
+      <h2 style="font-size:1.8rem;font-weight:900;margin-bottom:1.5rem">📊 לוח בקרה</h2>
+      <div class="stats-grid" id="stats-grid"></div>
+      <h3 style="font-weight:700;margin-bottom:1rem">🕐 הזמנות אחרונות</h3>
+      <div id="recent-orders"></div>
+    </div>
+
+    <!-- ORDERS -->
+    <div class="admin-section" id="section-orders">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem">
+        <h2 style="font-size:1.8rem;font-weight:900">📦 כל ההזמנות</h2>
+        <button class="btn btn-outline" onclick="clearOrders()" style="font-size:0.85rem;padding:0.5rem 1rem">🗑️ מחק הכל</button>
+      </div>
+      <div style="overflow-x:auto;background:var(--card);border:1px solid var(--border);border-radius:var(--radius)">
+        <table class="orders-table" id="orders-table-full">
+          <thead><tr>
+            <th>מס' הזמנה</th><th>תאריך</th><th>לקוח</th><th>פריטים</th><th>סה"כ</th><th>סטטוס</th><th>פעולה</th>
+          </tr></thead>
+          <tbody id="orders-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- PRODUCTS -->
+    <div class="admin-section" id="section-products">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem">
+        <h2 style="font-size:1.8rem;font-weight:900">🛍️ ניהול מוצרים</h2>
+        <button class="btn btn-primary" onclick="openAddProduct()">+ הוסף מוצר</button>
+      </div>
+      <div class="product-manage-grid" id="products-manage-grid"></div>
+    </div>
+
+    <!-- SETTINGS -->
+    <div class="admin-section" id="section-settings">
+      <h2 style="font-size:1.8rem;font-weight:900;margin-bottom:1.5rem">⚙️ הגדרות החנות</h2>
+      <div class="form-box">
+        <h3>🏪 מידע כללי</h3>
+        <div class="setting-row">
+          <label>שם החנות</label>
+          <input type="text" id="s-name" placeholder="TechZone">
+        </div>
+        <div class="setting-row">
+          <label>תיאור</label>
+          <textarea id="s-desc" placeholder="תיאור קצר של החנות..."></textarea>
+        </div>
+        <div class="setting-row">
+          <label>צבע ראשי</label>
+          <input type="color" id="s-color" value="#7c3aed" style="width:60px;height:40px;padding:0.2rem;cursor:pointer">
+          <div class="color-preview" id="color-preview"></div>
+          <span style="color:var(--muted);font-size:0.85rem">צבע הכפתורים והלוגו</span>
+        </div>
+        <div style="margin-top:1.5rem">
+          <button class="btn btn-primary" onclick="saveSettings()">💾 שמור הגדרות</button>
+        </div>
+      </div>
+
+      <div class="form-box" style="margin-top:1.5rem">
+        <h3>👁️ תצוגה מקדימה</h3>
+        <div id="store-preview" style="background:var(--bg);border-radius:10px;padding:1.5rem;text-align:center">
+          <div id="preview-logo" style="font-size:1.5rem;font-weight:900;margin-bottom:0.5rem">⚡ TechZone</div>
+          <div id="preview-desc" style="color:var(--muted);font-size:0.9rem">הטכנולוגיה הכי טובה, המחירים הכי שווים</div>
+          <div id="preview-btn" style="display:inline-block;margin-top:1rem;padding:0.5rem 1.5rem;border-radius:8px;color:white;font-weight:700">+ הוסף לעגלה</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ADD/EDIT PRODUCT MODAL -->
+<div class="modal-overlay" id="product-modal">
+  <div class="modal">
+    <h3 id="modal-title">➕ הוסף מוצר</h3>
+    <input type="hidden" id="edit-product-id">
+    <div class="form-group">
+      <label>שם המוצר</label>
+      <input type="text" id="p-name" placeholder="שם המוצר">
+    </div>
+    <div class="form-group">
+      <label>מחיר (₪)</label>
+      <input type="number" id="p-price" placeholder="0">
+    </div>
+    <div class="form-group">
+      <label>קטגוריה</label>
+      <select id="p-category">
+        <option value="גיימינג">גיימינג</option>
+        <option value="מחשבים">מחשבים</option>
+        <option value="סמארטפונים">סמארטפונים</option>
+        <option value="טאבלטים">טאבלטים</option>
+        <option value="אביזרים">אביזרים</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>אמוג'י (לסמל המוצר)</label>
+      <input type="text" id="p-emoji" placeholder="🖥️">
+    </div>
+    <div class="form-group">
+      <label>תיאור</label>
+      <textarea id="p-desc" placeholder="תיאור קצר של המוצר..."></textarea>
+    </div>
+    <div class="form-group">
+      <label>מלאי</label>
+      <input type="number" id="p-stock" placeholder="10" value="10">
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-primary" onclick="saveProduct()">💾 שמור</button>
+      <button class="btn btn-outline" onclick="closeModal()">ביטול</button>
+    </div>
+  </div>
+</div>
+
+<script src="../js/products.js"></script>
+<script src="../js/cart.js"></script>
+<script>
+  let editingProductId = null;
+
+  function showSection(name) {
+    document.querySelectorAll('.admin-section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
+    document.getElementById('section-' + name).classList.add('active');
+    event.target.classList.add('active');
+    if (name === 'dashboard') renderDashboard();
+    if (name === 'orders') renderOrdersTable();
+    if (name === 'products') renderProductsManage();
+    if (name === 'settings') loadSettings();
+  }
+
+  function loadStoreInfo() {
+    const name = localStorage.getItem('storeName') || 'TechZone';
+    document.getElementById('store-name-display').textContent = '⚡ ' + name;
+  }
+
+  /* ---- DASHBOARD ---- */
+  function renderDashboard() {
+    const orders = JSON.parse(localStorage.getItem('orders') || '[]');
+    const total = orders.reduce((s, o) => s + o.total, 0);
+    const prods = getProducts();
+
+    document.getElementById('stats-grid').innerHTML = `
+      <div class="stat-card">
+        <div class="stat-icon">📦</div>
+        <div class="stat-value">${orders.length}</div>
+        <div class="stat-label">הזמנות</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">💰</div>
+        <div class="stat-value">₪${total.toLocaleString()}</div>
+        <div class="stat-label">הכנסות</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">🛍️</div>
+        <div class="stat-value">${prods.length}</div>
+        <div class="stat-label">מוצרים</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">👥</div>
+        <div class="stat-value">${new Set(orders.map(o=>o.email)).size}</div>
+        <div class="stat-label">לקוחות ייחודיים</div>
+      </div>
+    `;
+
+    const recent = orders.slice(0, 5);
+    if (recent.length === 0) {
+      document.getElementById('recent-orders').innerHTML = '<div class="empty-state"><span>📭</span>עדיין אין הזמנות</div>';
+      return;
+    }
+    document.getElementById('recent-orders').innerHTML = `
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden">
+        <table class="orders-table">
+          <thead><tr><th>הזמנה</th><th>לקוח</th><th>סה"כ</th><th>סטטוס</th></tr></thead>
+          <tbody>
+            ${recent.map(o => `
+              <tr>
+                <td style="font-weight:700">${o.id}</td>
+                <td>${o.customer}</td>
+                <td style="color:#a855f7;font-weight:700">₪${o.total.toLocaleString()}</td>
+                <td><span class="status-badge status-pending">${o.status}</span></td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </div>
+    `;
+  }
+
+  /* ---- ORDERS ---- */
+  function renderOrdersTable() {
+    const orders = JSON.parse(localStorage.getItem('orders') || '[]');
+    const tbody = document.getElementById('orders-tbody');
+    if (orders.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:3rem;color:#94a3b8">אין הזמנות עדיין</td></tr>';
+      return;
+    }
+    tbody.innerHTML = orders.map(o => `
+      <tr>
+        <td style="font-weight:700;font-size:0.82rem">${o.id}</td>
+        <td style="color:#94a3b8;font-size:0.85rem">${o.date}</td>
+        <td>${o.customer}<br><span style="color:#94a3b8;font-size:0.8rem">${o.email}</span></td>
+        <td>${o.items.map(i=>i.emoji+'×'+i.qty).join(' ')}</td>
+        <td style="color:#a855f7;font-weight:700">₪${o.total.toLocaleString()}</td>
+        <td>
+          <select onchange="updateOrderStatus('${o.id}', this.value)"
+            style="background:var(--surface);border:1px solid var(--border);color:var(--text);padding:0.3rem 0.5rem;border-radius:6px;font-family:Heebo,sans-serif">
+            <option ${o.status==='ממתין לאישור'?'selected':''}>ממתין לאישור</option>
+            <option ${o.status==='נשלח'?'selected':''}>נשלח</option>
+            <option ${o.status==='הושלם'?'selected':''}>הושלם</option>
+          </select>
+        </td>
+        <td>
+          <button class="remove-btn" onclick="deleteOrder('${o.id}')">🗑️</button>
+        </td>
+      </tr>
+    `).join('');
+  }
+
+  function updateOrderStatus(id, status) {
+    const orders = JSON.parse(localStorage.getItem('orders') || '[]');
+    const order = orders.find(o => o.id === id);
+    if (order) { order.status = status; localStorage.setItem('orders', JSON.stringify(orders)); }
+  }
+
+  function deleteOrder(id) {
+    let orders = JSON.parse(localStorage.getItem('orders') || '[]');
+    orders = orders.filter(o => o.id !== id);
+    localStorage.setItem('orders', JSON.stringify(orders));
+    renderOrdersTable();
+  }
+
+  function clearOrders() {
+    if (confirm('האם אתה בטוח שרוצה למחוק את כל ההזמנות?')) {
+      localStorage.removeItem('orders');
+      renderOrdersTable();
+      renderDashboard();
+    }
+  }
+
+  /* ---- PRODUCTS ---- */
+  function renderProductsManage() {
+    const prods = getProducts();
+    document.getElementById('products-manage-grid').innerHTML = prods.map(p => `
+      <div class="product-manage-card">
+        <div class="pm-header">
+          <span class="pm-emoji">${p.emoji}</span>
+          <span style="color:var(--muted);font-size:0.75rem">${p.category}</span>
+        </div>
+        <div class="pm-name">${p.name}</div>
+        <div class="pm-price">₪${p.price.toLocaleString()}</div>
+        <div style="color:var(--muted);font-size:0.78rem;margin-top:0.3rem">מלאי: ${p.stock}</div>
+        <div class="pm-actions">
+          <button class="pm-btn" onclick="openEditProduct(${p.id})">✏️ ערוך</button>
+          <button class="pm-btn danger" onclick="deleteProduct(${p.id})">🗑️ מחק</button>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function openAddProduct() {
+    editingProductId = null;
+    document.getElementById('modal-title').textContent = '➕ הוסף מוצר';
+    document.getElementById('p-name').value = '';
+    document.getElementById('p-price').value = '';
+    document.getElementById('p-emoji').value = '';
+    document.getElementById('p-desc').value = '';
+    document.getElementById('p-stock').value = '10';
+    document.getElementById('product-modal').classList.add('open');
+  }
+
+  function openEditProduct(id) {
+    const prods = getProducts();
+    const p = prods.find(x => x.id === id);
+    if (!p) return;
+    editingProductId = id;
+    document.getElementById('modal-title').textContent = '✏️ ערוך מוצר';
+    document.getElementById('p-name').value = p.name;
+    document.getElementById('p-price').value = p.price;
+    document.getElementById('p-emoji').value = p.emoji;
+    document.getElementById('p-desc').value = p.description;
+    document.getElementById('p-stock').value = p.stock;
+    document.getElementById('p-category').value = p.category;
+    document.getElementById('product-modal').classList.add('open');
+  }
+
+  function closeModal() {
+    document.getElementById('product-modal').classList.remove('open');
+  }
+
+  function saveProduct() {
+    const name = document.getElementById('p-name').value.trim();
+    const price = parseInt(document.getElementById('p-price').value);
+    const emoji = document.getElementById('p-emoji').value.trim() || '📦';
+    const desc = document.getElementById('p-desc').value.trim();
+    const stock = parseInt(document.getElementById('p-stock').value) || 0;
+    const category = document.getElementById('p-category').value;
+
+    if (!name || !price) { alert('אנא מלא שם ומחיר'); return; }
+
+    let prods = getProducts();
+    if (editingProductId) {
+      const idx = prods.findIndex(p => p.id === editingProductId);
+      if (idx > -1) prods[idx] = { ...prods[idx], name, price, emoji, description:desc, stock, category };
+    } else {
+      prods.push({ id: Date.now(), name, price, emoji, description:desc, stock, category });
+    }
+    localStorage.setItem('products', JSON.stringify(prods));
+    closeModal();
+    renderProductsManage();
+    showToast('✅ המוצר נשמר!');
+  }
+
+  function deleteProduct(id) {
+    if (!confirm('האם למחוק את המוצר?')) return;
+    let prods = getProducts();
+    prods = prods.filter(p => p.id !== id);
+    localStorage.setItem('products', JSON.stringify(prods));
+    renderProductsManage();
+  }
+
+  /* ---- SETTINGS ---- */
+  function loadSettings() {
+    document.getElementById('s-name').value = localStorage.getItem('storeName') || 'TechZone';
+    document.getElementById('s-desc').value = localStorage.getItem('storeDesc') || 'הטכנולוגיה הכי טובה, המחירים הכי שווים';
+    const color = localStorage.getItem('accentColor') || '#7c3aed';
+    document.getElementById('s-color').value = color;
+    updateColorPreview(color);
+  }
+
+  function updateColorPreview(color) {
+    document.getElementById('color-preview').style.background = color;
+    document.getElementById('preview-btn').style.background = color;
+    document.getElementById('preview-logo').style.color = color;
+  }
+
+  document.getElementById('s-color').addEventListener('input', e => {
+    updateColorPreview(e.target.value);
+    const name = document.getElementById('s-name').value || 'TechZone';
+    const desc = document.getElementById('s-desc').value;
+    document.getElementById('preview-logo').textContent = '⚡ ' + name;
+    document.getElementById('preview-desc').textContent = desc;
+  });
+
+  document.getElementById('s-name').addEventListener('input', e => {
+    document.getElementById('preview-logo').textContent = '⚡ ' + (e.target.value || 'TechZone');
+  });
+
+  document.getElementById('s-desc').addEventListener('input', e => {
+    document.getElementById('preview-desc').textContent = e.target.value;
+  });
+
+  function saveSettings() {
+    const name = document.getElementById('s-name').value.trim() || 'TechZone';
+    const desc = document.getElementById('s-desc').value.trim();
+    const color = document.getElementById('s-color').value;
+    localStorage.setItem('storeName', name);
+    localStorage.setItem('storeDesc', desc);
+    localStorage.setItem('accentColor', color);
+    document.getElementById('store-name-display').textContent = '⚡ ' + name;
+    showToast('✅ הגדרות נשמרו!');
+  }
+
+  loadStoreInfo();
+  renderDashboard();
+  updateCartBadge();
+</script>
+</body>
+</html>

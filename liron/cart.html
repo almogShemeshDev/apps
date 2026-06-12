@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>עגלת קניות</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<nav>
+  <a class="nav-logo" id="store-name-display" href="index.html">⚡ TechZone</a>
+  <div class="nav-links">
+    <a href="index.html">🏠 המוצרים</a>
+    <a href="cart.html" class="cart-btn">
+      🛒 עגלה
+      <span id="cart-badge">0</span>
+    </a>
+  </div>
+</nav>
+
+<div class="page-container">
+  <h1 class="page-title">🛒 עגלת הקניות</h1>
+  <div id="cart-content"></div>
+</div>
+
+<footer>
+  <span id="footer-store-name">TechZone</span> — חנות הטק הכי שווה 🚀
+</footer>
+
+<script src="js/products.js"></script>
+<script src="js/cart.js"></script>
+<script>
+  function loadStoreInfo() {
+    const name = localStorage.getItem('storeName') || 'TechZone';
+    document.getElementById('store-name-display').textContent = '⚡ ' + name;
+    document.getElementById('footer-store-name').textContent = name;
+  }
+
+  function renderCart() {
+    const cart = getCart();
+    const container = document.getElementById('cart-content');
+
+    if (cart.length === 0) {
+      container.innerHTML = `
+        <div class="empty-state">
+          <span>🛒</span>
+          <h2>העגלה ריקה</h2>
+          <p style="margin-bottom:1.5rem">תוסיף כמה מוצרים !</p>
+          <a href="index.html" class="btn btn-primary">← חזרה לחנות</a>
+        </div>`;
+      return;
+    }
+
+    const total = getCartTotal();
+
+    container.innerHTML = `
+      <table class="cart-table">
+        <thead>
+          <tr>
+            <th>מוצר</th>
+            <th>מחיר ליחידה</th>
+            <th>כמות</th>
+            <th>סה"כ</th>
+            <th>הסרה</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${cart.map(item => `
+            <tr>
+              <td>
+                <span class="cart-item-emoji">${item.emoji}</span>
+                <span class="cart-item-name">${item.name}</span>
+              </td>
+              <td>₪${item.price.toLocaleString()}</td>
+              <td>
+                <input class="qty-input" type="number" min="1" value="${item.qty}"
+                  onchange="updateQty(${item.id}, this.value)">
+              </td>
+              <td style="font-weight:700;color:#a855f7">₪${(item.price * item.qty).toLocaleString()}</td>
+              <td>
+                <button class="remove-btn" onclick="deleteItem(${item.id})">🗑️ הסר</button>
+              </td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+
+      <div class="cart-summary">
+        <div>
+          <div class="cart-total">סה"כ לתשלום: <span>₪${total.toLocaleString()}</span></div>
+          <div style="color:#94a3b8;font-size:0.85rem;margin-top:0.3rem">${cart.reduce((s,i)=>s+i.qty,0)} פריטים בעגלה</div>
+        </div>
+        <div style="display:flex;gap:1rem;flex-wrap:wrap">
+          <a href="index.html" class="btn btn-outline">← המשך קניות</a>
+          <a href="checkout.html" class="btn btn-primary">לתשלום ←</a>
+        </div>
+      </div>
+    `;
+  }
+
+  function updateQty(id, val) {
+    val = parseInt(val);
+    if (val < 1) val = 1;
+    const cart = getCart();
+    const item = cart.find(i => i.id === id);
+    if (item) { item.qty = val; saveCart(cart); }
+    renderCart();
+    updateCartBadge();
+  }
+
+  function deleteItem(id) {
+    removeFromCart(id);
+    renderCart();
+    updateCartBadge();
+  }
+
+  loadStoreInfo();
+  renderCart();
+  updateCartBadge();
+</script>
+</body>
+</html>
