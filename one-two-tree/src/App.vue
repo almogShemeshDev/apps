@@ -29,7 +29,7 @@
     <BiddingPhase v-else-if="state.phase === 'bidding'" />
 
     <!-- Game -->
-    <GameBoard v-else-if="state.phase === 'playing' || state.phase === 'trick-resolved'" />
+    <GameBoard v-else-if="state.phase === 'playing' || state.phase === 'trick-resolved' || state.phase === 'replacing-bid'" />
 
     <!-- Scores -->
     <ScoreBoard

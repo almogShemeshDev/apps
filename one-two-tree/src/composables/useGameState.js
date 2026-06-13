@@ -4,7 +4,7 @@ import { resolveTrick, legalCards, isBidCorrect } from './useTrickLogic.js'
 import { CARDS_PER_PLAYER } from '../constants/game.js'
 
 const state = reactive({
-  phase: 'setup', // 'setup' | 'bidding' | 'playing' | 'trick-resolved' | 'game-over'
+  phase: 'setup', // 'setup' | 'bidding' | 'playing' | 'replacing-bid' | 'trick-resolved' | 'game-over'
   players: [],
   currentTrick: {
     leadPlayerId: null,
@@ -13,6 +13,7 @@ const state = reactive({
   },
   currentLeaderId: null,
   biddingIndex: 0,
+  replacingBidPlayerId: null,
   scores: [],
 })
 
@@ -73,14 +74,43 @@ function playCard(playerId, card) {
   if (activePlayer() !== playerId) return
 
   const player = getPlayer(playerId)
-  if (!player.hand.find(c => c.id === card.id)) return
+  const isBidCard = player.bid?.id === card.id
+  const isHandCard = !!player.hand.find(c => c.id === card.id)
+  if (!isBidCard && !isHandCard) return
 
   const leadSuit = state.currentTrick.plays[0]?.card.suit ?? null
-  const legal = legalCards(player.hand, leadSuit)
+  const legal = legalCards(player.hand, leadSuit, player.bid)
   if (!legal.find(c => c.id === card.id)) return
 
+  if (isBidCard) {
+    player.bid = null
+    state.currentTrick.plays.push({ playerId, card })
+    if (player.hand.length > 0) {
+      state.phase = 'replacing-bid'
+      state.replacingBidPlayerId = playerId
+      return
+    }
+  } else {
+    player.hand = player.hand.filter(c => c.id !== card.id)
+    state.currentTrick.plays.push({ playerId, card })
+  }
+
+  if (state.currentTrick.plays.length === state.players.length) {
+    _resolveTrick()
+  }
+}
+
+function replaceBid(playerId, card) {
+  if (state.phase !== 'replacing-bid') return
+  if (state.replacingBidPlayerId !== playerId) return
+
+  const player = getPlayer(playerId)
+  if (!player.hand.find(c => c.id === card.id)) return
+
+  player.bid = card
   player.hand = player.hand.filter(c => c.id !== card.id)
-  state.currentTrick.plays.push({ playerId, card })
+  state.replacingBidPlayerId = null
+  state.phase = 'playing'
 
   if (state.currentTrick.plays.length === state.players.length) {
     _resolveTrick()
@@ -124,6 +154,7 @@ function resetGame() {
   state.currentTrick = { leadPlayerId: null, plays: [], winnerId: null }
   state.currentLeaderId = null
   state.biddingIndex = 0
+  state.replacingBidPlayerId = null
   state.scores = []
 }
 
@@ -136,6 +167,7 @@ export function useGameState() {
     startGame,
     placeInitialBid,
     playCard,
+    replaceBid,
     nextTrick,
     resetGame,
   }

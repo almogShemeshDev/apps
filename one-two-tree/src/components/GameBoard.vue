@@ -13,7 +13,6 @@
 
     <div class="center">
       <TrickArea :trick="state.currentTrick" />
-      <BidArea :players="state.players" />
     </div>
 
     <PlayerHand
@@ -21,6 +20,12 @@
       :isActive="activePlayer() === 0"
       :leadSuit="leadSuit"
       @play="card => playCard(0, card)"
+    />
+
+    <!-- Replace bid modal -->
+    <ReplaceBidModal
+      v-if="state.phase === 'replacing-bid'"
+      :player="getPlayer(state.replacingBidPlayerId)"
     />
 
     <!-- Trick resolved overlay -->
@@ -40,7 +45,7 @@
 import { computed } from 'vue'
 import PlayerHand from './PlayerHand.vue'
 import TrickArea from './TrickArea.vue'
-import BidArea from './BidArea.vue'
+import ReplaceBidModal from './ReplaceBidModal.vue'
 import { useGameState } from '../composables/useGameState.js'
 
 const { state, activePlayer, getPlayer, playCard, nextTrick, resetGame } = useGameState()

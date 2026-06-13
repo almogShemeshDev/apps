@@ -18,10 +18,11 @@ export function resolveTrick(plays) {
   ).playerId
 }
 
-export function legalCards(hand, leadSuit) {
-  if (!leadSuit) return hand
-  const suitCards = hand.filter(c => c.suit === leadSuit)
-  return suitCards.length ? suitCards : hand
+export function legalCards(hand, leadSuit, bidCard = null) {
+  const pool = bidCard ? [...hand, bidCard] : hand
+  if (!leadSuit) return pool
+  const suitCards = pool.filter(c => c.suit === leadSuit)
+  return suitCards.length ? suitCards : pool
 }
 
 export function isBidCorrect(bidCard, tricksWon) {
