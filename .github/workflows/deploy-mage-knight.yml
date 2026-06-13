@@ -3,11 +3,6 @@ name: Deploy Apps
 on:
   push:
     branches: [main, master]
-    paths:
-      - mage-knight-player-aid/**
-      - milky-way/**
-      - one-two-tree/**
-      - .github/workflows/**
   workflow_dispatch:
 
 permissions:
