@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title id="page-title">חנות טק</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<nav>
+  <a class="nav-logo" id="store-name-display" href="index.html">⚡ TechZone</a>
+  <div class="nav-links">
+    <a href="index.html">🏠 ראשי</a>
+    <a href="cart.html" class="cart-btn">
+      🛒 עגלה
+      <span id="cart-badge">0</span>
+    </a>
+    <a href="admin/index.html">⚙️ ניהול</a>
+  </div>
+</nav>
+
+<section class="hero">
+  <h1>ברוכים הבאים<br>ל<span id="hero-store-name">TechZone</span> 🎮</h1>
+  <p id="hero-desc">הטכנולוגיה הכי טובה, המחירים הכי שווים</p>
+</section>
+
+<div class="categories" id="categories-bar">
+  <button class="cat-btn active" onclick="filterCategory('הכל')">הכל</button>
+</div>
+
+<div style="max-width:1300px;margin:0 auto">
+  <h2 class="section-title">🔥 המוצרים שלנו</h2>
+  <div class="products-grid" id="products-grid"></div>
+</div>
+
+<footer>
+  <span id="footer-store-name">TechZone</span> — חנות הטק הכי שווה 🚀
+</footer>
+
+<script src="js/products.js"></script>
+<script src="js/cart.js"></script>
+<script>
+  let allProducts = getProducts();
+  let currentCategory = 'הכל';
+
+  function loadStoreInfo() {
+    const name = localStorage.getItem('storeName') || 'TechZone';
+    const desc = localStorage.getItem('storeDesc') || 'הטכנולוגיה הכי טובה, המחירים הכי שווים';
+    document.getElementById('store-name-display').textContent = '⚡ ' + name;
+    document.getElementById('hero-store-name').textContent = name;
+    document.getElementById('hero-desc').textContent = desc;
+    document.getElementById('footer-store-name').textContent = name;
+    document.title = name;
+  }
+
+  function buildCategories() {
+    const cats = ['הכל', ...new Set(allProducts.map(p => p.category))];
+    const bar = document.getElementById('categories-bar');
+    bar.innerHTML = '';
+    cats.forEach(cat => {
+      const btn = document.createElement('button');
+      btn.className = 'cat-btn' + (cat === currentCategory ? ' active' : '');
+      btn.textContent = cat;
+      btn.onclick = () => filterCategory(cat);
+      bar.appendChild(btn);
+    });
+  }
+
+  function filterCategory(cat) {
+    currentCategory = cat;
+    buildCategories();
+    renderProducts();
+  }
+
+  function renderProducts() {
+    const grid = document.getElementById('products-grid');
+    const filtered = currentCategory === 'הכל'
+      ? allProducts
+      : allProducts.filter(p => p.category === currentCategory);
+
+    if (filtered.length === 0) {
+      grid.innerHTML = '<div class="empty-state"><span>📦</span>אין מוצרים בקטגוריה זו</div>';
+      return;
+    }
+
+    grid.innerHTML = filtered.map(p => `
+      <div class="product-card">
+        <div class="product-img">${p.emoji}</div>
+        <div class="product-info">
+          <div class="product-category">${p.category}</div>
+          <div class="product-name">${p.name}</div>
+          <div class="product-desc">${p.description}</div>
+          <div class="product-footer">
+            <div class="product-price">₪${p.price.toLocaleString()}</div>
+            <button class="add-btn" onclick="addToCart(${p.id})">+ הוסף לעגלה</button>
+          </div>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  loadStoreInfo();
+  buildCategories();
+  renderProducts();
+  updateCartBadge();
+</script>
+</body>
+</html>

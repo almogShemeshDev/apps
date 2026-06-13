@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>הזמנה הושלמה!</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    @keyframes pop { 0%{transform:scale(0.5);opacity:0} 80%{transform:scale(1.1)} 100%{transform:scale(1);opacity:1} }
+    .success-icon { animation: pop 0.6s ease; }
+    .confetti { position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;overflow:hidden;z-index:0; }
+    .confetti-piece { position:absolute;width:10px;height:10px;border-radius:2px;animation:fall linear infinite; }
+    @keyframes fall { 0%{transform:translateY(-20px) rotate(0deg);opacity:1} 100%{transform:translateY(100vh) rotate(720deg);opacity:0} }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-logo" id="store-name-display" href="index.html">⚡ TechZone</a>
+  <div class="nav-links">
+    <a href="index.html">🏠 חנות</a>
+    <a href="admin/index.html">⚙️ ניהול הזמנות</a>
+  </div>
+</nav>
+
+<div class="confetti" id="confetti"></div>
+
+<div class="success-page" style="position:relative;z-index:1">
+  <div class="success-icon">🎉</div>
+  <h1>ההזמנה אושרה!</h1>
+  <p>תודה שקנית אצלנו! ההזמנה שלך בדרך אליך 🚀</p>
+
+  <div class="order-number" id="order-details">
+    טוען פרטים...
+  </div>
+
+  <div style="margin-bottom:2rem">
+    <div id="order-items-summary" style="max-width:400px;margin:0 auto;text-align:right"></div>
+  </div>
+
+  <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap">
+    <a href="index.html" class="btn btn-primary">🛍️ המשך קניות</a>
+    <a href="admin/index.html" class="btn btn-outline">📋 צפה בהזמנות</a>
+  </div>
+</div>
+
+<footer>
+  <span id="footer-store-name">TechZone</span> — תודה שקנית! 💜
+</footer>
+
+<script src="js/products.js"></script>
+<script src="js/cart.js"></script>
+<script>
+  function createConfetti() {
+    const colors = ['#7c3aed','#06b6d4','#a855f7','#10b981','#f59e0b'];
+    const container = document.getElementById('confetti');
+    for (let i = 0; i < 60; i++) {
+      const piece = document.createElement('div');
+      piece.className = 'confetti-piece';
+      piece.style.cssText = `
+        left: ${Math.random() * 100}%;
+        background: ${colors[Math.floor(Math.random() * colors.length)]};
+        animation-duration: ${Math.random() * 3 + 2}s;
+        animation-delay: ${Math.random() * 2}s;
+        width: ${Math.random() * 12 + 6}px;
+        height: ${Math.random() * 12 + 6}px;
+        border-radius: ${Math.random() > 0.5 ? '50%' : '2px'};
+      `;
+      container.appendChild(piece);
+    }
+  }
+
+  function loadStoreInfo() {
+    const name = localStorage.getItem('storeName') || 'TechZone';
+    document.getElementById('store-name-display').textContent = '⚡ ' + name;
+    document.getElementById('footer-store-name').textContent = name;
+  }
+
+  function showOrder() {
+    const order = JSON.parse(localStorage.getItem('lastOrder') || 'null');
+    if (!order) return;
+
+    document.getElementById('order-details').innerHTML = `
+      <div style="font-size:0.85rem;color:#94a3b8;margin-bottom:0.5rem">מספר הזמנה</div>
+      <div style="font-size:1.3rem;font-weight:800;color:#a855f7">${order.id}</div>
+      <div style="font-size:0.85rem;color:#94a3b8;margin-top:0.5rem">${order.date} | ${order.time}</div>
+      <div style="margin-top:0.5rem">👤 ${order.customer} | 📦 ${order.address}</div>
+    `;
+
+    document.getElementById('order-items-summary').innerHTML = `
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1rem;margin-top:1rem">
+        <div style="font-weight:700;margin-bottom:0.8rem">📦 מה הזמנת:</div>
+        ${order.items.map(i => `
+          <div style="display:flex;justify-content:space-between;padding:0.4rem 0;border-bottom:1px solid var(--border);font-size:0.9rem">
+            <span>${i.emoji} ${i.name} ×${i.qty}</span>
+            <span style="color:#a855f7;font-weight:600">₪${(i.price * i.qty).toLocaleString()}</span>
+          </div>
+        `).join('')}
+        <div style="display:flex;justify-content:space-between;font-weight:800;font-size:1.1rem;padding-top:0.8rem">
+          <span>סה"כ שולם:</span>
+          <span style="color:#a855f7">₪${order.total.toLocaleString()}</span>
+        </div>
+      </div>
+    `;
+  }
+
+  createConfetti();
+  loadStoreInfo();
+  showOrder();
+  updateCartBadge();
+</script>
+</body>
+</html>
