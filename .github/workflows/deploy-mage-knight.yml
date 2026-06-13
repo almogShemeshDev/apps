@@ -6,6 +6,7 @@ on:
     paths:
       - mage-knight-player-aid/**
       - milky-way/**
+      - one-two-tree/**
       - .github/workflows/**
   workflow_dispatch:
 
@@ -37,12 +38,19 @@ jobs:
       - run: npm run build
         working-directory: milky-way
 
+      - run: npm ci
+        working-directory: one-two-tree
+      - run: npm run build
+        working-directory: one-two-tree
+
       - name: Arrange site structure
         run: |
           mkdir -p _site/mage-knight-player-aid
           mkdir -p _site/milky-way
+          mkdir -p _site/one-two-tree
           cp -r mage-knight-player-aid/dist/. _site/mage-knight-player-aid/
           cp -r milky-way/dist/. _site/milky-way/
+          cp -r one-two-tree/dist/. _site/one-two-tree/
 
       - uses: actions/upload-pages-artifact@v3
         with:
