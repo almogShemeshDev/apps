@@ -4,6 +4,16 @@
   padding: 0;
 }
 
+:root {
+  --gold: #c9a84c;
+  --gold-light: #d4b85e;
+  --text: #f0e6c8;
+  --text-dim: rgba(240, 230, 200, 0.5);
+  --surface: rgba(255, 255, 255, 0.06);
+  --border: rgba(255, 255, 255, 0.1);
+  --overlay-bg: rgba(0, 0, 0, 0.72);
+}
+
 html, body {
   height: 100%;
 }
@@ -11,7 +21,7 @@ html, body {
 body {
   font-family: 'Segoe UI', system-ui, sans-serif;
   background: #1a1208;
-  color: #f0e6c8;
+  color: var(--text);
   -webkit-font-smoothing: antialiased;
 }
 
