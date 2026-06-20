@@ -37,11 +37,12 @@ function getPlayer(id) {
   return state.players.find(p => p.id === id)
 }
 
-function startGame(playerNames) {
-  const hands = deal(playerNames.length, CARDS_PER_PLAYER[playerNames.length])
-  state.players = playerNames.map((name, i) => ({
+function startGame(players) {
+  const hands = deal(players.length, CARDS_PER_PLAYER[players.length])
+  state.players = players.map(({ name, isBot }, i) => ({
     id: i,
     name,
+    isBot: !!isBot,
     hand: hands[i],
     bid: null,
     tricksWon: 0,

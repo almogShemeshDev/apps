@@ -11,20 +11,24 @@
       </p>
       <p class="progress">Player {{ state.biddingIndex + 1 }} of {{ state.players.length }}</p>
 
-      <div class="cards">
-        <CardComponent
-          v-for="card in currentPlayer.hand"
-          :key="card.id"
-          :card="card"
-          :selectable="true"
-          :selected="selected?.id === card.id"
-          @select="selected = card"
-        />
+      <div v-if="currentPlayer.isBot" class="bot-thinking">
+        🤖 Thinking...
       </div>
-
-      <button class="btn-confirm" :disabled="!selected" @click="confirm">
-        Confirm Bid
-      </button>
+      <template v-else>
+        <div class="cards">
+          <CardComponent
+            v-for="card in currentPlayer.hand"
+            :key="card.id"
+            :card="card"
+            :selectable="true"
+            :selected="selected?.id === card.id"
+            @select="selected = card"
+          />
+        </div>
+        <button class="btn-confirm" :disabled="!selected" @click="confirm">
+          Confirm Bid
+        </button>
+      </template>
     </div>
 
     <footer class="credits">© 2026 Almog Shemesh · Game Design &amp; Concept · All rights reserved</footer>
@@ -112,6 +116,12 @@ function confirm() {
 .btn-confirm:disabled {
   opacity: 0.4;
   cursor: default;
+}
+.bot-thinking {
+  font-size: 1.1rem;
+  color: rgba(255,255,255,0.6);
+  padding: 24px 0;
+  letter-spacing: 0.03em;
 }
 .credits {
   position: fixed;
