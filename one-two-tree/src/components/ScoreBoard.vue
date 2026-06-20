@@ -1,6 +1,7 @@
 <template>
   <div class="scoreboard">
     <h1>Game Over</h1>
+    <div class="scoreboard-table-wrapper">
     <table>
       <thead>
         <tr>
@@ -21,6 +22,7 @@
         </tr>
       </tbody>
     </table>
+    </div>
     <p class="winner-msg">🏆 {{ winner?.name }} wins!</p>
     <button class="btn-play-again" @click="$emit('playAgain')">Play Again</button>
     <p class="credits">© 2026 Almog Shemesh · Game Design &amp; Concept · All rights reserved</p>
@@ -54,18 +56,24 @@ function bidLabel(card) {
   padding: 40px 20px;
   color: #e8f5e9;
 }
+
+.scoreboard-table-wrapper {
+  overflow: auto;
+}
+
 h1 {
   font-size: 2rem;
   margin: 0;
 }
 table {
   border-collapse: collapse;
-  min-width: 400px;
+  width: fit-content;
 }
 th, td {
   padding: 10px 20px;
   text-align: center;
   border-bottom: 1px solid rgba(255,255,255,0.1);
+  white-space: nowrap;
 }
 th {
   color: #a0aec0;

@@ -94,8 +94,7 @@ function start() {
 
 <style scoped>
 #app {
-  min-height: 100vh;
-  background: #1a4731;
+  padding: 12px;
 }
 .setup {
   display: flex;
@@ -122,7 +121,6 @@ function start() {
   background: rgba(0,0,0,0.25);
   padding: 32px;
   border-radius: 16px;
-  min-width: 320px;
 }
 .form label {
   font-size: 0.85rem;
@@ -158,6 +156,7 @@ function start() {
   align-items: flex-end;
   gap: 10px;
 }
+
 .name-col {
   display: flex;
   flex-direction: column;
@@ -192,6 +191,7 @@ function start() {
   color: #e8f5e9;
   font-size: 1rem;
   outline: none;
+  width: 100%;
 }
 .name-input input:focus {
   border-color: #38a169;
@@ -237,5 +237,11 @@ function start() {
   color: rgba(255,255,255,0.25);
   pointer-events: none;
   letter-spacing: 0.03em;
+}
+
+@media screen and (max-width: 425px) {
+  .title {
+    font-size: 2rem;
+  }
 }
 </style>
