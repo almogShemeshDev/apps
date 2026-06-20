@@ -17,8 +17,22 @@
         </div>
 
         <div v-for="i in playerCount" :key="i" class="name-input">
-          <label>Player {{ i }} name</label>
-          <input v-model="names[i - 1]" :placeholder="`Player ${i}`" />
+          <div class="name-row">
+            <div class="name-col">
+              <label>Player {{ i }} name</label>
+              <input v-model="names[i - 1]" :placeholder="`Player ${i}`" :disabled="i > 1 && bots[i - 1]" />
+            </div>
+            <div v-if="i > 1" class="bot-toggle">
+              <button
+                :class="{ active: !bots[i - 1] }"
+                @click="bots[i - 1] = false"
+              >Human</button>
+              <button
+                :class="{ active: bots[i - 1] }"
+                @click="bots[i - 1] = true"
+              >Bot</button>
+            </div>
+          </div>
         </div>
 
         <button class="btn-start" @click="start">Start Game</button>
@@ -55,11 +69,14 @@ import BiddingPhase from './components/BiddingPhase.vue'
 import ScoreBoard from './components/ScoreBoard.vue'
 import RulesModal from './components/RulesModal.vue'
 import { useGameState } from './composables/useGameState.js'
+import { useBotAI } from './composables/useBotAI.js'
 
 const { state, startGame, resetGame } = useGameState()
+useBotAI()
 
 const playerCount = ref(3)
-const names = ref(['Player 1', 'Player 2', 'Player 3', 'Player 4', 'Player 5'])
+const names = ref(['You', 'Bot 1', 'Bot 2', 'Bot 3', 'Bot 4'])
+const bots = ref([false, true, true, true, true])
 const showRules = ref(false)
 
 function setPlayerCount(n) {
@@ -67,8 +84,11 @@ function setPlayerCount(n) {
 }
 
 function start() {
-  const playerNames = names.value.slice(0, playerCount.value).map((n, i) => n.trim() || `Player ${i + 1}`)
-  startGame(playerNames)
+  const players = names.value.slice(0, playerCount.value).map((n, i) => ({
+    name: n.trim() || (i === 0 ? 'You' : `Bot ${i}`),
+    isBot: i === 0 ? false : bots.value[i],
+  }))
+  startGame(players)
 }
 </script>
 
@@ -132,6 +152,37 @@ function start() {
   display: flex;
   flex-direction: column;
   gap: 4px;
+}
+.name-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+}
+.name-col {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+.bot-toggle {
+  display: flex;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,0.2);
+  flex-shrink: 0;
+}
+.bot-toggle button {
+  padding: 8px 12px;
+  border: none;
+  background: transparent;
+  color: rgba(255,255,255,0.45);
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.bot-toggle button.active {
+  background: #38a169;
+  color: white;
 }
 .name-input input {
   background: rgba(255,255,255,0.08);

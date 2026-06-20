@@ -5,7 +5,9 @@
         v-for="player in opponents"
         :key="player.id"
         :player="player"
-        :isActive="activePlayer() === player.id"
+        :isActive="activePlayer() === player.id && !player.isBot"
+        :isBot="player.isBot"
+        :isTurn="activePlayer() === player.id"
         :leadSuit="leadSuit"
         @play="card => playCard(player.id, card)"
       />
@@ -22,9 +24,9 @@
       @play="card => playCard(0, card)"
     />
 
-    <!-- Replace bid modal -->
+    <!-- Replace bid modal (only for human player) -->
     <ReplaceBidModal
-      v-if="state.phase === 'replacing-bid'"
+      v-if="state.phase === 'replacing-bid' && !getPlayer(state.replacingBidPlayerId)?.isBot"
       :player="getPlayer(state.replacingBidPlayerId)"
     />
 

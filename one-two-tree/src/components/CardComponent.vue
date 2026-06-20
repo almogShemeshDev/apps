@@ -1,11 +1,11 @@
 <template>
   <button
     class="card"
-    :class="[`suit-${card.suit}`, { selectable, dimmed, selected }]"
-    :disabled="!selectable"
+    :class="faceDown ? 'face-down' : [`suit-${card.suit}`, { selectable, dimmed, selected }]"
+    :disabled="!selectable || faceDown"
     @click="selectable && $emit('select', card)"
   >
-    <span class="card-value">{{ label }}</span>
+    <span v-if="!faceDown" class="card-value">{{ label }}</span>
   </button>
 </template>
 
@@ -17,6 +17,7 @@ const props = defineProps({
   selectable: { type: Boolean, default: false },
   dimmed: { type: Boolean, default: false },
   selected: { type: Boolean, default: false },
+  faceDown: { type: Boolean, default: false },
 })
 defineEmits(['select'])
 
@@ -64,4 +65,16 @@ const label = computed(() => {
 .suit-blue   { background: #ebf4ff; border-color: #3182ce; color: #2b6cb0; }
 .suit-green  { background: #f0fff4; border-color: #38a169; color: #276749; }
 .suit-yellow { background: #fffff0; border-color: #d69e2e; color: #b7791f; }
+
+.face-down {
+  background: repeating-linear-gradient(
+    45deg,
+    #1a4731,
+    #1a4731 4px,
+    #163d2a 4px,
+    #163d2a 8px
+  );
+  border-color: #0d2b1d;
+  cursor: default;
+}
 </style>

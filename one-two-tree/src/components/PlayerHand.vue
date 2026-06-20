@@ -1,12 +1,13 @@
 <template>
   <div class="hand">
     <p class="hand-label">{{ player.name }}</p>
-    <div class="hand-row">
+    <div class="hand-row" :style="isBot ? { pointerEvents: 'none' } : {}">
       <div class="cards">
         <CardComponent
           v-for="card in player.hand"
           :key="card.id"
           :card="card"
+          :faceDown="isBot"
           :selectable="isActive && isLegal(card)"
           :dimmed="isActive && !isLegal(card)"
           @select="$emit('play', card)"
@@ -17,6 +18,7 @@
       <div class="bid-box" :class="{ matching: isMatching }">
         <span class="bid-box-label" :class="{ matching: isMatching }">BID</span>
         <CardComponent v-if="player.bid" :card="player.bid"
+          :faceDown="isBot"
           :selectable="isActive && isBidCardLegal"
           :dimmed="isActive && !isBidCardLegal"
           @select="$emit('play', player.bid)" />
@@ -26,7 +28,8 @@
         </span>
       </div>
     </div>
-    <span v-if="isActive" class="turn-badge">Your turn</span>
+    <span v-if="isBot && isTurn" class="turn-badge bot-badge">Thinking...</span>
+    <span v-else-if="isActive" class="turn-badge">Your turn</span>
   </div>
 </template>
 
@@ -38,6 +41,8 @@ import { legalCards, isBidCorrect } from '../composables/useTrickLogic.js'
 const props = defineProps({
   player: { type: Object, required: true },
   isActive: { type: Boolean, default: false },
+  isBot: { type: Boolean, default: false },
+  isTurn: { type: Boolean, default: false },
   leadSuit: { type: String, default: null },
 })
 defineEmits(['play'])
@@ -141,5 +146,9 @@ const isMatching = computed(() =>
   font-weight: 700;
   padding: 2px 8px;
   border-radius: 999px;
+}
+.bot-badge {
+  background: #718096;
+  color: #e2e8f0;
 }
 </style>
