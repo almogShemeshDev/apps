@@ -22,12 +22,13 @@
           <li>4 players — 14 cards each</li>
           <li>5 players — 10 cards each</li>
         </ul>
-        <p>Before play begins, each player secretly picks <strong>1 card from their hand</strong> as their bid. The bid stays face-up in front of them all game.</p>
+        <p>Before play begins, each player picks <strong>1 card from their hand</strong> as their bid. The bid is visible to all players and represents the target they're aiming for.</p>
       </section>
 
       <section>
         <h3>Playing a Trick</h3>
-        <p>The lead player plays any card. Going clockwise, each player must <strong>follow suit</strong> (match the lead card's color) if they can. If they can't, they may play any card.</p>
+        <p>The lead player plays any card from their hand <strong>or their bid card</strong>. Going clockwise, each player must <strong>follow suit</strong> (match the lead card's color) if they can. If they can't, they may play any card.</p>
+        <p>If you play your bid card, you immediately pick a replacement card from your hand to become the new bid.</p>
       </section>
 
       <section>

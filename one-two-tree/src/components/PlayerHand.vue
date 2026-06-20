@@ -18,7 +18,7 @@
       <div class="bid-box" :class="{ matching: isMatching }">
         <span class="bid-box-label" :class="{ matching: isMatching }">BID</span>
         <CardComponent v-if="player.bid" :card="player.bid"
-          :faceDown="isBot"
+          :faceDown="false"
           :selectable="isActive && isBidCardLegal"
           :dimmed="isActive && !isBidCardLegal"
           @select="$emit('play', player.bid)" />
