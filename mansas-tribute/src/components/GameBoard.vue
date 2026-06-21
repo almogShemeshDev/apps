@@ -152,8 +152,18 @@ watch(() => state.currentPlayerIndex, () => {
   selectedDiceIds.value = []
 })
 
+// Computed so Vue tracks trumpSuit + leadSuit + hand changes as explicit dependencies
+const legalCardIds = computed(() => {
+  const hand = currentPlayer.value?.hand ?? []
+  return new Set(
+    hand
+      .filter(card => isLegalPlay(card, hand, state.leadSuit, state.trumpSuit))
+      .map(card => card.id)
+  )
+})
+
 function isLegal(card) {
-  return isLegalPlay(card, currentPlayer.value.hand, state.leadSuit)
+  return legalCardIds.value.has(card.id)
 }
 
 function toggleCard(card) {

@@ -2,8 +2,12 @@ export function diceTotal(dice) {
   return dice.reduce((s, d) => s + d.value, 0)
 }
 
-export function isLegalPlay(card, hand, leadSuit) {
-  if (!leadSuit) return true
+export function isLegalPlay(card, hand, leadSuit, trumpSuit) {
+  if (!leadSuit) {
+    // Lead player: trump is only legal if no other color in hand
+    if (card.suit === trumpSuit) return !hand.some(c => c.suit !== trumpSuit)
+    return true
+  }
   if (card.suit === leadSuit) return true
   return !hand.some(c => c.suit === leadSuit)
 }
