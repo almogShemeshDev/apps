@@ -1,5 +1,6 @@
 <template>
   <div id="app">
+     <!-- Mansa's Tribute -->
     <GameSetup v-if="state.phase === 'setup'" @start="startGame" />
     <GameBoard
       v-else-if="state.phase === 'playing' || state.phase === 'trick-result' || state.phase === 'dice-picking'"
