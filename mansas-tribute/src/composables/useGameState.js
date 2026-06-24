@@ -30,23 +30,23 @@ const state = reactive({
   players: [],
   king: { deck: [], revealed: null },
   round: 0,
-  trumpSuit: null,
   leadSuit: null,
   leadPlayerIndex: 0,
   currentPlayerIndex: 0,
   trick: [],
-  trickResult: null,   // { winnerIndex, losers: playerIndex[] }
+  trickResult: null,
   dicePool: [],
   dicePickingTurn: 0,
 })
 
-function startGame(playerNames) {
+function startGame(playerInputs) {
   _uid = 0
-  const n = playerNames.length
+  const n = playerInputs.length
   const deck = buildDeck(n)
 
-  state.players = playerNames.map((name, i) => ({
-    name,
+  state.players = playerInputs.map((p, i) => ({
+    name: typeof p === 'string' ? p : p.name,
+    isBot: typeof p === 'string' ? false : !!p.isBot,
     hand: deck.slice(i * 8, i * 8 + 8),
     dice: Array.from({ length: 4 }, makeDie),
     tricks: 0,
@@ -65,8 +65,7 @@ function startGame(playerNames) {
 function _startRound() {
   state.round++
   state.king.revealed = state.king.deck[state.round - 1]
-  state.trumpSuit = state.king.revealed.suit
-  state.leadSuit = null
+  state.leadSuit = state.king.revealed.suit
   state.trick = []
   state.trickResult = null
   state.dicePool = []
@@ -78,8 +77,6 @@ function _startRound() {
 function playCard(card, diceIds) {
   const pi = state.currentPlayerIndex
   const player = state.players[pi]
-
-  if (state.trick.length === 0) state.leadSuit = card.suit
 
   player.hand = player.hand.filter(c => c.id !== card.id)
   const playedDice = player.dice.filter(d => diceIds.includes(d.id))
@@ -95,9 +92,7 @@ function playCard(card, diceIds) {
 }
 
 function _resolveTrick() {
-  const { winner, losers } = determineTrickWinner(
-    state.trick, state.leadSuit, state.trumpSuit
-  )
+  const { winner, losers } = determineTrickWinner(state.trick, state.leadSuit)
   state.players[winner.playerIndex].tricks++
   state.dicePool = state.trick.flatMap(e => e.dice)
   state.trickResult = {

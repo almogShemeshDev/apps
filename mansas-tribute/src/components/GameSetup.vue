@@ -18,7 +18,17 @@
 
       <div v-for="i in playerCount" :key="i" class="field">
         <label>Player {{ i }}</label>
-        <input v-model="names[i - 1]" :placeholder="`Player ${i}`" />
+        <div class="player-row">
+          <input
+            v-model="names[i - 1]"
+            :placeholder="i === 1 ? 'Player 1' : `Bot ${i}`"
+            :disabled="i > 1 && bots[i - 1]"
+          />
+          <div v-if="i > 1" class="bot-toggle">
+            <button :class="{ active: !bots[i - 1] }" @click="bots[i - 1] = false">Human</button>
+            <button :class="{ active: bots[i - 1] }" @click="bots[i - 1] = true">Bot</button>
+          </div>
+        </div>
       </div>
 
       <button class="btn-start" @click="start">Start Game</button>
@@ -32,13 +42,17 @@ import { ref } from 'vue'
 const emit = defineEmits(['start'])
 
 const playerCount = ref(3)
-const names = ref(['Player 1', 'Player 2', 'Player 3', 'Player 4', 'Player 5'])
+const names = ref(['Player 1', 'Bot 2', 'Bot 3', 'Bot 4', 'Bot 5'])
+const bots = ref([false, true, true, true, true])
 
 function start() {
-  const list = names.value
+  const players = names.value
     .slice(0, playerCount.value)
-    .map((n, i) => n.trim() || `Player ${i + 1}`)
-  emit('start', list)
+    .map((n, i) => ({
+      name: n.trim() || (i === 0 ? 'Player 1' : `Bot ${i + 1}`),
+      isBot: i === 0 ? false : bots.value[i],
+    }))
+  emit('start', players)
 }
 </script>
 
@@ -87,8 +101,15 @@ function start() {
     text-transform: uppercase;
     letter-spacing: 0.07em;
   }
+}
+
+.player-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
 
   input {
+    flex: 1;
     background: rgba(255, 255, 255, 0.07);
     border: 1px solid var(--border);
     border-radius: 8px;
@@ -99,6 +120,35 @@ function start() {
     transition: border-color 0.15s;
 
     &:focus { border-color: var(--gold); }
+    &:disabled { opacity: 0.4; }
+  }
+}
+
+.bot-toggle {
+  display: flex;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  flex-shrink: 0;
+
+  button {
+    padding: 8px 10px;
+    border: none;
+    background: transparent;
+    color: var(--text-dim);
+    font-size: 0.78rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+
+    &.active {
+      background: var(--gold);
+      color: #1a1208;
+    }
+
+    &:not(.active):hover {
+      color: var(--text);
+    }
   }
 }
 
