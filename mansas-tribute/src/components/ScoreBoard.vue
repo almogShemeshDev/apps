@@ -3,16 +3,23 @@
     <h1>Game Over</h1>
     <div class="rows">
       <div
-        v-for="(p, i) in sorted"
-        :key="p.name"
+        v-for="(s, i) in sorted"
+        :key="s.name"
         class="row"
         :class="{ winner: i === 0 }"
       >
         <span class="rank">{{ i + 1 }}</span>
-        <span class="name">{{ p.name }}</span>
-        <span class="tricks">{{ p.tricks }} trick{{ p.tricks !== 1 ? 's' : '' }}</span>
+        <span class="name">{{ s.name }}</span>
+        <span class="breakdown">
+          {{ s.tricks }} trick{{ s.tricks !== 1 ? 's' : '' }}
+          <span class="plus">+</span>
+          {{ s.bonus }} bonus
+          <span class="equals">=</span>
+          <span class="total">{{ s.total }}</span>
+        </span>
       </div>
     </div>
+    <div class="formula-note">Bonus = sum of remaining dice ÷ tricks won (rounded down)</div>
     <button class="btn-again" @click="$emit('playAgain')">Play Again</button>
   </div>
 </template>
@@ -24,7 +31,13 @@ const props = defineProps({ players: { type: Array, required: true } })
 defineEmits(['playAgain'])
 
 const sorted = computed(() =>
-  [...props.players].sort((a, b) => b.tricks - a.tricks)
+  props.players
+    .map(p => {
+      const diceTotal = p.dice.reduce((s, d) => s + d.value, 0)
+      const bonus = p.tricks > 0 ? Math.floor(diceTotal / p.tricks) : 0
+      return { name: p.name, tricks: p.tricks, diceTotal, bonus, total: p.tricks + bonus }
+    })
+    .sort((a, b) => b.total - a.total || b.tricks - a.tricks)
 )
 </script>
 
@@ -35,7 +48,7 @@ const sorted = computed(() =>
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 24px;
+  gap: 20px;
   padding: 24px;
 }
 
@@ -50,7 +63,7 @@ h1 {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  min-width: 280px;
+  min-width: 320px;
 }
 
 .row {
@@ -67,6 +80,7 @@ h1 {
     background: rgba(201, 168, 76, 0.1);
 
     .rank { color: var(--gold); }
+    .total { color: var(--gold); }
   }
 }
 
@@ -82,9 +96,32 @@ h1 {
   font-weight: 600;
 }
 
-.tricks {
+.breakdown {
+  font-size: 0.88rem;
   color: var(--text-dim);
-  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  white-space: nowrap;
+}
+
+.plus, .equals {
+  color: var(--text-dim);
+  opacity: 0.6;
+}
+
+.total {
+  font-weight: 800;
+  font-size: 1rem;
+  color: var(--text);
+}
+
+.formula-note {
+  font-size: 0.72rem;
+  color: var(--text-dim);
+  opacity: 0.6;
+  text-align: center;
+  max-width: 320px;
 }
 
 .btn-again {
