@@ -4,8 +4,8 @@
     <!-- Header -->
     <div class="header">
       <div class="round-info">Round {{ state.round }} / 8</div>
-      <div class="trump-badge" :style="{ background: trumpColor }">
-        {{ trumpSym }} Trump: {{ state.trumpSuit }}
+      <div class="king-lead-badge" :style="{ background: leadSuitColor }">
+        {{ leadSuitSym }} King's Lead: {{ state.leadSuit }}
       </div>
       <div class="scores">
         <span v-for="p in state.players" :key="p.name" class="score-pill">
@@ -17,9 +17,9 @@
     <!-- Main area: king + trick -->
     <div class="main">
 
-      <!-- King's demand -->
+      <!-- King's lead card -->
       <div class="king-area">
-        <div class="area-label">King's Demand</div>
+        <div class="area-label">King's Lead</div>
         <CardComponent v-if="state.king.revealed" :card="state.king.revealed" />
         <div class="king-sub">{{ 8 - state.round }} card{{ 8 - state.round !== 1 ? 's' : '' }} left</div>
       </div>
@@ -28,13 +28,13 @@
       <div class="trick-area">
         <div class="area-label">
           Current Trick
-          <span v-if="state.leadSuit" class="lead-suit" :style="{ color: leadSuitColor }">
-            — lead: {{ leadSuitSym }} {{ state.leadSuit }}
+          <span class="lead-suit" :style="{ color: leadSuitColor }">
+            — follow: {{ leadSuitSym }} {{ state.leadSuit }}
           </span>
         </div>
 
         <div v-if="!state.trick.length" class="trick-empty">
-          {{ currentPlayer.name }} leads this trick
+          {{ currentPlayer.name }} plays first
         </div>
 
         <div class="trick-entries">
@@ -60,53 +60,61 @@
 
     <!-- Current player action area -->
     <div v-if="state.phase === 'playing'" class="player-area">
-      <div class="player-label">
-        {{ currentPlayer.name }}'s turn
-        <span class="dice-count">({{ currentPlayer.dice.length }} dice)</span>
+      <!-- Bot thinking -->
+      <div v-if="currentPlayerIsBot" class="bot-thinking">
+        🤖 {{ currentPlayer.name }} is thinking...
       </div>
 
-      <div class="section">
-        <div class="section-label">Hand — select a card to play</div>
-        <div class="cards-row">
-          <CardComponent
-            v-for="card in currentPlayer.hand"
-            :key="card.id"
-            :card="card"
-            :selectable="isLegal(card)"
-            :selected="selectedCard?.id === card.id"
-            :dimmed="!isLegal(card)"
-            @select="toggleCard(card)"
-          />
+      <!-- Human player UI -->
+      <template v-else>
+        <div class="player-label">
+          {{ currentPlayer.name }}'s turn
+          <span class="dice-count">({{ currentPlayer.dice.length }} dice)</span>
         </div>
-      </div>
 
-      <div class="section">
-        <div class="section-label">
-          Your dice — attach 0 or more
-          <span v-if="selectedDiceIds.length" class="total-badge">
-            total: {{ selectedTotal }}
+        <div class="section">
+          <div class="section-label">Hand — select a card to play</div>
+          <div class="cards-row">
+            <CardComponent
+              v-for="card in currentPlayer.hand"
+              :key="card.id"
+              :card="card"
+              :selectable="isLegal(card)"
+              :selected="selectedCard?.id === card.id"
+              :dimmed="!isLegal(card)"
+              @select="toggleCard(card)"
+            />
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-label">
+            Your dice — attach 0 or more
+            <span v-if="selectedDiceIds.length" class="total-badge">
+              total: {{ selectedTotal }}
+            </span>
+          </div>
+          <div class="dice-row">
+            <DiceComponent
+              v-for="die in currentPlayer.dice"
+              :key="die.id"
+              :die="die"
+              selectable
+              :selected="selectedDiceIds.includes(die.id)"
+              @select="toggleDie(die.id)"
+            />
+            <span v-if="!currentPlayer.dice.length" class="no-dice">No dice</span>
+          </div>
+        </div>
+
+        <button class="btn-play" :disabled="!selectedCard" @click="play">
+          <span v-if="selectedCard">
+            Play {{ selectedCard.suit }} card
+            <span v-if="selectedDiceIds.length">+ {{ selectedDiceIds.length }} dice ({{ selectedTotal }})</span>
           </span>
-        </div>
-        <div class="dice-row">
-          <DiceComponent
-            v-for="die in currentPlayer.dice"
-            :key="die.id"
-            :die="die"
-            selectable
-            :selected="selectedDiceIds.includes(die.id)"
-            @select="toggleDie(die.id)"
-          />
-          <span v-if="!currentPlayer.dice.length" class="no-dice">No dice</span>
-        </div>
-      </div>
-
-      <button class="btn-play" :disabled="!selectedCard" @click="play">
-        <span v-if="selectedCard">
-          Play {{ selectedCard.suit }} card
-          <span v-if="selectedDiceIds.length">+ {{ selectedDiceIds.length }} dice ({{ selectedTotal }})</span>
-        </span>
-        <span v-else>Select a card to play</span>
-      </button>
+          <span v-else>Select a card to play</span>
+        </button>
+      </template>
     </div>
 
     <!-- Overlays -->
@@ -136,8 +144,7 @@ const selectedCard = ref(null)
 const selectedDiceIds = ref([])
 
 const currentPlayer = computed(() => state.players[state.currentPlayerIndex])
-const trumpColor = computed(() => SUIT_COLORS[state.trumpSuit])
-const trumpSym = computed(() => SUIT_SYMBOLS[state.trumpSuit])
+const currentPlayerIsBot = computed(() => state.players[state.currentPlayerIndex]?.isBot === true)
 const leadSuitColor = computed(() => state.leadSuit ? SUIT_COLORS[state.leadSuit] : null)
 const leadSuitSym = computed(() => state.leadSuit ? SUIT_SYMBOLS[state.leadSuit] : null)
 const selectedTotal = computed(() =>
@@ -152,12 +159,11 @@ watch(() => state.currentPlayerIndex, () => {
   selectedDiceIds.value = []
 })
 
-// Computed so Vue tracks trumpSuit + leadSuit + hand changes as explicit dependencies
 const legalCardIds = computed(() => {
   const hand = currentPlayer.value?.hand ?? []
   return new Set(
     hand
-      .filter(card => isLegalPlay(card, hand, state.leadSuit, state.trumpSuit))
+      .filter(card => isLegalPlay(card, hand, state.leadSuit))
       .map(card => card.id)
   )
 })
@@ -214,7 +220,7 @@ function play() {
   white-space: nowrap;
 }
 
-.trump-badge {
+.king-lead-badge {
   font-size: 0.8rem;
   font-weight: 700;
   padding: 3px 10px;
@@ -350,6 +356,14 @@ function play() {
   flex-direction: column;
   gap: 12px;
   background: rgba(0,0,0,0.15);
+}
+
+.bot-thinking {
+  font-size: 1rem;
+  color: var(--text-dim);
+  font-style: italic;
+  padding: 12px 0;
+  letter-spacing: 0.03em;
 }
 
 .player-label {

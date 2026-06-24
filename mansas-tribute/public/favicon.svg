@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <rect width="32" height="32" rx="5" fill="#1a1208"/>
+  <!-- Crown shape -->
+  <path d="M4 22 L4 14 L10 20 L16 8 L22 20 L28 14 L28 22 Z" fill="#c9a84c"/>
+  <rect x="4" y="22" width="24" height="4" rx="1" fill="#c9a84c"/>
+  <circle cx="4" cy="14" r="2.5" fill="#f0d060"/>
+  <circle cx="16" cy="8" r="2.5" fill="#f0d060"/>
+  <circle cx="28" cy="14" r="2.5" fill="#f0d060"/>
+</svg>

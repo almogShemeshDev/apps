@@ -1,6 +1,5 @@
 <template>
   <div id="app">
-     <!-- Mansa's Tribute -->
     <GameSetup v-if="state.phase === 'setup'" @start="startGame" />
     <GameBoard
       v-else-if="state.phase === 'playing' || state.phase === 'trick-result' || state.phase === 'dice-picking'"
@@ -18,8 +17,10 @@ import GameSetup from './components/GameSetup.vue'
 import GameBoard from './components/GameBoard.vue'
 import ScoreBoard from './components/ScoreBoard.vue'
 import { useGameState } from './composables/useGameState.js'
+import { useBotAI } from './composables/useBotAI.js'
 
 const { state, startGame, resetGame } = useGameState()
+useBotAI()
 </script>
 
 <style lang="scss" scoped>

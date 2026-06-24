@@ -4,17 +4,21 @@
       <div class="title">{{ currentPicker.name }}, pick a die</div>
       <div class="sub">{{ dicePickingTurn + 1 }} of {{ losers.length }}</div>
 
-      <div class="pool">
-        <DiceComponent
-          v-for="die in state.dicePool"
-          :key="die.id"
-          :die="die"
-          selectable
-          @select="pickDie(die.id)"
-        />
+      <div v-if="currentPicker.isBot" class="bot-thinking">
+        🤖 Thinking...
       </div>
-
-      <button class="btn-pass" @click="passPicking">Pass</button>
+      <template v-else>
+        <div class="pool">
+          <DiceComponent
+            v-for="die in state.dicePool"
+            :key="die.id"
+            :die="die"
+            selectable
+            @select="pickDie(die.id)"
+          />
+        </div>
+        <button class="btn-pass" @click="passPicking">Pass</button>
+      </template>
     </div>
   </div>
 </template>
@@ -64,6 +68,13 @@ const currentPicker = computed(() => state.players[losers.value[dicePickingTurn.
   font-size: 0.8rem;
   color: var(--text-dim);
   margin-top: -8px;
+}
+
+.bot-thinking {
+  font-size: 1rem;
+  color: var(--text-dim);
+  font-style: italic;
+  padding: 8px 0;
 }
 
 .pool {
