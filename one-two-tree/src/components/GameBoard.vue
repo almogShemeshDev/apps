@@ -33,12 +33,12 @@
     <!-- Trick resolved overlay -->
     <div v-if="state.phase === 'trick-resolved'" class="overlay">
       <div class="trick-result">
-        <p class="winner-name">{{ getPlayer(state.currentTrick.winnerId)?.name }} won the trick!</p>
-        <button class="btn-next" @click="nextTrick">Next Trick</button>
+        <p class="winner-name">{{ t('wonTrick', getPlayer(state.currentTrick.winnerId)?.name) }}</p>
+        <button class="btn-next" @click="nextTrick">{{ t('nextTrick') }}</button>
       </div>
     </div>
 
-    <button class="btn-new-game" @click="confirmNewGame">New Game</button>
+    <button class="btn-new-game" @click="confirmNewGame">{{ t('newGame') }}</button>
     <footer class="credits">© 2026 Almog Shemesh · Game Design &amp; Concept · All rights reserved</footer>
   </div>
 </template>
@@ -49,14 +49,16 @@ import PlayerHand from './PlayerHand.vue'
 import TrickArea from './TrickArea.vue'
 import ReplaceBidModal from './ReplaceBidModal.vue'
 import { useGameState } from '../composables/useGameState.js'
+import { useLang } from '../composables/useLang.js'
 
 const { state, activePlayer, getPlayer, playCard, nextTrick, resetGame } = useGameState()
+const { t } = useLang()
 
 const opponents = computed(() => state.players.filter(p => p.id !== 0))
 const leadSuit = computed(() => state.currentTrick.plays[0]?.card.suit ?? null)
 
 function confirmNewGame() {
-  if (window.confirm('Start a new game? Current progress will be lost.')) {
+  if (window.confirm(t('confirmNewGame'))) {
     resetGame()
   }
 }

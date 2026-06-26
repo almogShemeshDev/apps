@@ -1,6 +1,6 @@
 <template>
   <div class="trick-area">
-    <h3 class="trick-title">Current Trick</h3>
+    <h3 class="trick-title">{{ t('currentTrick') }}</h3>
     <div class="plays">
       <div
         v-for="play in trick.plays"
@@ -10,9 +10,9 @@
       >
         <span class="play-name">{{ getPlayer(play.playerId)?.name }}</span>
         <CardComponent :card="play.card" />
-        <span v-if="trick.winnerId === play.playerId" class="win-label">Winner!</span>
+        <span v-if="trick.winnerId === play.playerId" class="win-label">{{ t('winnerLabel') }}</span>
       </div>
-      <div v-if="!trick.plays.length" class="empty">Waiting for lead...</div>
+      <div v-if="!trick.plays.length" class="empty">{{ t('waitingForLead') }}</div>
     </div>
   </div>
 </template>
@@ -20,12 +20,14 @@
 <script setup>
 import CardComponent from './CardComponent.vue'
 import { useGameState } from '../composables/useGameState.js'
+import { useLang } from '../composables/useLang.js'
 
 defineProps({
   trick: { type: Object, required: true },
 })
 
 const { getPlayer } = useGameState()
+const { t } = useLang()
 </script>
 
 <style scoped>

@@ -1,6 +1,6 @@
 <template>
   <div class="scoreboard">
-    <h1>Game Over</h1>
+    <h1>{{ t('gameOver') }}</h1>
     <div class="rows">
       <div
         v-for="(s, i) in sorted"
@@ -11,24 +11,27 @@
         <span class="rank">{{ i + 1 }}</span>
         <span class="name">{{ s.name }}</span>
         <span class="breakdown">
-          {{ s.tricks }} trick{{ s.tricks !== 1 ? 's' : '' }}
+          {{ t('trickCount', s.tricks) }}
           <span class="plus">+</span>
-          {{ s.bonus }} bonus
+          {{ s.bonus }} {{ t('bonus') }}
           <span class="equals">=</span>
           <span class="total">{{ s.total }}</span>
         </span>
       </div>
     </div>
-    <div class="formula-note">Bonus = sum of remaining dice ÷ tricks won (rounded down)</div>
-    <button class="btn-again" @click="$emit('playAgain')">Play Again</button>
+    <div class="formula-note">{{ t('formulaNote') }}</div>
+    <button class="btn-again" @click="$emit('playAgain')">{{ t('playAgain') }}</button>
   </div>
 </template>
 
 <script setup>
 import { computed } from 'vue'
+import { useLang } from '../composables/useLang.js'
 
 const props = defineProps({ players: { type: Array, required: true } })
 defineEmits(['playAgain'])
+
+const { t } = useLang()
 
 const sorted = computed(() =>
   props.players

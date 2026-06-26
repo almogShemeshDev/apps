@@ -3,18 +3,21 @@
     <div v-for="player in players" :key="player.id" class="bid-slot">
       <span class="bid-name">{{ player.name }}</span>
       <CardComponent v-if="player.bid" :card="player.bid" />
-      <div v-else class="bid-empty">No bid</div>
-      <span class="tricks-count">{{ player.tricksWon }} trick{{ player.tricksWon !== 1 ? 's' : '' }}</span>
+      <div v-else class="bid-empty">{{ t('noBid') }}</div>
+      <span class="tricks-count">{{ t('trickCount', player.tricksWon) }}</span>
     </div>
   </div>
 </template>
 
 <script setup>
 import CardComponent from './CardComponent.vue'
+import { useLang } from '../composables/useLang.js'
 
 defineProps({
   players: { type: Array, required: true },
 })
+
+const { t } = useLang()
 </script>
 
 <style scoped>

@@ -2,19 +2,19 @@
   <div class="overlay">
     <div class="card">
       <div class="winner">
-        🏆 {{ players[result.winnerIndex].name }} wins the trick!
+        {{ t('winsTrick', players[result.winnerIndex].name) }}
       </div>
-      <div class="sub">Leads the next round</div>
+      <div class="sub">{{ t('leadsNext') }}</div>
 
       <div v-if="result.losers.length && dicePool.length" class="picking-order">
-        <div class="label">Dice picking order:</div>
+        <div class="label">{{ t('dicePickingOrder') }}</div>
         <div v-for="(pi, i) in result.losers" :key="pi" class="entry">
           {{ i + 2 }}. {{ players[pi].name }}
         </div>
       </div>
 
       <button class="btn" @click="$emit('continue')">
-        {{ dicePool.length ? 'Pick Dice →' : 'Next Round →' }}
+        {{ dicePool.length ? t('pickDice') : t('nextRound') }}
       </button>
     </div>
   </div>
@@ -23,6 +23,7 @@
 <script setup>
 import { computed } from 'vue'
 import { useGameState } from '../composables/useGameState.js'
+import { useLang } from '../composables/useLang.js'
 
 const props = defineProps({
   result: { type: Object, required: true },
@@ -31,6 +32,7 @@ const props = defineProps({
 defineEmits(['continue'])
 
 const { state } = useGameState()
+const { t } = useLang()
 const dicePool = computed(() => state.dicePool)
 </script>
 

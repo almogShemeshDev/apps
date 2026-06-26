@@ -12,11 +12,11 @@
           :dimmed="isActive && !isLegal(card)"
           @select="$emit('play', card)"
         />
-        <span v-if="!player.hand.length" class="empty">No cards</span>
+        <span v-if="!player.hand.length" class="empty">{{ t('noCards') }}</span>
       </div>
 
       <div class="bid-box" :class="{ matching: isMatching }">
-        <span class="bid-box-label" :class="{ matching: isMatching }">BID</span>
+        <span class="bid-box-label" :class="{ matching: isMatching }">{{ t('bidBoxLabel') }}</span>
         <CardComponent v-if="player.bid" :card="player.bid"
           :faceDown="false"
           :selectable="isActive && isBidCardLegal"
@@ -24,12 +24,12 @@
           @select="$emit('play', player.bid)" />
         <div v-else class="bid-empty">—</div>
         <span class="tricks-count" :class="{ matching: isMatching }">
-          {{ player.tricksWon }} trick{{ player.tricksWon !== 1 ? 's' : '' }}
+          {{ t('trickCount', player.tricksWon) }}
         </span>
       </div>
     </div>
-    <span v-if="isBot && isTurn" class="turn-badge bot-badge">Thinking...</span>
-    <span v-else-if="isActive" class="turn-badge">Your turn</span>
+    <span v-if="isBot && isTurn" class="turn-badge bot-badge">{{ t('thinking') }}</span>
+    <span v-else-if="isActive" class="turn-badge">{{ t('yourTurn') }}</span>
   </div>
 </template>
 
@@ -37,6 +37,7 @@
 import { computed } from 'vue'
 import CardComponent from './CardComponent.vue'
 import { legalCards, isBidCorrect } from '../composables/useTrickLogic.js'
+import { useLang } from '../composables/useLang.js'
 
 const props = defineProps({
   player: { type: Object, required: true },
@@ -46,6 +47,8 @@ const props = defineProps({
   leadSuit: { type: String, default: null },
 })
 defineEmits(['play'])
+
+const { t } = useLang()
 
 function isLegal(card) {
   return !!legalCards(props.player.hand, props.leadSuit, props.player.bid).find(c => c.id === card.id)
