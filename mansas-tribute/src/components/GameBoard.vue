@@ -3,9 +3,9 @@
 
     <!-- Header -->
     <div class="header">
-      <div class="round-info">Round {{ state.round }} / 8</div>
+      <div class="round-info">{{ t('roundInfo', state.round) }}</div>
       <div class="king-lead-badge" :style="{ background: leadSuitColor }">
-        {{ leadSuitSym }} King's Lead: {{ state.leadSuit }}
+        {{ leadSuitSym }} {{ t('kingsLead') }} {{ state.leadSuit }}
       </div>
       <div class="scores">
         <span v-for="p in state.players" :key="p.name" class="score-pill">
@@ -19,22 +19,22 @@
 
       <!-- King's lead card -->
       <div class="king-area">
-        <div class="area-label">King's Lead</div>
+        <div class="area-label">{{ t('kingsLead') }}</div>
         <CardComponent v-if="state.king.revealed" :card="state.king.revealed" />
-        <div class="king-sub">{{ 8 - state.round }} card{{ 8 - state.round !== 1 ? 's' : '' }} left</div>
+        <div class="king-sub">{{ t('cardsLeft', 8 - state.round) }}</div>
       </div>
 
       <!-- Trick in progress -->
       <div class="trick-area">
         <div class="area-label">
-          Current Trick
+          {{ t('currentTrick') }}
           <span class="lead-suit" :style="{ color: leadSuitColor }">
-            — follow: {{ leadSuitSym }} {{ state.leadSuit }}
+            — {{ t('follow') }} {{ leadSuitSym }} {{ state.leadSuit }}
           </span>
         </div>
 
         <div v-if="!state.trick.length" class="trick-empty">
-          {{ currentPlayer.name }} plays first
+          {{ t('playsFirst', currentPlayer.name) }}
         </div>
 
         <div class="trick-entries">
@@ -48,7 +48,7 @@
             <CardComponent :card="entry.card" />
             <div class="entry-dice">
               <DiceComponent v-for="d in entry.dice" :key="d.id" :die="d" />
-              <span v-if="!entry.dice.length" class="no-dice">0 dice</span>
+              <span v-if="!entry.dice.length" class="no-dice">{{ t('zeroDice') }}</span>
             </div>
             <div class="entry-total" v-if="entry.dice.length">
               = {{ entryTotal(entry) }}
@@ -62,18 +62,18 @@
     <div v-if="state.phase === 'playing'" class="player-area">
       <!-- Bot thinking -->
       <div v-if="currentPlayerIsBot" class="bot-thinking">
-        🤖 {{ currentPlayer.name }} is thinking...
+        {{ t('botThinking', currentPlayer.name) }}
       </div>
 
       <!-- Human player UI -->
       <template v-else>
         <div class="player-label">
-          {{ currentPlayer.name }}'s turn
-          <span class="dice-count">({{ currentPlayer.dice.length }} dice)</span>
+          {{ t('yourTurn', currentPlayer.name) }}
+          <span class="dice-count">{{ t('diceCount', currentPlayer.dice.length) }}</span>
         </div>
 
         <div class="section">
-          <div class="section-label">Hand — select a card to play</div>
+          <div class="section-label">{{ t('handLabel') }}</div>
           <div class="cards-row">
             <CardComponent
               v-for="card in currentPlayer.hand"
@@ -89,9 +89,9 @@
 
         <div class="section">
           <div class="section-label">
-            Your dice — attach 0 or more
+            {{ t('diceLabel') }}
             <span v-if="selectedDiceIds.length" class="total-badge">
-              total: {{ selectedTotal }}
+              {{ t('diceTotal', selectedTotal) }}
             </span>
           </div>
           <div class="dice-row">
@@ -103,16 +103,20 @@
               :selected="selectedDiceIds.includes(die.id)"
               @select="toggleDie(die.id)"
             />
-            <span v-if="!currentPlayer.dice.length" class="no-dice">No dice</span>
+            <span v-if="!currentPlayer.dice.length" class="no-dice">{{ t('noDice') }}</span>
           </div>
         </div>
 
         <button class="btn-play" :disabled="!selectedCard" @click="play">
           <span v-if="selectedCard">
-            Play {{ selectedCard.suit }} card
-            <span v-if="selectedDiceIds.length">+ {{ selectedDiceIds.length }} dice ({{ selectedTotal }})</span>
+            <template v-if="selectedDiceIds.length">
+              {{ t('playCardWithDice', selectedCard.suit, selectedDiceIds.length, selectedTotal) }}
+            </template>
+            <template v-else>
+              {{ t('playCard', selectedCard.suit) }}
+            </template>
           </span>
-          <span v-else>Select a card to play</span>
+          <span v-else>{{ t('selectCard') }}</span>
         </button>
       </template>
     </div>
@@ -137,8 +141,10 @@ import DicePickingPhase from './DicePickingPhase.vue'
 import { useGameState } from '../composables/useGameState.js'
 import { isLegalPlay, diceTotal } from '../composables/useTrickLogic.js'
 import { SUIT_COLORS, SUIT_SYMBOLS } from '../constants.js'
+import { useLang } from '../composables/useLang.js'
 
 const { state, playCard, proceedToDicePicking } = useGameState()
+const { t } = useLang()
 
 const selectedCard = ref(null)
 const selectedDiceIds = ref([])

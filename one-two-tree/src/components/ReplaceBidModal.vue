@@ -1,9 +1,9 @@
 <template>
   <div class="overlay">
     <div class="modal">
-      <h2>You played your bid card!</h2>
-      <p class="sub">Pick a new bid from your hand, <strong>{{ player.name }}</strong></p>
-      <p class="hint">1 = bet 1 trick &nbsp;|&nbsp; 2 = bet 2 tricks &nbsp;|&nbsp; 🌳 = bet exactly 0 or 3 tricks</p>
+      <h2>{{ t('playedBidCard') }}</h2>
+      <p class="sub">{{ t('pickNewBidSuffix', player.name) }}</p>
+      <p class="hint">{{ t('bidHintShort') }}</p>
 
       <div class="cards">
         <CardComponent
@@ -16,7 +16,7 @@
         />
       </div>
 
-      <button class="btn-confirm" :disabled="!selected" @click="confirm">Confirm New Bid</button>
+      <button class="btn-confirm" :disabled="!selected" @click="confirm">{{ t('confirmNewBid') }}</button>
     </div>
   </div>
 </template>
@@ -25,12 +25,14 @@
 import { ref } from 'vue'
 import CardComponent from './CardComponent.vue'
 import { useGameState } from '../composables/useGameState.js'
+import { useLang } from '../composables/useLang.js'
 
 const props = defineProps({
   player: { type: Object, required: true },
 })
 
 const { replaceBid } = useGameState()
+const { t } = useLang()
 const selected = ref(null)
 
 function confirm() {

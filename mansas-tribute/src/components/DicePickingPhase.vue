@@ -1,11 +1,11 @@
 <template>
   <div class="overlay">
     <div class="panel">
-      <div class="title">{{ currentPicker.name }}, pick a die</div>
-      <div class="sub">{{ dicePickingTurn + 1 }} of {{ losers.length }}</div>
+      <div class="title">{{ t('pickADie', currentPicker.name) }}</div>
+      <div class="sub">{{ t('pickingOrder', dicePickingTurn + 1, losers.length) }}</div>
 
       <div v-if="currentPicker.isBot" class="bot-thinking">
-        🤖 Thinking...
+        {{ t('botThinking', currentPicker.name) }}
       </div>
       <template v-else>
         <div class="pool">
@@ -17,7 +17,7 @@
             @select="pickDie(die.id)"
           />
         </div>
-        <button class="btn-pass" @click="passPicking">Pass</button>
+        <button class="btn-pass" @click="passPicking">{{ t('pass') }}</button>
       </template>
     </div>
   </div>
@@ -27,8 +27,10 @@
 import { computed } from 'vue'
 import DiceComponent from './DiceComponent.vue'
 import { useGameState } from '../composables/useGameState.js'
+import { useLang } from '../composables/useLang.js'
 
 const { state, pickDie, passPicking } = useGameState()
+const { t } = useLang()
 
 const losers = computed(() => state.trickResult.losers)
 const dicePickingTurn = computed(() => state.dicePickingTurn)

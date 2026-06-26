@@ -1,15 +1,15 @@
 <template>
   <div class="scoreboard">
-    <h1>Game Over</h1>
+    <h1>{{ t('gameOver') }}</h1>
     <div class="scoreboard-table-wrapper">
     <table>
       <thead>
         <tr>
-          <th>Player</th>
-          <th>Tricks</th>
-          <th>Bid</th>
-          <th>Bonus</th>
-          <th>Total</th>
+          <th>{{ t('colPlayer') }}</th>
+          <th>{{ t('colTricks') }}</th>
+          <th>{{ t('colBid') }}</th>
+          <th>{{ t('colBonus') }}</th>
+          <th>{{ t('colTotal') }}</th>
         </tr>
       </thead>
       <tbody>
@@ -23,26 +23,29 @@
       </tbody>
     </table>
     </div>
-    <p class="winner-msg">🏆 {{ winner?.name }} wins!</p>
-    <button class="btn-play-again" @click="$emit('playAgain')">Play Again</button>
+    <p class="winner-msg">{{ t('winsMsg', winner?.name) }}</p>
+    <button class="btn-play-again" @click="$emit('playAgain')">{{ t('playAgain') }}</button>
     <p class="credits">© 2026 Almog Shemesh · Game Design &amp; Concept · All rights reserved</p>
   </div>
 </template>
 
 <script setup>
 import { computed } from 'vue'
+import { useLang } from '../composables/useLang.js'
 
 const props = defineProps({
   scores: { type: Array, required: true },
 })
 defineEmits(['playAgain'])
 
+const { t } = useLang()
+
 const maxScore = computed(() => Math.max(...props.scores.map(s => s.total)))
 const winner = computed(() => props.scores.find(s => s.total === maxScore.value))
 
 function bidLabel(card) {
-  if (!card) return 'None'
-  if (card.value === 'tree') return '🌳 (0 or 3)'
+  if (!card) return t('bidNone')
+  if (card.value === 'tree') return t('bidTree')
   return card.value
 }
 </script>

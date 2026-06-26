@@ -4,15 +4,13 @@
 
     <div class="panel">
       <p class="prompt">
-        <strong>{{ currentPlayer.name }}</strong>, pick your bid card
+        <strong>{{ currentPlayer.name }}</strong>{{ t('pickBidSuffix') }}
       </p>
-      <p class="hint">
-        1 = bet exactly 1 trick &nbsp;|&nbsp; 2 = bet exactly 2 tricks &nbsp;|&nbsp; 🌳 = bet exactly 0 or 3 tricks
-      </p>
-      <p class="progress">Player {{ state.biddingIndex + 1 }} of {{ state.players.length }}</p>
+      <p class="hint">{{ t('bidHint') }}</p>
+      <p class="progress">{{ t('playerOf', state.biddingIndex + 1, state.players.length) }}</p>
 
       <div v-if="currentPlayer.isBot" class="bot-thinking">
-        🤖 Thinking...
+        {{ t('botThinking') }}
       </div>
       <template v-else>
         <div class="cards">
@@ -26,7 +24,7 @@
           />
         </div>
         <button class="btn-confirm" :disabled="!selected" @click="confirm">
-          Confirm Bid
+          {{ t('confirmBid') }}
         </button>
       </template>
     </div>
@@ -39,8 +37,10 @@
 import { ref, computed } from 'vue'
 import CardComponent from './CardComponent.vue'
 import { useGameState } from '../composables/useGameState.js'
+import { useLang } from '../composables/useLang.js'
 
 const { state, placeInitialBid } = useGameState()
+const { t } = useLang()
 
 const selected = ref(null)
 

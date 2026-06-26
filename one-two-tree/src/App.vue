@@ -1,12 +1,12 @@
 <template>
-  <div id="app">
+  <div id="app" :dir="dir">
     <!-- Setup -->
     <div v-if="state.phase === 'setup'" class="setup">
       <h1 class="title">🌳 One-Two-Tree</h1>
-      <p class="subtitle">A trick-taking card game</p>
+      <p class="subtitle">{{ t('subtitle') }}</p>
 
       <div class="form">
-        <label>Number of players</label>
+        <label>{{ t('numPlayers') }}</label>
         <div class="player-count">
           <button
             v-for="n in [3, 4, 5]"
@@ -19,23 +19,23 @@
         <div v-for="i in playerCount" :key="i" class="name-input">
           <div class="name-row">
             <div class="name-col">
-              <label>Player {{ i }} name</label>
+              <label>{{ t('playerNameLabel', i) }}</label>
               <input v-model="names[i - 1]" :placeholder="`Player ${i}`" :disabled="i > 1 && bots[i - 1]" />
             </div>
             <div v-if="i > 1" class="bot-toggle">
               <button
                 :class="{ active: !bots[i - 1] }"
                 @click="bots[i - 1] = false"
-              >Human</button>
+              >{{ t('human') }}</button>
               <button
                 :class="{ active: bots[i - 1] }"
                 @click="bots[i - 1] = true"
-              >Bot</button>
+              >{{ t('bot') }}</button>
             </div>
           </div>
         </div>
 
-        <button class="btn-start" @click="start">Start Game</button>
+        <button class="btn-start" @click="start">{{ t('startGame') }}</button>
       </div>
     </div>
 
@@ -52,8 +52,11 @@
       @playAgain="resetGame"
     />
 
-    <!-- Rules button — always visible -->
-    <button class="btn-rules" @click="showRules = true">Rules</button>
+    <!-- Fixed controls — always visible -->
+    <div class="fixed-controls">
+      <button class="btn-ctrl" @click="showRules = true">{{ t('rules') }}</button>
+      <button class="btn-ctrl btn-lang" @click="toggleLang">{{ lang === 'en' ? 'עב' : 'EN' }}</button>
+    </div>
     <RulesModal v-if="showRules" @close="showRules = false" />
 
     <footer class="credits">
@@ -63,16 +66,23 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 import GameBoard from './components/GameBoard.vue'
 import BiddingPhase from './components/BiddingPhase.vue'
 import ScoreBoard from './components/ScoreBoard.vue'
 import RulesModal from './components/RulesModal.vue'
 import { useGameState } from './composables/useGameState.js'
 import { useBotAI } from './composables/useBotAI.js'
+import { useLang } from './composables/useLang.js'
 
 const { state, startGame, resetGame } = useGameState()
 useBotAI()
+
+const { lang, t, dir, toggleLang } = useLang()
+watch(lang, v => {
+  document.documentElement.setAttribute('dir', v === 'he' ? 'rtl' : 'ltr')
+  document.documentElement.setAttribute('lang', v)
+}, { immediate: true })
 
 const playerCount = ref(3)
 const names = ref(['You', 'Bot 1', 'Bot 2', 'Bot 3', 'Bot 4'])
@@ -210,21 +220,25 @@ function start() {
 .btn-start:hover {
   background: #2f855a;
 }
-.btn-rules {
+.fixed-controls {
   position: fixed;
   top: 16px;
   left: 16px;
+  display: flex;
+  gap: 6px;
+  z-index: 50;
+}
+.btn-ctrl {
   background: rgba(0,0,0,0.35);
   color: #e8f5e9;
   border: 1px solid rgba(255,255,255,0.2);
   border-radius: 8px;
-  padding: 6px 16px;
+  padding: 6px 14px;
   font-size: 0.85rem;
   font-weight: 600;
   cursor: pointer;
-  z-index: 50;
 }
-.btn-rules:hover {
+.btn-ctrl:hover {
   background: rgba(255,255,255,0.12);
 }
 .credits {

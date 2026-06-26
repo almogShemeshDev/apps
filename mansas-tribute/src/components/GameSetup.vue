@@ -1,11 +1,11 @@
 <template>
   <div class="setup">
     <h1 class="title">Mansa's Tribute</h1>
-    <p class="subtitle">A trick-taking dice game · 2–5 players</p>
+    <p class="subtitle">{{ t('subtitle') }}</p>
 
     <div class="form">
       <div class="field">
-        <label>Number of players</label>
+        <label>{{ t('numPlayers') }}</label>
         <div class="count-picker">
           <button
             v-for="n in [2, 3, 4, 5]"
@@ -17,7 +17,7 @@
       </div>
 
       <div v-for="i in playerCount" :key="i" class="field">
-        <label>Player {{ i }}</label>
+        <label>{{ t('playerLabel', i) }}</label>
         <div class="player-row">
           <input
             v-model="names[i - 1]"
@@ -25,21 +25,23 @@
             :disabled="i > 1 && bots[i - 1]"
           />
           <div v-if="i > 1" class="bot-toggle">
-            <button :class="{ active: !bots[i - 1] }" @click="bots[i - 1] = false">Human</button>
-            <button :class="{ active: bots[i - 1] }" @click="bots[i - 1] = true">Bot</button>
+            <button :class="{ active: !bots[i - 1] }" @click="bots[i - 1] = false">{{ t('human') }}</button>
+            <button :class="{ active: bots[i - 1] }" @click="bots[i - 1] = true">{{ t('bot') }}</button>
           </div>
         </div>
       </div>
 
-      <button class="btn-start" @click="start">Start Game</button>
+      <button class="btn-start" @click="start">{{ t('startGame') }}</button>
     </div>
   </div>
 </template>
 
 <script setup>
 import { ref } from 'vue'
+import { useLang } from '../composables/useLang.js'
 
 const emit = defineEmits(['start'])
+const { t } = useLang()
 
 const playerCount = ref(3)
 const names = ref(['Player 1', 'Bot 2', 'Bot 3', 'Bot 4', 'Bot 5'])
