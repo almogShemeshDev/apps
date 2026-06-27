@@ -5,9 +5,10 @@
                 v-for="player in opponents"
                 :key="player.id"
                 :player="player"
-                :isActive="activePlayer() === player.id"
+                :isActive="activePlayer() === player.id && !player.isBot"
+                :isBot="player.isBot"
+                :isTurn="activePlayer() === player.id"
                 :leadSuit="leadSuit"
-                :faceDown="true"
                 @play="(card) => playCard(player.id, card)"
             />
         </div>

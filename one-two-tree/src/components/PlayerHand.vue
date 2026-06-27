@@ -7,8 +7,8 @@
                     v-for="card in player.hand"
                     :key="card.id"
                     :card="card"
-                    :selectable="isActive && !player.isBot && isLegal(card)"
-                    :faceDown="faceDown"
+                    :selectable="isActive && isLegal(card)"
+                    :faceDown="isBot"
                     @select="$emit('play', card)"
                 />
                 <span v-if="!player.hand.length" class="empty">{{ t('noCards') }}</span>
@@ -21,7 +21,8 @@
                 <CardComponent
                     v-if="player.bid"
                     :card="player.bid"
-                    :selectable="isActive && !player.isBot && isBidCardLegal"
+                    :faceDown="false"
+                    :selectable="isActive && isBidCardLegal"
                     @select="$emit('play', player.bid)"
                 />
                 <div v-else class="bid-empty">—</div>
@@ -30,7 +31,7 @@
                 </span>
             </div>
         </div>
-        <span v-if="isActive && player.isBot" class="turn-badge bot">{{ t('thinking') }}</span>
+        <span v-if="isBot && isTurn" class="turn-badge bot">{{ t('thinking') }}</span>
         <span v-else-if="isActive" class="turn-badge">{{ t('yourTurn') }}</span>
     </div>
 </template>
@@ -44,8 +45,9 @@ import { useLang } from '../composables/useLang.js'
 const props = defineProps({
     player: { type: Object, required: true },
     isActive: { type: Boolean, default: false },
+    isBot: { type: Boolean, default: false },
+    isTurn: { type: Boolean, default: false },
     leadSuit: { type: String, default: null },
-    faceDown: { type: Boolean, default: false },
 })
 defineEmits(['play'])
 
