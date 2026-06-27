@@ -6,6 +6,11 @@
     padding: 0;
 }
 
+html, body {
+  /* height: 100%; */
+  /* overflow: hidden; */
+}
+
 body {
     font-family: 'Segoe UI', system-ui, sans-serif;
     background: #1a4731;
