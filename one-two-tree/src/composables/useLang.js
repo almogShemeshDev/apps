@@ -14,7 +14,8 @@ const strings = {
         newGame: 'New Game',
         confirmNewGame: 'Start a new game? Current progress will be lost.',
         pickBidSuffix: ', pick your bid card',
-        bidHint: '1 = bet exactly 1 trick | 2 = bet exactly 2 tricks | 🌳 = bet exactly 0 or 3 tricks',
+        bidHint:
+            '1 = bet exactly 1 trick | 2 = bet exactly 2 tricks | 🌳 = bet exactly 0 or 3 tricks',
         playerOf: (a, b) => `Player ${a} of ${b}`,
         botThinking: '🤖 Thinking...',
         confirmBid: 'Confirm Bid',

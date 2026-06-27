@@ -8,7 +8,7 @@
                     :key="card.id"
                     :card="card"
                     :selectable="isActive && isLegal(card)"
-                    :faceDown="isBot"
+                    :face-down="isBot"
                     @select="$emit('play', card)"
                 />
                 <span v-if="!player.hand.length" class="empty">{{ t('noCards') }}</span>
@@ -21,7 +21,7 @@
                 <CardComponent
                     v-if="player.bid"
                     :card="player.bid"
-                    :faceDown="false"
+                    :face-down="false"
                     :selectable="isActive && isBidCardLegal"
                     @select="$emit('play', player.bid)"
                 />

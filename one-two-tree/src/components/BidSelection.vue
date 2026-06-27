@@ -35,7 +35,7 @@
 import { ref } from 'vue'
 import CardComponent from './CardComponent.vue'
 
-const props = defineProps({
+defineProps({
     winner: { type: Object, required: true },
     currentPicker: { type: Object, required: true },
     remainingCards: { type: Array, required: true },

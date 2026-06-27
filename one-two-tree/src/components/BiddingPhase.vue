@@ -8,7 +8,9 @@
                 >{{ t('pickBidSuffix') }}
             </p>
             <p class="hint">{{ t('bidHint') }}</p>
-            <p class="progress">{{ t('playerOf', state.biddingIndex + 1, state.players.length) }}</p>
+            <p class="progress">
+                {{ t('playerOf', state.biddingIndex + 1, state.players.length) }}
+            </p>
 
             <div v-if="currentPlayer.isBot" class="bot-thinking">
                 {{ t('botThinking') }}

@@ -131,9 +131,7 @@ export function useBotAI() {
         const leadSuit = plays[0].card.suit
         const treePlays = plays.filter((p) => p.card.value === 'tree')
         if (treePlays.length === 1) return treePlays[0].card
-        const suitPlays = plays.filter(
-            (p) => p.card.suit === leadSuit && p.card.value !== 'tree'
-        )
+        const suitPlays = plays.filter((p) => p.card.suit === leadSuit && p.card.value !== 'tree')
         if (!suitPlays.length) return plays[0].card
         return suitPlays.reduce(
             (best, p) => (VALUE_RANK[p.card.value] > VALUE_RANK[best.value] ? p.card : best),

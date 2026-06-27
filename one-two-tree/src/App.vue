@@ -25,7 +25,6 @@
                             <input
                                 v-model="names[i - 1]"
                                 :placeholder="`Player ${i}`"
-                                :disabled="i > 1 && bots[i - 1]"
                             />
                         </div>
                         <div v-if="i > 1" class="bot-toggle">
@@ -59,7 +58,7 @@
         <ScoreBoard
             v-else-if="state.phase === 'game-over'"
             :scores="state.scores"
-            @playAgain="resetGame"
+            @play-again="resetGame"
         />
 
         <!-- Fixed controls — always visible -->
