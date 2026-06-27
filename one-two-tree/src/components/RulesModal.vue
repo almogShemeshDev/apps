@@ -194,15 +194,18 @@ const { lang } = useLang()
     display: flex;
     align-items: center;
     justify-content: center;
+
     &:hover {
         background: rgba(255, 255, 255, 0.18);
     }
 }
+
 h2 {
     font-size: 1.4rem;
     margin: 0;
     padding-inline-end: 36px;
 }
+
 section {
     display: flex;
     flex-direction: column;
