@@ -1,3 +1,5 @@
+@use 'colors' as *;
+
 *,
 *::before,
 *::after {
@@ -6,18 +8,24 @@
     padding: 0;
 }
 
-html, body {
-  /* height: 100%; */
-  /* overflow: hidden; */
+html,
+body {
+    height: 100%;
 }
 
 body {
     font-family: 'Segoe UI', system-ui, sans-serif;
-    background: #1a4731;
-    color: #e8f5e9;
+    background: $bg-dark;
+    color: $text;
     -webkit-font-smoothing: antialiased;
 }
 
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
 button {
     font-family: inherit;
 }

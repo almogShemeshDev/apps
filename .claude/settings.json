@@ -1,0 +1,17 @@
+{
+    "hooks": {
+        "PostToolUse": [
+            {
+                "matcher": "Write|Edit",
+                "hooks": [
+                    {
+                        "type": "command",
+                        "shell": "powershell",
+                        "command": "$d = [Console]::In.ReadToEnd(); $j = $d | ConvertFrom-Json; $f = $j.tool_input.file_path; if ($f -like '*one-two-tree*' -or $f -like '*mansas-tribute*') { Set-Location 'C:/Projects/code'; npx prettier --write $f 2>$null }",
+                        "timeout": 30
+                    }
+                ]
+            }
+        ]
+    }
+}
