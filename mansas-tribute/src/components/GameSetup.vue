@@ -22,7 +22,6 @@
           <input
             v-model="names[i - 1]"
             :placeholder="i === 1 ? 'Player 1' : `Bot ${i}`"
-            :disabled="i > 1 && bots[i - 1]"
           />
           <div v-if="i > 1" class="bot-toggle">
             <button :class="{ active: !bots[i - 1] }" @click="bots[i - 1] = false">{{ t('human') }}</button>
@@ -122,7 +121,6 @@ function start() {
     transition: border-color 0.15s;
 
     &:focus { border-color: var(--gold); }
-    &:disabled { opacity: 0.4; }
   }
 }
 
