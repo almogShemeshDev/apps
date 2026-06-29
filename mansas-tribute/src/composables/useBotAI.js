@@ -1,6 +1,6 @@
 import { watch } from 'vue'
 import { useGameState } from './useGameState.js'
-import { isLegalPlay } from './useTrickLogic.js'
+import { isLegalPlay, diceTotal } from './useTrickLogic.js'
 
 const DELAY = 900
 
@@ -43,11 +43,38 @@ export function useBotAI() {
       ? leadCards[Math.floor(Math.random() * leadCards.length)]
       : legal[Math.floor(Math.random() * legal.length)]
 
-    // Following lead suit: attach all dice to maximise winning chance
-    // Not following: no dice (can't win the primary contest; save dice)
-    const diceIds = card.suit === leadSuit ? player.dice.map(d => d.id) : []
+    const diceIds = card.suit === leadSuit ? selectDice(player) : []
 
     playCard(card, diceIds)
+  }
+
+  function selectDice(player) {
+    const myDice = [...player.dice].sort((a, b) => b.value - a.value)
+    if (!myDice.length) return []
+
+    // What's the best lead-suit total already committed this trick?
+    const leadPlays = state.trick.filter(e => e.card.suit === state.leadSuit)
+    const currentBest = leadPlays.length
+      ? Math.max(...leadPlays.map(e => diceTotal(e.dice)))
+      : -1
+
+    if (currentBest >= 0) {
+      // Respond to an existing target: play minimum dice that exceed it
+      let sum = 0
+      const chosen = []
+      for (const die of myDice) {
+        chosen.push(die)
+        sum += die.value
+        if (sum > currentBest) return chosen.map(d => d.id)
+      }
+      // Can't beat the target even with all dice — save them
+      return []
+    }
+
+    // Bot is first to set a lead-suit total: scale aggression with round
+    // Round 1 → 1 die, Round 8 → all dice
+    const count = Math.max(1, Math.round((state.round / 8) * myDice.length))
+    return myDice.slice(0, count).map(d => d.id)
   }
 
   function doPick() {
