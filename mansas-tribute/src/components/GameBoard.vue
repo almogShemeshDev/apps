@@ -13,6 +13,22 @@
             </div>
         </div>
 
+        <!-- All players' dice (always visible) -->
+        <div class="players-panel">
+            <div
+                v-for="(p, i) in state.players"
+                :key="p.name"
+                class="player-strip"
+                :class="{ 'is-active': state.currentPlayerIndex === i && state.phase === 'playing' }"
+            >
+                <div class="strip-name">{{ p.name }}</div>
+                <div class="strip-dice">
+                    <DiceComponent v-for="die in p.dice" :key="die.id" :die="die" />
+                    <span v-if="!p.dice.length" class="no-dice">—</span>
+                </div>
+            </div>
+        </div>
+
         <!-- Main area: king + trick -->
         <div class="main">
             <!-- King's lead card -->
@@ -65,10 +81,7 @@
 
             <!-- Human player UI -->
             <template v-else>
-                <div class="player-label">
-                    {{ t('yourTurn', currentPlayer.name) }}
-                    <span class="dice-count">{{ t('diceCount', currentPlayer.dice.length) }}</span>
-                </div>
+                <div class="player-label">{{ t('yourTurn', currentPlayer.name) }}</div>
 
                 <div class="section">
                     <div class="section-label">{{ t('handLabel') }}</div>
@@ -253,6 +266,46 @@ function play() {
     white-space: nowrap;
 }
 
+.players-panel {
+    display: flex;
+    gap: 0;
+    border-bottom: 1px solid $border;
+    overflow-x: auto;
+}
+
+.player-strip {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+    border-right: 1px solid $border;
+    flex-shrink: 0;
+    transition: background 0.2s;
+
+    &.is-active {
+        background: rgba($gold, 0.07);
+    }
+
+    &:last-child {
+        border-right: none;
+    }
+}
+
+.strip-name {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: $text-dim;
+    white-space: nowrap;
+    min-width: 48px;
+}
+
+.strip-dice {
+    display: flex;
+    gap: 4px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
 .main {
     display: flex;
     gap: 0;
@@ -372,13 +425,6 @@ function play() {
     font-size: 1rem;
     font-weight: 700;
     color: $gold;
-}
-
-.dice-count {
-    font-size: 0.8rem;
-    font-weight: 400;
-    color: $text-dim;
-    margin-left: 6px;
 }
 
 .section {
