@@ -22,6 +22,7 @@
             }}</button>
         </div>
         <RulesModal v-if="showRules" @close="showRules = false" />
+        <CreditsFooter />
     </div>
 </template>
 
@@ -31,6 +32,7 @@ import GameSetup from './components/GameSetup.vue'
 import GameBoard from './components/GameBoard.vue'
 import ScoreBoard from './components/ScoreBoard.vue'
 import RulesModal from './components/RulesModal.vue'
+import CreditsFooter from './components/CreditsFooter.vue'
 import { useGameState } from './composables/useGameState.js'
 import { useBotAI } from './composables/useBotAI.js'
 import { useLang } from './composables/useLang.js'

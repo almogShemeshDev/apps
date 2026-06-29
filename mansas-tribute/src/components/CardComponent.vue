@@ -1,7 +1,7 @@
 <template>
     <div
         class="card"
-        :class="{ selectable, selected, dimmed }"
+        :class="{ selectable, selected, dimmed, horizontal }"
         :style="{ '--c': suitColor }"
         @click="selectable && $emit('select')"
     >
@@ -19,6 +19,7 @@ const props = defineProps({
     selectable: { type: Boolean, default: false },
     selected: { type: Boolean, default: false },
     dimmed: { type: Boolean, default: false },
+    horizontal: { type: Boolean, default: false },
 })
 defineEmits(['select'])
 
@@ -62,6 +63,11 @@ const sym = computed(() => SUIT_SYMBOLS[props.card.suit])
 
     &.dimmed {
         opacity: 0.3;
+    }
+
+    &.horizontal {
+        transform: rotate(90deg);
+        margin: 13px 0;
     }
 }
 
