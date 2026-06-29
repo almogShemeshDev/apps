@@ -42,6 +42,7 @@ const strings = {
     dicePickingOrder: 'Dice picking order:',
     pickDice: 'Pick Dice →',
     nextRound: 'Next Round →',
+    credits: '© 2026 Almog Shemesh · Game Design & Concept · All rights reserved',
   },
   he: {
     subtitle: 'משחק קלפים עם קוביות · 2–5 שחקנים',
@@ -53,7 +54,7 @@ const strings = {
     rules: 'חוקים',
     roundInfo: r => `סיבוב ${r} / 8`,
     kingsLead: 'דרישת המלך:',
-    trumpCard: 'קוזר:',
+    trumpCard: 'טראמפ:',
     cardsLeft: n => `נותרו ${n} ${n !== 1 ? 'קלפים' : 'קלף'}`,
     currentTrick: 'טריק נוכחי',
     follow: 'עקוב:',
@@ -82,6 +83,7 @@ const strings = {
     dicePickingOrder: 'סדר בחירת קוביות:',
     pickDice: '← בחר קוביות',
     nextRound: '← סיבוב הבא',
+    credits: '© 2026 אלמוג שמש · עיצוב ורעיון המשחק · כל הזכויות שמורות',
   },
 }
 

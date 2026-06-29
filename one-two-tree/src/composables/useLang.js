@@ -44,6 +44,7 @@ const strings = {
         bidBoxLabel: 'BID',
         yourTurn: 'Your turn',
         thinking: 'Thinking...',
+        credits: '© 2026 Almog Shemesh · Game Design & Concept · All rights reserved',
     },
     he: {
         subtitle: 'משחק קלפים של לקיחת טריקים',
@@ -85,6 +86,7 @@ const strings = {
         bidBoxLabel: 'הימור',
         yourTurn: 'התור שלך',
         thinking: 'חושב...',
+        credits: '© 2026 אלמוג שמש · עיצוב ורעיון המשחק · כל הזכויות שמורות',
     },
 }
 
