@@ -31,11 +31,13 @@
 
         <!-- Main area: king + trick -->
         <div class="main">
-            <!-- King's lead card -->
+            <!-- King's lead card + trump card -->
             <div class="king-area">
                 <div class="area-label">{{ t('kingsLead') }}</div>
                 <CardComponent v-if="state.king.revealed" :card="state.king.revealed" />
                 <div class="king-sub">{{ t('cardsLeft', 8 - state.round) }}</div>
+                <div class="area-label trump-label">{{ t('trumpCard') }}</div>
+                <CardComponent v-if="state.king.trump" :card="state.king.trump" horizontal />
             </div>
 
             <!-- Trick in progress -->
@@ -342,6 +344,10 @@ function play() {
     font-size: 0.72rem;
     color: $text-dim;
     white-space: nowrap;
+}
+
+.trump-label {
+    margin-top: 8px;
 }
 
 .trick-area {

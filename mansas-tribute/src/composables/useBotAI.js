@@ -8,20 +8,21 @@ export function useBotAI() {
   const { state, playCard, pickDie, passPicking } = useGameState()
 
   watch(
-    () => ({
-      phase: state.phase,
-      currentPlayerIndex: state.currentPlayerIndex,
-      dicePickingTurn: state.dicePickingTurn,
-    }),
-    ({ phase }) => {
-      if (phase === 'playing' && state.players[state.currentPlayerIndex]?.isBot) {
+    () => state.phase === 'playing' && state.currentPlayerIndex,
+    () => {
+      if (state.phase === 'playing' && state.players[state.currentPlayerIndex]?.isBot) {
         setTimeout(doPlay, DELAY)
       }
-      if (phase === 'dice-picking') {
-        const pickerIndex = state.trickResult?.losers?.[state.dicePickingTurn]
-        if (pickerIndex !== undefined && state.players[pickerIndex]?.isBot) {
-          setTimeout(doPick, DELAY)
-        }
+    }
+  )
+
+  watch(
+    () => [state.phase, state.dicePickingTurn],
+    () => {
+      if (state.phase !== 'dice-picking') return
+      const pickerIndex = state.trickResult?.losers?.[state.dicePickingTurn]
+      if (pickerIndex !== undefined && state.players[pickerIndex]?.isBot) {
+        setTimeout(doPick, DELAY)
       }
     }
   )

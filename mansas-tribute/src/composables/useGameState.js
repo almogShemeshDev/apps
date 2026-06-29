@@ -15,7 +15,7 @@ function shuffle(arr) {
 }
 
 function buildDeck(n) {
-  const perSuit = (n * 8 + 8) / 4
+  const perSuit = (n * 8 + 16) / 4
   return shuffle(SUITS.flatMap(suit =>
     Array.from({ length: perSuit }, () => ({ id: uid(), suit }))
   ))
@@ -28,9 +28,10 @@ function makeDie() {
 const state = reactive({
   phase: 'setup',
   players: [],
-  king: { deck: [], revealed: null },
+  king: { deck: [], revealed: null, trumpDeck: [], trump: null },
   round: 0,
   leadSuit: null,
+  trumpSuit: null,
   leadPlayerIndex: 0,
   currentPlayerIndex: 0,
   trick: [],
@@ -55,6 +56,8 @@ function startGame(playerInputs) {
   state.king = {
     deck: deck.slice(n * 8, n * 8 + 8),
     revealed: null,
+    trumpDeck: deck.slice(n * 8 + 8, n * 8 + 16),
+    trump: null,
   }
 
   state.round = 0
@@ -65,7 +68,9 @@ function startGame(playerInputs) {
 function _startRound() {
   state.round++
   state.king.revealed = state.king.deck[state.round - 1]
+  state.king.trump = state.king.trumpDeck[state.round - 1]
   state.leadSuit = state.king.revealed.suit
+  state.trumpSuit = state.king.trump.suit
   state.trick = []
   state.trickResult = null
   state.dicePool = []
