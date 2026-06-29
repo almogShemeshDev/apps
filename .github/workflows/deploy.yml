@@ -25,22 +25,22 @@ jobs:
 
       - run: npm install -g npm@11
 
-      - run: npm ci
+      - run: npm install
         working-directory: mage-knight-player-aid
       - run: npm run build
         working-directory: mage-knight-player-aid
 
-      - run: npm ci
+      - run: npm install
         working-directory: milky-way
       - run: npm run build
         working-directory: milky-way
 
-      - run: npm ci
+      - run: npm install
         working-directory: one-two-tree
       - run: npm run build
         working-directory: one-two-tree
 
-      - run: npm ci
+      - run: npm install
         working-directory: mansas-tribute
       - run: npm run build
         working-directory: mansas-tribute
