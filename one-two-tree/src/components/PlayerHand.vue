@@ -8,6 +8,7 @@
                     :key="card.id"
                     :card="card"
                     :selectable="isActive && isLegal(card)"
+                    :disabled="!isBot && !(isActive && isLegal(card))"
                     :face-down="isBot"
                     @select="$emit('play', card)"
                 />

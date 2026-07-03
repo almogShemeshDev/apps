@@ -15,6 +15,14 @@
 
         <div class="center">
             <TrickArea :trick="state.currentTrick" />
+
+            <!-- Trick resolved banner — kept non-blocking so the winning card stays visible -->
+            <div v-if="state.phase === 'trick-resolved'" class="trick-result-banner">
+                <p class="winner-name">
+                    {{ t('wonTrick', getPlayer(state.currentTrick.winnerId)?.name) }}
+                </p>
+                <button class="btn-next" @click="nextTrick">{{ t('nextTrick') }}</button>
+            </div>
         </div>
 
         <PlayerHand
@@ -29,16 +37,6 @@
             v-if="state.phase === 'replacing-bid' && !getPlayer(state.replacingBidPlayerId)?.isBot"
             :player="getPlayer(state.replacingBidPlayerId)"
         />
-
-        <!-- Trick resolved overlay -->
-        <div v-if="state.phase === 'trick-resolved'" class="overlay">
-            <div class="trick-result">
-                <p class="winner-name">
-                    {{ t('wonTrick', getPlayer(state.currentTrick.winnerId)?.name) }}
-                </p>
-                <button class="btn-next" @click="nextTrick">{{ t('nextTrick') }}</button>
-            </div>
-        </div>
 
         <button class="btn-new-game" @click="confirmNewGame">{{ t('newGame') }}</button>
         <CreditsFooter />
@@ -91,25 +89,16 @@ function confirmNewGame() {
     align-items: center;
     gap: 16px;
 }
-.overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.55);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 100;
-}
-.trick-result {
+.trick-result-banner {
     background: $bg-deep;
-    border: 2px solid rgba(255, 255, 255, 0.15);
+    border: 2px solid rgba(246, 224, 94, 0.4);
     border-radius: 16px;
-    padding: 32px 48px;
+    padding: 16px 32px;
     text-align: center;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 20px;
+    gap: 12px;
 }
 .winner-name {
     font-size: 1.4rem;

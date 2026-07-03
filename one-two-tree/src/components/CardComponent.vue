@@ -1,7 +1,7 @@
 <template>
     <div
         class="card"
-        :class="[`suit-${card.suit}`, { selectable, selected, 'face-down': faceDown }]"
+        :class="[`suit-${card.suit}`, { selectable, selected, 'face-down': faceDown, disabled }]"
         @click="selectable && !faceDown && $emit('select', card)"
     >
         <template v-if="!faceDown">
@@ -19,6 +19,7 @@ const props = defineProps({
     selectable: { type: Boolean, default: false },
     selected: { type: Boolean, default: false },
     faceDown: { type: Boolean, default: false },
+    disabled: { type: Boolean, default: false },
 })
 
 defineEmits(['select'])
@@ -57,11 +58,34 @@ const suitIcon = computed(() => {
         border-color 0.1s;
     user-select: none;
 
+    &.suit-red {
+        border-color: #fc8181;
+        .suit-icon {
+            color: #fc8181;
+        }
+    }
+    &.suit-blue {
+        border-color: #63b3ed;
+        .suit-icon {
+            color: #63b3ed;
+        }
+    }
+    &.suit-green {
+        border-color: $green-light;
+        .suit-icon {
+            color: $green-light;
+        }
+    }
+    &.suit-yellow {
+        border-color: $gold;
+        .suit-icon {
+            color: $gold;
+        }
+    }
     &.selectable:not(.face-down) {
         cursor: pointer;
         &:hover {
             transform: translateY(-6px);
-            border-color: rgba(255, 255, 255, 0.4);
         }
     }
     &.selected {
@@ -69,17 +93,9 @@ const suitIcon = computed(() => {
         border-color: $gold;
         box-shadow: 0 0 12px rgba(246, 224, 94, 0.4);
     }
-    &.suit-red .suit-icon {
-        color: #fc8181;
-    }
-    &.suit-blue .suit-icon {
-        color: #63b3ed;
-    }
-    &.suit-green .suit-icon {
-        color: $green-light;
-    }
-    &.suit-yellow .suit-icon {
-        color: $gold;
+    &.disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
     }
     &.face-down {
         background: repeating-linear-gradient(
