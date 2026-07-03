@@ -1,22 +1,20 @@
 <template>
-    <div class="overlay">
-        <div class="card">
-            <div class="winner">
-                {{ t('winsTrick', players[result.winnerIndex].name) }}
-            </div>
-            <div class="sub">{{ t('leadsNext') }}</div>
-
-            <div v-if="result.losers.length && dicePool.length" class="picking-order">
-                <div class="label">{{ t('dicePickingOrder') }}</div>
-                <div v-for="(pi, i) in result.losers" :key="pi" class="entry">
-                    {{ i + 2 }}. {{ players[pi].name }}
-                </div>
-            </div>
-
-            <button class="btn" @click="$emit('continue')">
-                {{ dicePool.length ? t('pickDice') : t('nextRound') }}
-            </button>
+    <div class="trick-result-strip">
+        <div class="winner">
+            {{ t('winsTrick', players[result.winnerIndex].name) }}
         </div>
+        <div class="sub">{{ t('leadsNext') }}</div>
+
+        <div v-if="result.losers.length && dicePool.length" class="picking-order">
+            <div class="label">{{ t('dicePickingOrder') }}</div>
+            <div v-for="(pi, i) in result.losers" :key="pi" class="entry">
+                {{ i + 2 }}. {{ players[pi].name }}
+            </div>
+        </div>
+
+        <button class="btn" @click="$emit('continue')">
+            {{ dicePool.length ? t('pickDice') : t('nextRound') }}
+        </button>
     </div>
 </template>
 
@@ -39,26 +37,16 @@ const dicePool = computed(() => state.dicePool)
 <style lang="scss" scoped>
 @use '../styles/colors' as *;
 
-.overlay {
-    position: fixed;
-    inset: 0;
-    background: $overlay-bg;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 100;
-}
-
-.card {
+.trick-result-strip {
     background: $bg-panel;
-    border: 1px solid $border;
-    border-radius: 16px;
-    padding: 32px 40px;
+    border: 1px solid $gold;
+    border-radius: 12px;
+    padding: 14px 24px;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 12px;
-    min-width: 280px;
+    gap: 10px;
+    margin: 12px 16px 0;
 }
 
 .winner {

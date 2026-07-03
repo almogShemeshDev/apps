@@ -97,7 +97,7 @@ function playCard(card, diceIds) {
 }
 
 function _resolveTrick() {
-  const { winner, losers } = determineTrickWinner(state.trick, state.leadSuit)
+  const { winner, losers } = determineTrickWinner(state.trick, state.leadSuit, state.trumpSuit)
   state.players[winner.playerIndex].tricks++
   state.dicePool = state.trick.flatMap(e => e.dice)
   state.trickResult = {

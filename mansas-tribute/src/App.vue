@@ -1,5 +1,12 @@
 <template>
     <div id="app" :dir="dir">
+        <header class="top-bar">
+            <button class="btn-ctrl" @click="showRules = true">{{ t('rules') }}</button>
+            <button class="btn-ctrl btn-lang" @click="toggleLang">{{
+                lang === 'en' ? 'עב' : 'EN'
+            }}</button>
+        </header>
+
         <GameSetup v-if="state.phase === 'setup'" @start="startGame" />
         <GameBoard
             v-else-if="
@@ -14,13 +21,6 @@
             @playAgain="resetGame"
         />
 
-        <!-- Fixed controls — always visible -->
-        <div class="fixed-controls">
-            <button class="btn-ctrl" @click="showRules = true">{{ t('rules') }}</button>
-            <button class="btn-ctrl btn-lang" @click="toggleLang">{{
-                lang === 'en' ? 'עב' : 'EN'
-            }}</button>
-        </div>
         <RulesModal v-if="showRules" @close="showRules = false" />
         <CreditsFooter />
     </div>
@@ -60,13 +60,12 @@ const showRules = ref(false)
     min-height: 100vh;
 }
 
-.fixed-controls {
-    position: fixed;
-    top: 12px;
-    inset-inline-start: 12px;
+.top-bar {
     display: flex;
     gap: 6px;
-    z-index: 50;
+    padding: 10px 16px;
+    background: rgba(0, 0, 0, 0.3);
+    border-bottom: 1px solid $border;
     direction: ltr;
 }
 

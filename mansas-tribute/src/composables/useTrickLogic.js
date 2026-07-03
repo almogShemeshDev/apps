@@ -7,12 +7,13 @@ export function isLegalPlay(card, hand, leadSuit) {
   return !hand.some(c => c.suit === leadSuit)
 }
 
-export function determineTrickWinner(trick, leadSuit) {
+export function determineTrickWinner(trick, leadSuit, trumpSuit) {
   const total = e => diceTotal(e.dice)
   const ord = e => trick.indexOf(e)
 
+  const trumpPlays = trick.filter(e => e.card.suit === trumpSuit)
   const leadPlays = trick.filter(e => e.card.suit === leadSuit)
-  const candidates = leadPlays.length > 0 ? leadPlays : trick
+  const candidates = trumpPlays.length > 0 ? trumpPlays : leadPlays.length > 0 ? leadPlays : trick
 
   const winner = candidates.reduce((best, e) => {
     const bt = total(best), et = total(e)

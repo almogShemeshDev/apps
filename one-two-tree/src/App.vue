@@ -1,5 +1,15 @@
 <template>
     <div id="app" :dir="dir">
+        <header class="top-bar">
+            <button class="btn-ctrl" @click="showRules = true">{{ t('rules') }}</button>
+            <button class="btn-ctrl btn-lang" @click="toggleLang">
+                {{ lang === 'en' ? 'עב' : 'EN' }}
+            </button>
+            <button v-if="canStartNewGame" class="btn-ctrl btn-new-game" @click="confirmNewGame">
+                {{ t('newGame') }}
+            </button>
+        </header>
+
         <!-- Setup -->
         <div v-if="state.phase === 'setup'" class="setup">
             <h1 class="title">🌳 One-Two-Tree</h1>
@@ -61,13 +71,6 @@
             @play-again="resetGame"
         />
 
-        <!-- Fixed controls — always visible -->
-        <div class="fixed-controls">
-            <button class="btn-ctrl" @click="showRules = true">{{ t('rules') }}</button>
-            <button class="btn-ctrl btn-lang" @click="toggleLang">
-                {{ lang === 'en' ? 'עב' : 'EN' }}
-            </button>
-        </div>
         <RulesModal v-if="showRules" @close="showRules = false" />
 
         <CreditsFooter />
@@ -75,7 +78,7 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue'
+import { ref, computed, watch } from 'vue'
 import GameBoard from './components/GameBoard.vue'
 import BiddingPhase from './components/BiddingPhase.vue'
 import ScoreBoard from './components/ScoreBoard.vue'
@@ -102,6 +105,16 @@ const playerCount = ref(3)
 const names = ref(['You', 'Bot 1', 'Bot 2', 'Bot 3', 'Bot 4'])
 const bots = ref([false, true, true, true, true])
 const showRules = ref(false)
+
+const canStartNewGame = computed(() =>
+    ['playing', 'trick-resolved', 'replacing-bid'].includes(state.phase)
+)
+
+function confirmNewGame() {
+    if (window.confirm(t('confirmNewGame'))) {
+        resetGame()
+    }
+}
 
 function setPlayerCount(n) {
     playerCount.value = n
@@ -236,13 +249,12 @@ function start() {
         background: $green-dark;
     }
 }
-.fixed-controls {
-    position: fixed;
-    top: 16px;
-    left: 16px;
+.top-bar {
     display: flex;
     gap: 6px;
-    z-index: 50;
+    padding: 10px 16px;
+    background: rgba(0, 0, 0, 0.3);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     direction: ltr;
 }
 .btn-ctrl {
@@ -256,6 +268,13 @@ function start() {
     cursor: pointer;
     &:hover {
         background: rgba(255, 255, 255, 0.12);
+    }
+}
+.btn-new-game {
+    margin-inline-start: auto;
+    &:hover {
+        background: rgba(220, 53, 69, 0.6);
+        border-color: transparent;
     }
 }
 

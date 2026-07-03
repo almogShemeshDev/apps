@@ -38,7 +38,6 @@
             :player="getPlayer(state.replacingBidPlayerId)"
         />
 
-        <button class="btn-new-game" @click="confirmNewGame">{{ t('newGame') }}</button>
         <CreditsFooter />
     </div>
 </template>
@@ -52,17 +51,11 @@ import CreditsFooter from './CreditsFooter.vue'
 import { useGameState } from '../composables/useGameState.js'
 import { useLang } from '../composables/useLang.js'
 
-const { state, activePlayer, getPlayer, playCard, nextTrick, resetGame } = useGameState()
+const { state, activePlayer, getPlayer, playCard, nextTrick } = useGameState()
 const { t } = useLang()
 
 const opponents = computed(() => state.players.filter((p) => p.id !== 0))
 const leadSuit = computed(() => state.currentTrick.plays[0]?.card.suit ?? null)
-
-function confirmNewGame() {
-    if (window.confirm(t('confirmNewGame'))) {
-        resetGame()
-    }
-}
 </script>
 
 <style lang="scss" scoped>
@@ -115,23 +108,5 @@ function confirmNewGame() {
     font-size: 1rem;
     font-weight: 700;
     cursor: pointer;
-}
-.btn-new-game {
-    position: fixed;
-    top: 16px;
-    inset-inline-end: 16px;
-    background: rgba(0, 0, 0, 0.35);
-    color: $text;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 8px;
-    padding: 6px 16px;
-    font-size: 0.85rem;
-    font-weight: 600;
-    cursor: pointer;
-    z-index: 50;
-    &:hover {
-        background: rgba(220, 53, 69, 0.6);
-        border-color: transparent;
-    }
 }
 </style>
