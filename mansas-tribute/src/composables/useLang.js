@@ -5,6 +5,7 @@ const lang = ref('en')
 const strings = {
   en: {
     subtitle: 'A trick-taking dice game · 2–5 players',
+    suitName: suit => ({ red: 'Red', yellow: 'Yellow', green: 'Green', blue: 'Blue' }[suit] ?? suit),
     numPlayers: 'Number of players',
     playerLabel: i => `Player ${i}`,
     human: 'Human',
@@ -46,6 +47,7 @@ const strings = {
   },
   he: {
     subtitle: 'משחק קלפים עם קוביות · 2–5 שחקנים',
+    suitName: suit => ({ red: 'אדום', yellow: 'צהוב', green: 'ירוק', blue: 'כחול' }[suit] ?? suit),
     numPlayers: 'מספר שחקנים',
     playerLabel: i => `שחקן ${i}`,
     human: 'אנושי',

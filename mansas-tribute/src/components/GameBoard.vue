@@ -4,7 +4,7 @@
         <div class="header">
             <div class="round-info">{{ t('roundInfo', state.round) }}</div>
             <div class="king-lead-badge" :style="{ background: leadSuitColor }">
-                {{ leadSuitSym }} {{ t('kingsLead') }} {{ state.leadSuit }}
+                {{ leadSuitSym }} {{ t('kingsLead') }} {{ t('suitName', state.leadSuit) }}
             </div>
             <div class="scores">
                 <span v-for="p in state.players" :key="p.name" class="score-pill">
@@ -22,6 +22,7 @@
                 :class="{ 'is-active': state.currentPlayerIndex === i && state.phase === 'playing' }"
             >
                 <div class="strip-name">{{ p.name }}</div>
+                <div class="strip-tricks">{{ t('trickCount', p.tricks) }}</div>
                 <div class="strip-dice">
                     <DiceComponent v-for="die in p.dice" :key="die.id" :die="die" />
                     <span v-if="!p.dice.length" class="no-dice">—</span>
@@ -45,7 +46,7 @@
                 <div class="area-label">
                     {{ t('currentTrick') }}
                     <span class="lead-suit" :style="{ color: leadSuitColor }">
-                        - {{ t('follow') }} {{ leadSuitSym }} {{ state.leadSuit }}
+                        - {{ t('follow') }} {{ leadSuitSym }} {{ t('suitName', state.leadSuit) }}
                     </span>
                 </div>
 
@@ -71,6 +72,14 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- Trick result strip — non-blocking so the winning card stays visible -->
+                <TrickResultOverlay
+                    v-if="state.phase === 'trick-result'"
+                    :result="state.trickResult"
+                    :players="state.players"
+                    @continue="proceedToDicePicking"
+                />
             </div>
         </div>
 
@@ -123,10 +132,17 @@
                 <button class="btn-play" :disabled="!selectedCard" @click="play">
                     <span v-if="selectedCard">
                         <template v-if="selectedDiceIds.length">
-                            {{ t('playCardWithDice', selectedCard.suit, selectedDiceIds.length, selectedTotal) }}
+                            {{
+                                t(
+                                    'playCardWithDice',
+                                    t('suitName', selectedCard.suit),
+                                    selectedDiceIds.length,
+                                    selectedTotal
+                                )
+                            }}
                         </template>
                         <template v-else>
-                            {{ t('playCard', selectedCard.suit) }}
+                            {{ t('playCard', t('suitName', selectedCard.suit)) }}
                         </template>
                     </span>
                     <span v-else>{{ t('selectCard') }}</span>
@@ -135,12 +151,6 @@
         </div>
 
         <!-- Overlays -->
-        <TrickResultOverlay
-            v-if="state.phase === 'trick-result'"
-            :result="state.trickResult"
-            :players="state.players"
-            @continue="proceedToDicePicking"
-        />
         <DicePickingPhase v-if="state.phase === 'dice-picking'" />
     </div>
 </template>
@@ -299,6 +309,15 @@ function play() {
     color: $text-dim;
     white-space: nowrap;
     min-width: 48px;
+}
+
+.strip-tricks {
+    font-size: 0.7rem;
+    color: $gold;
+    background: rgba($gold, 0.1);
+    border-radius: 20px;
+    padding: 1px 8px;
+    white-space: nowrap;
 }
 
 .strip-dice {
