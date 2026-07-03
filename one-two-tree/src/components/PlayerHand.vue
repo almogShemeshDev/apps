@@ -24,7 +24,6 @@
                     :card="player.bid"
                     :face-down="false"
                     :selectable="isActive && isBidCardLegal"
-                    :disabled="!(isActive && isBidCardLegal)"
                     @select="$emit('play', player.bid)"
                 />
                 <div v-else class="bid-empty">—</div>
