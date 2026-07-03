@@ -39,9 +39,10 @@ function getPlayer(id) {
 
 function startGame(playerNames) {
     const hands = deal(playerNames.length, CARDS_PER_PLAYER[playerNames.length])
-    state.players = playerNames.map((name, i) => ({
+    state.players = playerNames.map(({ name, isBot }, i) => ({
         id: i,
         name,
+        isBot,
         hand: hands[i],
         bid: null,
         tricksWon: 0,

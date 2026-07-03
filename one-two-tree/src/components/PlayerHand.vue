@@ -8,6 +8,7 @@
                     :key="card.id"
                     :card="card"
                     :selectable="isActive && isLegal(card)"
+                    :disabled="!isBot && !(isActive && isLegal(card))"
                     :face-down="isBot"
                     @select="$emit('play', card)"
                 />
@@ -23,6 +24,7 @@
                     :card="player.bid"
                     :face-down="false"
                     :selectable="isActive && isBidCardLegal"
+                    :disabled="!(isActive && isBidCardLegal)"
                     @select="$emit('play', player.bid)"
                 />
                 <div v-else class="bid-empty">—</div>
