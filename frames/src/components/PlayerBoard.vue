@@ -19,7 +19,7 @@
             <span class="cube black">{{ t('blackCubes', player.bag.black) }}</span>
         </div>
 
-        <div v-if="!compact" class="film-strip">
+        <div class="film-strip">
             <span class="strip-label">{{ t('filmStripLabel') }} ({{ player.filmStrip.length }})</span>
             <div class="strip-frames">
                 <div
