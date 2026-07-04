@@ -42,6 +42,30 @@
                 </section>
 
                 <section>
+                    <h3>Upgrade Tracks</h3>
+                    <ul>
+                        <li>
+                            <strong>💡 Creativity</strong> — raises the Creativity level checked
+                            against photo tiles' Creativity requirement.
+                        </li>
+                        <li>
+                            <strong>📷 Equipment</strong> — raises the Equipment level checked
+                            against photo tiles' Equipment requirement.
+                        </li>
+                        <li>
+                            <strong>📖 Knowledge</strong> — removes 1 black cube from your bag
+                            immediately instead of adding one.
+                        </li>
+                        <li>
+                            <strong>🌑 Darkroom</strong> — grants one reusable redraw: during
+                            development, a black cube you draw can be set aside to draw again
+                            (each Darkroom upgrade you own can be used once across the whole
+                            development phase).
+                        </li>
+                    </ul>
+                </section>
+
+                <section>
                     <h3>End of Game</h3>
                     <p>
                         The game ends once the tile supply runs out. Every player then develops
@@ -99,6 +123,29 @@
                             אחת לשקית; שדרוגי ידע מסירים אחת במקום זאת.
                         </li>
                         <li><strong>ותר</strong> — השאר את האריח וקבל אסימון זמן אחד.</li>
+                    </ul>
+                </section>
+
+                <section>
+                    <h3>מסלולי שדרוג</h3>
+                    <ul>
+                        <li>
+                            <strong>💡 יצירתיות</strong> — מעלה את רמת היצירתיות הנבדקת מול דרישת
+                            היצירתיות של אריחי צילום.
+                        </li>
+                        <li>
+                            <strong>📷 ציוד</strong> — מעלה את רמת הציוד הנבדקת מול דרישת הציוד של
+                            אריחי צילום.
+                        </li>
+                        <li>
+                            <strong>📖 ידע</strong> — מסיר קובייה שחורה אחת מהשקית שלך מיד במקום
+                            להוסיף אחת.
+                        </li>
+                        <li>
+                            <strong>🌑 חדר חושך</strong> — מעניק הגרלה חוזרת אחת לשימוש: במהלך
+                            הפיתוח, קובייה שחורה שהוגרלה יכולה להיות מונחת בצד כדי להגריל שוב (כל
+                            שדרוג חדר חושך שברשותך ניתן לשימוש פעם אחת לאורך כל שלב הפיתוח).
+                        </li>
                     </ul>
                 </section>
 
