@@ -16,8 +16,23 @@ export const TRACKS = {
 export const STARTING_TIME_TOKENS = 5
 export const MARKET_SIZE = 4
 export const TILES_PER_PLAYER = 24
-export const MIN_RUN_LENGTH = 3
-export const RUN_BONUS_PER_TILE = 2
+
+export const POINTS_PER_PHOTO = 1
+
+// Sequence bonus for N consecutive same-theme developed photos in film order.
+// Index = run length. Runs longer than the table gain +5 per additional photo.
+export const SEQUENCE_BONUS_TABLE = [0, 0, 2, 5, 9, 14]
+export const SEQUENCE_BONUS_PER_EXTRA = 5
+
+export const VARIETY_BONUS_THEMES = 4
+export const VARIETY_BONUS_POINTS = 5
+
+export function sequenceBonusForLength(len) {
+  if (len < 2) return 0
+  if (len < SEQUENCE_BONUS_TABLE.length) return SEQUENCE_BONUS_TABLE[len]
+  const last = SEQUENCE_BONUS_TABLE.length - 1
+  return SEQUENCE_BONUS_TABLE[last] + (len - last) * SEQUENCE_BONUS_PER_EXTRA
+}
 
 const PHOTO_TEMPLATES = [
   { category: 'portrait', subject: 'Golden Hour Portrait', cost: 1, reqCreativity: 0, reqEquipment: 0 },

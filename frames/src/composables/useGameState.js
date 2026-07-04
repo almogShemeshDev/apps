@@ -1,5 +1,13 @@
 import { reactive } from 'vue'
-import { buildTileDeck, STARTING_TIME_TOKENS, MARKET_SIZE, MIN_RUN_LENGTH, RUN_BONUS_PER_TILE } from '../constants.js'
+import {
+  buildTileDeck,
+  STARTING_TIME_TOKENS,
+  MARKET_SIZE,
+  POINTS_PER_PHOTO,
+  sequenceBonusForLength,
+  VARIETY_BONUS_THEMES,
+  VARIETY_BONUS_POINTS,
+} from '../constants.js'
 import { drawCube } from './useDevelopment.js'
 
 const state = reactive({
@@ -101,10 +109,8 @@ function buyUpgrade(tileId, track) {
   player.time -= tile.cost
   player.tracks[track]++
 
-  if (track === 'knowledge') {
-    if (player.bag.black > 0) player.bag.black--
-  } else {
-    player.bag.black++
+  if (track === 'knowledge' && player.bag.black > 0) {
+    player.bag.black--
   }
 
   _removeFromMarket(tileId)
@@ -176,12 +182,7 @@ function continueDevelopment() {
   dev.playerFinished = state.players[dev.playerIndex].filmStrip.length === 0
 }
 
-function _runBonusForLength(len) {
-  if (len < MIN_RUN_LENGTH) return 0
-  return (len - (MIN_RUN_LENGTH - 1)) * RUN_BONUS_PER_TILE
-}
-
-function _calcRunBonus(filmStrip) {
+function _calcSequenceBonus(filmStrip) {
   let bonus = 0
   let runLen = 0
   let runCategory = null
@@ -189,24 +190,36 @@ function _calcRunBonus(filmStrip) {
     if (photo.developed && photo.category === runCategory) {
       runLen++
     } else if (photo.developed) {
-      bonus += _runBonusForLength(runLen)
+      bonus += sequenceBonusForLength(runLen)
       runCategory = photo.category
       runLen = 1
     } else {
-      bonus += _runBonusForLength(runLen)
+      bonus += sequenceBonusForLength(runLen)
       runCategory = null
       runLen = 0
     }
   }
-  bonus += _runBonusForLength(runLen)
+  bonus += sequenceBonusForLength(runLen)
   return bonus
+}
+
+function _calcVarietyBonus(filmStrip) {
+  const themes = new Set(filmStrip.filter((ph) => ph.developed).map((ph) => ph.category))
+  return themes.size >= VARIETY_BONUS_THEMES ? VARIETY_BONUS_POINTS : 0
 }
 
 function _calcScores() {
   state.scores = state.players.map((p) => {
-    const photoScore = p.filmStrip.filter((ph) => ph.developed).reduce((s, ph) => s + ph.cost, 0)
-    const bonus = _calcRunBonus(p.filmStrip)
-    return { name: p.name, photoScore, bonus, total: photoScore + bonus }
+    const photoScore = p.filmStrip.filter((ph) => ph.developed).length * POINTS_PER_PHOTO
+    const sequenceBonus = _calcSequenceBonus(p.filmStrip)
+    const varietyBonus = _calcVarietyBonus(p.filmStrip)
+    return {
+      name: p.name,
+      photoScore,
+      sequenceBonus,
+      varietyBonus,
+      total: photoScore + sequenceBonus + varietyBonus,
+    }
   })
 }
 

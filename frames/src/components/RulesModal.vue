@@ -37,8 +37,7 @@
                         </li>
                         <li>
                             <strong>Buy Upgrade</strong> — pay the same Time cost and raise
-                            <em>any one track of your choice</em> by one. Most upgrades add 1
-                            black cube to your bag; Knowledge upgrades remove one instead.
+                            <em>any one track of your choice</em> by one. No requirements needed.
                         </li>
                         <li><strong>Pass</strong> — leave the tile and gain 1 Time token.</li>
                     </ul>
@@ -56,8 +55,8 @@
                             against photo tiles' Equipment requirement.
                         </li>
                         <li>
-                            <strong>📖 Knowledge</strong> — removes 1 black cube from your bag
-                            immediately instead of adding one.
+                            <strong>📖 Knowledge</strong> — immediately removes 1 black cube from
+                            your bag.
                         </li>
                         <li>
                             <strong>🌑 Darkroom</strong> — grants one reusable redraw: during
@@ -82,10 +81,15 @@
                 <section>
                     <h3>Scoring</h3>
                     <ul>
-                        <li>Only successfully developed photos score, worth their Time cost.</li>
+                        <li><strong>Successful photos</strong> — +1 point each.</li>
                         <li>
-                            Bonus points for long runs of consecutive, same-category developed
-                            photos in your film strip.
+                            <strong>Film sequences</strong> — bonus for runs of consecutive
+                            same-theme developed photos in film order: 2 photos = +2, 3 = +5,
+                            4 = +9, 5 = +14, then +5 per additional photo beyond 5.
+                        </li>
+                        <li>
+                            <strong>Variety bonus</strong> — +5 points if you have successfully
+                            developed photos of at least 4 different themes.
                         </li>
                     </ul>
                     <p>Highest total wins!</p>
@@ -106,7 +110,7 @@
                 <section>
                     <h3>הכנה</h3>
                     <p>
-                        כל שחקן מתחיל עם <strong>5 אסימוני זמן</strong>, לוח שחקן ריק ושקית ריקה.
+                        כל שחקן מתחיל עם <strong>5 אסימוני זמן</strong>, לוח שחקן ריק ושק ריקה.
                         4 אריחים נחשפים לשוק המשותף.
                     </p>
                 </section>
@@ -118,12 +122,11 @@
                         <li>
                             <strong>צלם תמונה</strong> — שלם את עלות הזמן שלו (חייב לעמוד בדרישת
                             היצירתיות/הציוד שלו), הוסף אותו לסרט הצילום שלך, והוסף קובייה לבנה אחת
-                            וקובייה שחורה אחת לשקית שלך.
+                            וקובייה שחורה אחת לשק שלך.
                         </li>
                         <li>
                             <strong>קנה שדרוג</strong> — שלם את אותה עלות זמן והעלה
-                            <em>כל מסלול לבחירתך</em> בדרגה אחת. רוב השדרוגים מוסיפים קובייה
-                            שחורה אחת לשקית; שדרוגי ידע מסירים אחת במקום זאת.
+                            <em>כל מסלול לבחירתך</em> בדרגה אחת. אין דרישות.
                         </li>
                         <li><strong>ותר</strong> — השאר את האריח וקבל אסימון זמן אחד.</li>
                     </ul>
@@ -141,8 +144,7 @@
                             אריחי צילום.
                         </li>
                         <li>
-                            <strong>📖 ידע</strong> — מסיר קובייה שחורה אחת מהשקית שלך מיד במקום
-                            להוסיף אחת.
+                            <strong>📖 ידע</strong> — מסיר מיד קובייה שחורה אחת מהשק שלך.
                         </li>
                         <li>
                             <strong>🌑 חדר חושך</strong> — מעניק הגרלה חוזרת אחת לשימוש: במהלך
@@ -156,7 +158,7 @@
                     <h3>סוף המשחק</h3>
                     <p>
                         המשחק מסתיים כאשר מלאי האריחים אוזל. כל שחקן מפתח אז את הסרט שלו, תמונה
-                        אחת בכל פעם לפי סדר הסרט: הגרל קובייה מהשקית שלך. לבן מפתח את התמונה; שחור
+                        אחת בכל פעם לפי סדר הסרט: הגרל קובייה מהשק שלך. לבן מפתח את התמונה; שחור
                         שורף אותה - אלא אם יש לך שדרוג חדר חושך שלא נוצל, המאפשר לך להניח את
                         הקובייה השחורה בצד ולהגריל שוב (כל שדרוג חדר חושך ניתן לשימוש פעם אחת).
                     </p>
@@ -165,10 +167,15 @@
                 <section>
                     <h3>ניקוד</h3>
                     <ul>
-                        <li>רק תמונות שפותחו בהצלחה מקבלות ניקוד, בשווי עלות הזמן שלהן.</li>
+                        <li><strong>תמונות מוצלחות</strong> — נקודה אחת לכל תמונה.</li>
                         <li>
-                            נקודות בונוס עבור רצפים ארוכים של תמונות שפותחו מאותה קטגוריה ברצף
-                            בסרט הצילום שלך.
+                            <strong>רצפי סרט</strong> — בונוס עבור רצפים של תמונות שפותחו מאותה
+                            קטגוריה ברצף לפי סדר הסרט: 2 תמונות = +2, 3 = +5, 4 = +9, 5 = +14, ואז
+                            +5 לכל תמונה נוספת מעבר ל-5.
+                        </li>
+                        <li>
+                            <strong>בונוס גיוון</strong> — +5 נקודות אם יש לך תמונות שפותחו
+                            בהצלחה מלפחות 4 קטגוריות שונות.
                         </li>
                     </ul>
                     <p>הניקוד הגבוה ביותר מנצח!</p>
