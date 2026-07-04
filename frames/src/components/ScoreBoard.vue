@@ -7,7 +7,8 @@
                     <tr>
                         <th>{{ t('colPlayer') }}</th>
                         <th>{{ t('colPhotos') }}</th>
-                        <th>{{ t('colBonus') }}</th>
+                        <th>{{ t('colSequenceBonus') }}</th>
+                        <th>{{ t('colVarietyBonus') }}</th>
                         <th>{{ t('colTotal') }}</th>
                     </tr>
                 </thead>
@@ -15,7 +16,8 @@
                     <tr v-for="row in scores" :key="row.name" :class="{ winner: row.total === maxScore }">
                         <td>{{ row.name }}</td>
                         <td>{{ row.photoScore }}</td>
-                        <td>{{ row.bonus > 0 ? `+${row.bonus}` : '—' }}</td>
+                        <td>{{ row.sequenceBonus > 0 ? `+${row.sequenceBonus}` : '—' }}</td>
+                        <td>{{ row.varietyBonus > 0 ? `+${row.varietyBonus}` : '—' }}</td>
                         <td class="total">{{ row.total }}</td>
                     </tr>
                 </tbody>

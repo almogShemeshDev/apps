@@ -16,8 +16,23 @@ export const TRACKS = {
 export const STARTING_TIME_TOKENS = 5
 export const MARKET_SIZE = 4
 export const TILES_PER_PLAYER = 24
-export const MIN_RUN_LENGTH = 3
-export const RUN_BONUS_PER_TILE = 2
+
+export const POINTS_PER_PHOTO = 1
+
+// Sequence bonus for N consecutive same-theme developed photos in film order.
+// Index = run length. Runs longer than the table gain +5 per additional photo.
+export const SEQUENCE_BONUS_TABLE = [0, 0, 2, 5, 9, 14]
+export const SEQUENCE_BONUS_PER_EXTRA = 5
+
+export const VARIETY_BONUS_THEMES = 4
+export const VARIETY_BONUS_POINTS = 5
+
+export function sequenceBonusForLength(len) {
+  if (len < 2) return 0
+  if (len < SEQUENCE_BONUS_TABLE.length) return SEQUENCE_BONUS_TABLE[len]
+  const last = SEQUENCE_BONUS_TABLE.length - 1
+  return SEQUENCE_BONUS_TABLE[last] + (len - last) * SEQUENCE_BONUS_PER_EXTRA
+}
 
 const PHOTO_TEMPLATES = [
   { category: 'portrait', subject: 'Golden Hour Portrait', cost: 1, reqCreativity: 0, reqEquipment: 0 },
@@ -51,28 +66,6 @@ const PHOTO_TEMPLATES = [
   { category: 'abstract', subject: 'Double Exposure', cost: 4, reqCreativity: 3, reqEquipment: 2 },
 ]
 
-const UPGRADE_TEMPLATES = [
-  { track: 'creativity', name: 'Vision Workshop', cost: 1 },
-  { track: 'creativity', name: 'Composition Study', cost: 2 },
-  { track: 'creativity', name: 'Color Theory Course', cost: 2 },
-  { track: 'creativity', name: 'Master Class', cost: 3 },
-
-  { track: 'equipment', name: 'Used Lens', cost: 1 },
-  { track: 'equipment', name: 'Tripod', cost: 2 },
-  { track: 'equipment', name: 'Prime Lens', cost: 2 },
-  { track: 'equipment', name: 'Full Kit Upgrade', cost: 3 },
-
-  { track: 'knowledge', name: 'Exposure Notes', cost: 1 },
-  { track: 'knowledge', name: 'Chemistry Basics', cost: 1 },
-  { track: 'knowledge', name: 'Technique Journal', cost: 2 },
-  { track: 'knowledge', name: 'Mentor Session', cost: 2 },
-
-  { track: 'darkroom', name: 'Safelight', cost: 1 },
-  { track: 'darkroom', name: 'Extra Tray', cost: 2 },
-  { track: 'darkroom', name: 'Timer', cost: 2 },
-  { track: 'darkroom', name: 'Enlarger', cost: 3 },
-]
-
 function shuffle(arr) {
   const a = [...arr]
   for (let i = a.length - 1; i > 0; i--) {
@@ -86,13 +79,8 @@ export function buildTileDeck(playerCount) {
   const targetCount = playerCount * TILES_PER_PLAYER
   const tiles = []
   for (let i = 0; i < targetCount; i++) {
-    const photo = PHOTO_TEMPLATES[i % PHOTO_TEMPLATES.length]
-    const upgrade = UPGRADE_TEMPLATES[(i * 7 + 3) % UPGRADE_TEMPLATES.length]
-    tiles.push({
-      id: i,
-      photo: { ...photo },
-      upgrade: { ...upgrade },
-    })
+    const template = PHOTO_TEMPLATES[i % PHOTO_TEMPLATES.length]
+    tiles.push({ id: i, ...template })
   }
   return shuffle(tiles)
 }

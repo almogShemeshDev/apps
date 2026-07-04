@@ -5,13 +5,12 @@
             <div class="tiles-left">{{ t('tilesLeft', state.market.length + state.drawPile.length) }}</div>
         </div>
 
-        <div class="others-panel">
+        <div class="players-panel">
             <PlayerBoard
-                v-for="(p, i) in otherPlayers"
+                v-for="(p, i) in state.players"
                 :key="p.name + i"
                 :player="p"
-                compact
-                :is-active="false"
+                :is-active="i === state.currentPlayerIndex"
             />
         </div>
 
@@ -33,14 +32,11 @@
 
         <button class="btn-pass" @click="pass">{{ t('pass') }}</button>
 
-        <PlayerBoard :player="currentPlayer()" :is-active="true" />
-
         <CreditsFooter />
     </div>
 </template>
 
 <script setup>
-import { computed } from 'vue'
 import PlayerBoard from './PlayerBoard.vue'
 import TileComponent from './TileComponent.vue'
 import CreditsFooter from './CreditsFooter.vue'
@@ -49,10 +45,6 @@ import { useLang } from '../composables/useLang.js'
 
 const { state, currentPlayer, canTakePhoto, canBuyUpgrade, takePhoto, buyUpgrade, pass } = useGameState()
 const { t } = useLang()
-
-const otherPlayers = computed(() =>
-    state.players.filter((_, i) => i !== state.currentPlayerIndex)
-)
 </script>
 
 <style lang="scss" scoped>
@@ -87,11 +79,10 @@ const otherPlayers = computed(() =>
     color: $text-dim;
 }
 
-.others-panel {
-    display: flex;
+.players-panel {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
     gap: 8px;
-    flex-wrap: wrap;
-    justify-content: center;
     width: 100%;
     max-width: 900px;
 }

@@ -1,5 +1,5 @@
 <template>
-    <div class="board" :class="{ compact, 'is-active': isActive }">
+    <div class="board" :class="{ 'is-active': isActive, dimmed: !isActive }">
         <div class="board-header">
             <div class="player-name">{{ player.name }}</div>
             <div class="time-badge">⏱ {{ t('timeTokens', player.time) }}</div>
@@ -43,7 +43,6 @@ import { useLang } from '../composables/useLang.js'
 
 defineProps({
     player: { type: Object, required: true },
-    compact: { type: Boolean, default: false },
     isActive: { type: Boolean, default: false },
 })
 
@@ -62,15 +61,16 @@ const trackKeys = ['creativity', 'equipment', 'knowledge', 'darkroom']
     display: flex;
     flex-direction: column;
     gap: 10px;
-    transition: border-color 0.2s;
+    transition:
+        border-color 0.2s,
+        opacity 0.2s;
 
     &.is-active {
         border-color: $amber;
     }
 
-    &.compact {
-        padding: 8px 12px;
-        gap: 6px;
+    &.dimmed {
+        opacity: 0.55;
     }
 }
 
