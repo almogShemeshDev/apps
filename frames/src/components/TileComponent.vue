@@ -2,11 +2,11 @@
     <div class="tile">
         <div class="face photo-face" :style="{ '--c': categoryColor }">
             <div class="face-icon">{{ categoryIcon }}</div>
-            <div class="face-subject">{{ tile.photo.subject }}</div>
-            <div class="face-category">{{ t('categoryName', tile.photo.category) }}</div>
+            <div class="face-subject">{{ tile.subject }}</div>
+            <div class="face-category">{{ t('categoryName', tile.category) }}</div>
             <div class="face-stats">
-                <span>{{ t('costLabel', tile.photo.cost) }}</span>
-                <span>{{ t('reqLabel', tile.photo.reqCreativity, tile.photo.reqEquipment) }}</span>
+                <span>{{ t('costLabel', tile.cost) }}</span>
+                <span>{{ t('reqLabel', tile.reqCreativity, tile.reqEquipment) }}</span>
             </div>
             <button
                 v-if="interactive"
@@ -18,21 +18,21 @@
             </button>
         </div>
 
-        <div class="face upgrade-face" :style="{ '--c': trackColor }">
-            <div class="face-icon">{{ trackIcon }}</div>
-            <div class="face-subject">{{ tile.upgrade.name }}</div>
-            <div class="face-category">{{ t('trackName', tile.upgrade.track) }}</div>
-            <div class="face-stats">
-                <span>{{ t('upgradeCostLabel', tile.upgrade.cost) }}</span>
+        <div class="upgrade-row">
+            <div class="upgrade-label">{{ t('buyUpgrade') }}</div>
+            <div class="track-buttons">
+                <button
+                    v-for="key in trackKeys"
+                    :key="key"
+                    class="track-btn"
+                    :style="{ '--c': TRACKS[key].color }"
+                    :disabled="!interactive || !canUpgrade"
+                    :title="t('trackName', key)"
+                    @click="$emit('buy-upgrade', tile.id, key)"
+                >
+                    {{ TRACKS[key].icon }}
+                </button>
             </div>
-            <button
-                v-if="interactive"
-                class="btn-action"
-                :disabled="!canUpgrade"
-                @click="$emit('buy-upgrade', tile.id)"
-            >
-                {{ t('buyUpgrade') }}
-            </button>
         </div>
     </div>
 </template>
@@ -52,10 +52,9 @@ defineEmits(['take-photo', 'buy-upgrade'])
 
 const { t } = useLang()
 
-const categoryIcon = computed(() => CATEGORIES[props.tile.photo.category]?.icon ?? '')
-const categoryColor = computed(() => CATEGORIES[props.tile.photo.category]?.color ?? '#888')
-const trackIcon = computed(() => TRACKS[props.tile.upgrade.track]?.icon ?? '')
-const trackColor = computed(() => TRACKS[props.tile.upgrade.track]?.color ?? '#888')
+const trackKeys = ['creativity', 'equipment', 'knowledge', 'darkroom']
+const categoryIcon = computed(() => CATEGORIES[props.tile.category]?.icon ?? '')
+const categoryColor = computed(() => CATEGORIES[props.tile.category]?.color ?? '#888')
 </script>
 
 <style lang="scss" scoped>
@@ -128,6 +127,55 @@ const trackColor = computed(() => TRACKS[props.tile.upgrade.track]?.color ?? '#8
 
     &:not(:disabled):hover {
         opacity: 0.85;
+    }
+}
+
+.upgrade-row {
+    background: $bg-panel;
+    border: 1px solid $border;
+    border-radius: 10px;
+    padding: 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+}
+
+.upgrade-label {
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: $text-dim;
+    font-weight: 700;
+}
+
+.track-buttons {
+    display: flex;
+    gap: 6px;
+}
+
+.track-btn {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: 2px solid var(--c);
+    background: rgba(255, 255, 255, 0.04);
+    font-size: 0.9rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition:
+        background 0.15s,
+        opacity 0.15s;
+
+    &:disabled {
+        opacity: 0.3;
+        cursor: not-allowed;
+    }
+
+    &:not(:disabled):hover {
+        background: var(--c);
     }
 }
 </style>

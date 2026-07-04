@@ -29,7 +29,6 @@ const strings = {
     pass: 'Pass (+1 time)',
     costLabel: n => `Cost: ${n}`,
     reqLabel: (cre, eq) => `Req: 💡${cre} 📷${eq}`,
-    upgradeCostLabel: n => `Upgrade cost: ${n}`,
 
     cantAffordTime: "Can't afford (not enough time)",
     reqNotMet: "Requirements not met",
@@ -81,7 +80,6 @@ const strings = {
     pass: 'ותר (+1 זמן)',
     costLabel: n => `עלות: ${n}`,
     reqLabel: (cre, eq) => `דרישה: 💡${cre} 📷${eq}`,
-    upgradeCostLabel: n => `עלות שדרוג: ${n}`,
 
     cantAffordTime: 'אין מספיק זמן',
     reqNotMet: 'הדרישות לא מתקיימות',

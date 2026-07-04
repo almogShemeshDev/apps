@@ -60,14 +60,14 @@ function _checkEndCondition() {
 
 function canTakePhoto(tile, player) {
   return (
-    player.time >= tile.photo.cost &&
-    player.tracks.creativity >= tile.photo.reqCreativity &&
-    player.tracks.equipment >= tile.photo.reqEquipment
+    player.time >= tile.cost &&
+    player.tracks.creativity >= tile.reqCreativity &&
+    player.tracks.equipment >= tile.reqEquipment
   )
 }
 
 function canBuyUpgrade(tile, player) {
-  return player.time >= tile.upgrade.cost
+  return player.time >= tile.cost
 }
 
 function takePhoto(tileId) {
@@ -76,12 +76,12 @@ function takePhoto(tileId) {
   const tile = state.market.find((t) => t.id === tileId)
   if (!tile || !canTakePhoto(tile, player)) return
 
-  player.time -= tile.photo.cost
+  player.time -= tile.cost
   player.filmStrip.push({
     id: tile.id,
-    category: tile.photo.category,
-    subject: tile.photo.subject,
-    cost: tile.photo.cost,
+    category: tile.category,
+    subject: tile.subject,
+    cost: tile.cost,
     developed: null,
   })
   player.bag.white++
@@ -92,16 +92,16 @@ function takePhoto(tileId) {
   if (!_checkEndCondition()) _advanceTurn()
 }
 
-function buyUpgrade(tileId) {
+function buyUpgrade(tileId, track) {
   if (state.phase !== 'playing') return
   const player = currentPlayer()
   const tile = state.market.find((t) => t.id === tileId)
   if (!tile || !canBuyUpgrade(tile, player)) return
 
-  player.time -= tile.upgrade.cost
-  player.tracks[tile.upgrade.track]++
+  player.time -= tile.cost
+  player.tracks[track]++
 
-  if (tile.upgrade.track === 'knowledge') {
+  if (track === 'knowledge') {
     if (player.bag.black > 0) player.bag.black--
   } else {
     player.bag.black++

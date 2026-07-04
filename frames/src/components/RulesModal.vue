@@ -25,17 +25,20 @@
 
                 <section>
                     <h3>On Your Turn</h3>
-                    <p>Do exactly one of the following:</p>
+                    <p>
+                        Every market tile is a photo. Do exactly one of the following with any
+                        market tile:
+                    </p>
                     <ul>
                         <li>
-                            <strong>Take Photo</strong> — pay a market tile's photo Time cost
-                            (must meet its Creativity/Equipment requirement), add it to your film
-                            strip, and add 1 white + 1 black cube to your bag.
+                            <strong>Take Photo</strong> — pay its Time cost (must meet its
+                            Creativity/Equipment requirement), add it to your film strip, and add
+                            1 white + 1 black cube to your bag.
                         </li>
                         <li>
-                            <strong>Buy Upgrade</strong> — pay a market tile's upgrade Time cost
-                            and raise that track by one. Most upgrades add 1 black cube to your
-                            bag; Knowledge upgrades remove one instead.
+                            <strong>Buy Upgrade</strong> — pay the same Time cost and raise
+                            <em>any one track of your choice</em> by one. Most upgrades add 1
+                            black cube to your bag; Knowledge upgrades remove one instead.
                         </li>
                         <li><strong>Pass</strong> — leave the tile and gain 1 Time token.</li>
                     </ul>
@@ -110,17 +113,17 @@
 
                 <section>
                     <h3>בתורך</h3>
-                    <p>בצע פעולה אחת בדיוק:</p>
+                    <p>כל אריח בשוק הוא אריח צילום. בצע פעולה אחת בדיוק עם אריח כלשהו מהשוק:</p>
                     <ul>
                         <li>
-                            <strong>צלם תמונה</strong> — שלם את עלות הזמן של צד הצילום של אריח
-                            מהשוק (חייב לעמוד בדרישת היצירתיות/הציוד), הוסף אותו לסרט הצילום שלך,
-                            והוסף קובייה לבנה אחת וקובייה שחורה אחת לשקית שלך.
+                            <strong>צלם תמונה</strong> — שלם את עלות הזמן שלו (חייב לעמוד בדרישת
+                            היצירתיות/הציוד שלו), הוסף אותו לסרט הצילום שלך, והוסף קובייה לבנה אחת
+                            וקובייה שחורה אחת לשקית שלך.
                         </li>
                         <li>
-                            <strong>קנה שדרוג</strong> — שלם את עלות הזמן של צד השדרוג של אריח
-                            והעלה את המסלול המתאים בדרגה אחת. רוב השדרוגים מוסיפים קובייה שחורה
-                            אחת לשקית; שדרוגי ידע מסירים אחת במקום זאת.
+                            <strong>קנה שדרוג</strong> — שלם את אותה עלות זמן והעלה
+                            <em>כל מסלול לבחירתך</em> בדרגה אחת. רוב השדרוגים מוסיפים קובייה
+                            שחורה אחת לשקית; שדרוגי ידע מסירים אחת במקום זאת.
                         </li>
                         <li><strong>ותר</strong> — השאר את האריח וקבל אסימון זמן אחד.</li>
                     </ul>
