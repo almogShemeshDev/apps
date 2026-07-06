@@ -24,19 +24,20 @@ function currentPlayer() {
   return state.players[state.currentPlayerIndex]
 }
 
-function startGame(names) {
-  state.players = names.map((name) => ({
-    name,
+function startGame(playerInputs) {
+  state.players = playerInputs.map((p) => ({
+    name: typeof p === 'string' ? p : p.name,
+    isBot: typeof p === 'string' ? false : !!p.isBot,
     time: STARTING_TIME_TOKENS,
     tracks: { creativity: 0, equipment: 0, knowledge: 0, darkroom: 0 },
     bag: { white: 0, black: 0 },
     filmStrip: [],
   }))
 
-  const deck = buildTileDeck(names.length)
+  const deck = buildTileDeck(playerInputs.length)
   state.market = deck.splice(0, MARKET_SIZE)
   state.drawPile = deck
-  state.currentPlayerIndex = Math.floor(Math.random() * names.length)
+  state.currentPlayerIndex = Math.floor(Math.random() * playerInputs.length)
   state.development = null
   state.scores = []
   state.phase = 'playing'

@@ -18,7 +18,9 @@
             </span>
         </div>
 
-        <button v-if="!dev.playerFinished" class="btn-draw" @click="developNextPhoto">
+        <!-- Bots draw automatically via useBotAI -->
+        <div v-if="isBot" class="bot-thinking">{{ t('botThinking', player.name) }}</div>
+        <button v-else-if="!dev.playerFinished" class="btn-draw" @click="developNextPhoto">
             {{ t('drawNext') }}
         </button>
         <button v-else class="btn-draw" @click="continueDevelopment">
@@ -39,6 +41,7 @@ const { t } = useLang()
 
 const dev = computed(() => state.development)
 const player = computed(() => state.players[dev.value.playerIndex])
+const isBot = computed(() => player.value?.isBot === true)
 </script>
 
 <style lang="scss" scoped>
@@ -97,6 +100,13 @@ const player = computed(() => state.players[dev.value.playerIndex])
 
 .result-subject {
     font-weight: 700;
+}
+
+.bot-thinking {
+    font-size: 0.95rem;
+    color: $text-dim;
+    padding: 12px 0;
+    letter-spacing: 0.03em;
 }
 
 .btn-draw {

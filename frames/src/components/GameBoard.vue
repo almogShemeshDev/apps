@@ -1,7 +1,9 @@
 <template>
     <div class="game-board">
         <div class="header">
-            <div class="turn-info">{{ t('yourTurn', currentPlayer().name) }}</div>
+            <div class="turn-info">
+                {{ isBotTurn ? t('botThinking', currentPlayer().name) : t('yourTurn', currentPlayer().name) }}
+            </div>
             <div class="tiles-left">{{ t('tilesLeft', state.market.length + state.drawPile.length) }}</div>
         </div>
 
@@ -22,19 +24,20 @@
                     :key="tile.id"
                     :tile="tile"
                     interactive
-                    :can-photo="canTakePhoto(tile, currentPlayer())"
-                    :can-upgrade="canBuyUpgrade(tile, currentPlayer())"
+                    :can-photo="!isBotTurn && canTakePhoto(tile, currentPlayer())"
+                    :can-upgrade="!isBotTurn && canBuyUpgrade(tile, currentPlayer())"
                     @take-photo="takePhoto"
                     @buy-upgrade="buyUpgrade"
                 />
             </div>
         </div>
 
-        <button class="btn-pass" @click="pass">{{ t('pass') }}</button>
+        <button class="btn-pass" :disabled="isBotTurn" @click="pass">{{ t('pass') }}</button>
     </div>
 </template>
 
 <script setup>
+import { computed } from 'vue'
 import PlayerBoard from './PlayerBoard.vue'
 import TileComponent from './TileComponent.vue'
 import { useGameState } from '../composables/useGameState.js'
@@ -42,6 +45,8 @@ import { useLang } from '../composables/useLang.js'
 
 const { state, currentPlayer, canTakePhoto, canBuyUpgrade, takePhoto, buyUpgrade, pass } = useGameState()
 const { t } = useLang()
+
+const isBotTurn = computed(() => currentPlayer()?.isBot === true)
 </script>
 
 <style lang="scss" scoped>
@@ -118,8 +123,13 @@ const { t } = useLang()
     cursor: pointer;
     transition: background 0.15s;
 
-    &:hover {
+    &:hover:not(:disabled) {
         background: rgba(255, 255, 255, 0.08);
+    }
+
+    &:disabled {
+        opacity: 0.4;
+        cursor: default;
     }
 }
 </style>
