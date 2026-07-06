@@ -9,14 +9,11 @@ const { t } = useLang()
 
 <style lang="scss" scoped>
 .credits {
-    position: fixed;
-    bottom: 12px;
-    left: 0;
-    right: 0;
+    margin-top: 12px;
+    padding-bottom: 12px;
     text-align: center;
     font-size: 0.7rem;
     color: rgba(255, 255, 255, 0.2);
-    pointer-events: none;
     letter-spacing: 0.03em;
 }
 </style>

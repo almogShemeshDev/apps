@@ -31,23 +31,20 @@
                 </button>
             </template>
         </div>
-
-        <CreditsFooter />
     </div>
 </template>
 
 <script setup>
 import { ref, computed } from 'vue'
 import CardComponent from './CardComponent.vue'
-import CreditsFooter from './CreditsFooter.vue'
 import { useGameState } from '../composables/useGameState.js'
 import { useLang } from '../composables/useLang.js'
 
-const { state, placeInitialBid } = useGameState()
+const { state, activePlayer, getPlayer, placeInitialBid } = useGameState()
 const { t } = useLang()
 
 const selected = ref(null)
-const currentPlayer = computed(() => state.players[state.biddingIndex])
+const currentPlayer = computed(() => getPlayer(activePlayer()))
 
 function confirm() {
     if (!selected.value) return

@@ -37,8 +37,6 @@
             v-if="state.phase === 'replacing-bid' && !getPlayer(state.replacingBidPlayerId)?.isBot"
             :player="getPlayer(state.replacingBidPlayerId)"
         />
-
-        <CreditsFooter />
     </div>
 </template>
 
@@ -47,7 +45,6 @@ import { computed } from 'vue'
 import PlayerHand from './PlayerHand.vue'
 import TrickArea from './TrickArea.vue'
 import ReplaceBidModal from './ReplaceBidModal.vue'
-import CreditsFooter from './CreditsFooter.vue'
 import { useGameState } from '../composables/useGameState.js'
 import { useLang } from '../composables/useLang.js'
 

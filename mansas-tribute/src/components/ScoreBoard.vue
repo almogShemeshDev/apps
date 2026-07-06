@@ -8,15 +8,25 @@
                 class="row"
                 :class="{ winner: i === 0 }"
             >
-                <span class="rank">{{ i + 1 }}</span>
-                <span class="name">{{ s.name }}</span>
-                <span class="breakdown">
-                    {{ t('trickCount', s.tricks) }}
-                    <span class="plus">+</span>
-                    {{ s.bonus }} {{ t('bonus') }}
-                    <span class="equals">=</span>
-                    <span class="total">{{ s.total }}</span>
-                </span>
+                <div class="row-main">
+                    <span class="rank">{{ i + 1 }}</span>
+                    <span class="name">{{ s.name }}</span>
+                    <span class="breakdown">
+                        {{ t('trickCount', s.tricks) }}
+                        <span class="plus">+</span>
+                        {{ s.bonus }} {{ t('bonus') }}
+                        <span class="equals">=</span>
+                        <span class="total">{{ s.total }}</span>
+                    </span>
+                </div>
+                <div class="row-dice">
+                    <span class="dice-label">{{ t('remainingDiceLabel') }}</span>
+                    <div class="dice-list">
+                        <DiceComponent v-for="die in s.dice" :key="die.id" :die="die" />
+                        <span v-if="!s.dice.length" class="no-dice">{{ t('noDice') }}</span>
+                    </div>
+                    <span class="dice-sum">{{ t('diceSumOverTricks', s.diceSum, s.tricks) }}</span>
+                </div>
             </div>
         </div>
         <div class="formula-note">{{ t('formulaNote') }}</div>
@@ -26,6 +36,7 @@
 
 <script setup>
 import { computed } from 'vue'
+import DiceComponent from './DiceComponent.vue'
 import { useLang } from '../composables/useLang.js'
 
 const props = defineProps({ players: { type: Array, required: true } })
@@ -38,7 +49,7 @@ const sorted = computed(() =>
         .map((p) => {
             const diceSum = p.dice.reduce((s, d) => s + d.value, 0)
             const bonus = p.tricks > 0 ? Math.floor(diceSum / p.tricks) : 0
-            return { name: p.name, tricks: p.tricks, diceSum, bonus, total: p.tricks + bonus }
+            return { name: p.name, tricks: p.tricks, dice: p.dice, diceSum, bonus, total: p.tricks + bonus }
         })
         .sort((a, b) => b.total - a.total || b.tricks - a.tricks)
 )
@@ -73,8 +84,8 @@ h1 {
 
 .row {
     display: flex;
-    align-items: center;
-    gap: 12px;
+    flex-direction: column;
+    gap: 8px;
     padding: 12px 16px;
     border-radius: 10px;
     background: $surface;
@@ -91,6 +102,53 @@ h1 {
             color: $gold;
         }
     }
+}
+
+.row-main {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.row-dice {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding-inline-start: 36px;
+}
+
+.dice-label {
+    font-size: 0.72rem;
+    color: $text-dim;
+    opacity: 0.7;
+    white-space: nowrap;
+}
+
+.dice-list {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex-wrap: wrap;
+
+    :deep(.die) {
+        width: 26px;
+        height: 26px;
+        font-size: 0.85rem;
+        border-width: 1px;
+    }
+}
+
+.no-dice {
+    font-size: 0.8rem;
+    color: $text-dim;
+    opacity: 0.6;
+}
+
+.dice-sum {
+    font-size: 0.78rem;
+    color: $text-dim;
+    opacity: 0.8;
+    white-space: nowrap;
 }
 
 .rank {

@@ -59,23 +59,29 @@ export function useBotAI() {
       ? Math.max(...leadPlays.map(e => diceTotal(e.dice)))
       : -1
 
+    // Round-scaled dice budget: Round 1 → 1 die, Round 8 → all dice.
+    // Applies whether the bot is leading or chasing an existing total, so bots
+    // don't blow most of their dice fighting over an early trick.
+    const budget = Math.max(1, Math.round((state.round / 8) * myDice.length))
+
     if (currentBest >= 0) {
-      // Respond to an existing target: play minimum dice that exceed it
+      // Respond to an existing target: find the fewest dice that exceed it
       let sum = 0
       const chosen = []
       for (const die of myDice) {
         chosen.push(die)
         sum += die.value
-        if (sum > currentBest) return chosen.map(d => d.id)
+        if (sum > currentBest) {
+          // Fold if beating it would cost more dice than this round's budget allows
+          return chosen.length <= budget ? chosen.map(d => d.id) : []
+        }
       }
       // Can't beat the target even with all dice — save them
       return []
     }
 
     // Bot is first to set a lead-suit total: scale aggression with round
-    // Round 1 → 1 die, Round 8 → all dice
-    const count = Math.max(1, Math.round((state.round / 8) * myDice.length))
-    return myDice.slice(0, count).map(d => d.id)
+    return myDice.slice(0, budget).map(d => d.id)
   }
 
   function doPick() {

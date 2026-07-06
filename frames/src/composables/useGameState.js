@@ -36,7 +36,7 @@ function startGame(names) {
   const deck = buildTileDeck(names.length)
   state.market = deck.splice(0, MARKET_SIZE)
   state.drawPile = deck
-  state.currentPlayerIndex = 0
+  state.currentPlayerIndex = Math.floor(Math.random() * names.length)
   state.development = null
   state.scores = []
   state.phase = 'playing'

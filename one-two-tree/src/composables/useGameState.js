@@ -12,13 +12,14 @@ const state = reactive({
         winnerId: null,
     },
     currentLeaderId: null,
+    biddingOrder: [],
     biddingIndex: 0,
     replacingBidPlayerId: null,
     scores: [],
 })
 
 function activePlayer() {
-    if (state.phase === 'bidding') return state.players[state.biddingIndex]?.id ?? null
+    if (state.phase === 'bidding') return state.biddingOrder[state.biddingIndex] ?? null
     if (state.phase === 'playing') {
         const playedIds = state.currentTrick.plays.map((p) => p.playerId)
         const order = playerOrder(state.currentTrick.leadPlayerId)
@@ -47,8 +48,10 @@ function startGame(playerNames) {
         bid: null,
         tricksWon: 0,
     }))
-    state.currentTrick = { leadPlayerId: 0, plays: [], winnerId: null }
-    state.currentLeaderId = 0
+    const startId = Math.floor(Math.random() * state.players.length)
+    state.currentTrick = { leadPlayerId: startId, plays: [], winnerId: null }
+    state.currentLeaderId = startId
+    state.biddingOrder = playerOrder(startId)
     state.biddingIndex = 0
     state.scores = []
     state.phase = 'bidding'
@@ -56,7 +59,7 @@ function startGame(playerNames) {
 
 function placeInitialBid(playerId, card) {
     if (state.phase !== 'bidding') return
-    if (state.players[state.biddingIndex]?.id !== playerId) return
+    if (state.biddingOrder[state.biddingIndex] !== playerId) return
 
     const player = getPlayer(playerId)
     if (!player.hand.find((c) => c.id === card.id)) return
@@ -154,6 +157,7 @@ function resetGame() {
     state.players = []
     state.currentTrick = { leadPlayerId: null, plays: [], winnerId: null }
     state.currentLeaderId = null
+    state.biddingOrder = []
     state.biddingIndex = 0
     state.replacingBidPlayerId = null
     state.scores = []

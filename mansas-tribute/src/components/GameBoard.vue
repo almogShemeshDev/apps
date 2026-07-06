@@ -39,6 +39,11 @@
                 <div class="king-sub">{{ t('cardsLeft', 8 - state.round) }}</div>
                 <div class="area-label trump-label">{{ t('trumpCard') }}</div>
                 <CardComponent v-if="state.king.trump" :card="state.king.trump" horizontal />
+
+                <template v-if="state.round < 8">
+                    <div class="area-label trump-label">{{ t('nextTrumpCard') }}</div>
+                    <CardComponent v-if="state.king.revealed" :card="state.king.revealed" horizontal dimmed />
+                </template>
             </div>
 
             <!-- Trick in progress -->

@@ -13,7 +13,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr v-for="row in scores" :key="row.name" :class="{ winner: row.total === maxScore }">
+                    <tr v-for="row in sortedScores" :key="row.name" :class="{ winner: row.total === maxScore }">
                         <td>{{ row.name }}</td>
                         <td>{{ row.photoScore }}</td>
                         <td>{{ row.sequenceBonus > 0 ? `+${row.sequenceBonus}` : '—' }}</td>
@@ -25,13 +25,11 @@
         </div>
         <p class="winner-msg">{{ t('winsMsg', winner?.name) }}</p>
         <button class="btn-play-again" @click="$emit('playAgain')">{{ t('playAgain') }}</button>
-        <CreditsFooter />
     </div>
 </template>
 
 <script setup>
 import { computed } from 'vue'
-import CreditsFooter from './CreditsFooter.vue'
 import { useLang } from '../composables/useLang.js'
 
 const props = defineProps({
@@ -43,6 +41,9 @@ const { t } = useLang()
 
 const maxScore = computed(() => Math.max(...props.scores.map((s) => s.total)))
 const winner = computed(() => props.scores.find((s) => s.total === maxScore.value))
+const sortedScores = computed(() =>
+    [...props.scores].sort((a, b) => b.total - a.total || b.photoScore - a.photoScore)
+)
 </script>
 
 <style lang="scss" scoped>

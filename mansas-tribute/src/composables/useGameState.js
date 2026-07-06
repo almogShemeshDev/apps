@@ -28,7 +28,7 @@ function makeDie() {
 const state = reactive({
   phase: 'setup',
   players: [],
-  king: { deck: [], revealed: null, trumpDeck: [], trump: null },
+  king: { deck: [], revealed: null, trump: null },
   round: 0,
   leadSuit: null,
   trumpSuit: null,
@@ -53,22 +53,30 @@ function startGame(playerInputs) {
     tricks: 0,
   }))
 
+  // Reserve 16 cards for the king as before (keeps per-suit counts divisible by 4);
+  // the new leading/trump mechanic only consumes 9 of them across 8 rounds.
   state.king = {
-    deck: deck.slice(n * 8, n * 8 + 8),
+    deck: deck.slice(n * 8, n * 8 + 16),
     revealed: null,
-    trumpDeck: deck.slice(n * 8 + 8, n * 8 + 16),
     trump: null,
   }
 
   state.round = 0
-  state.leadPlayerIndex = 0
+  state.leadPlayerIndex = Math.floor(Math.random() * n)
   _startRound()
 }
 
 function _startRound() {
   state.round++
-  state.king.revealed = state.king.deck[state.round - 1]
-  state.king.trump = state.king.trumpDeck[state.round - 1]
+  if (state.round === 1) {
+    // King draws two cards to open the game: one leading, one trump.
+    state.king.revealed = state.king.deck[0]
+    state.king.trump = state.king.deck[1]
+  } else {
+    // Last round's leading card becomes this round's trump; king deals a fresh leading card.
+    state.king.trump = state.king.revealed
+    state.king.revealed = state.king.deck[state.round]
+  }
   state.leadSuit = state.king.revealed.suit
   state.trumpSuit = state.king.trump.suit
   state.trick = []
