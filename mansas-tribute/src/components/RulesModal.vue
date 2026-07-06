@@ -15,17 +15,18 @@
                     <h3>Setup</h3>
                     <p>
                         Each player starts with <strong>8 cards</strong> and
-                        <strong>4 dice</strong>. A King's deck of 8 cards is set aside - one is
-                        revealed each round to set the lead suit.
+                        <strong>4 dice</strong>. A King's deck is set aside. At the start of the
+                        game the King draws <strong>two cards</strong>: one sets the
+                        <strong>lead suit</strong> and one sets the <strong>trump suit</strong>.
                     </p>
                 </section>
 
                 <section>
                     <h3>Playing a Round</h3>
                     <p>
-                        The lead player plays any card from their hand. Going clockwise, each player
-                        must <strong>follow suit</strong> (play the same color) if they can;
-                        otherwise they may play any card.
+                        A random player leads the first round. Going clockwise, each player must
+                        <strong>follow the King's lead suit</strong> (play the same color) if they
+                        can; otherwise they may play any card.
                     </p>
                     <p>
                         Each player may also attach any number of their dice to their play - the
@@ -36,14 +37,19 @@
                 <section>
                     <h3>Winning a Trick</h3>
                     <ul>
-                        <li>Only lead-suit plays compete for the win.</li>
                         <li>
-                            Among those, the player with the
+                            <strong>Trump-suit plays beat everything</strong> - if any were played,
+                            only they compete for the win.
+                        </li>
+                        <li>Otherwise, only lead-suit plays compete.</li>
+                        <li>
+                            Among the competing plays, the
                             <strong>highest dice total</strong> wins.
                         </li>
                         <li>Ties go to the player who played first.</li>
                         <li>
-                            If nobody followed suit, the highest total among all plays wins.
+                            If nobody played trump or followed suit, the highest total among all
+                            plays wins.
                         </li>
                     </ul>
                 </section>
@@ -54,6 +60,10 @@
                         All played dice go into a shared pool. The winner leads the next round.
                         Losers may pick dice from the pool in order - the loser with the highest
                         total picks first.
+                    </p>
+                    <p>
+                        The round's <strong>lead card becomes the next round's trump</strong>, and
+                        the King reveals a fresh lead card.
                     </p>
                 </section>
 
@@ -82,17 +92,18 @@
                     <h3>הכנה</h3>
                     <p>
                         כל שחקן מתחיל עם <strong>8 קלפים</strong> ו-<strong>4 קוביות</strong>.
-                        חפיסת המלך (8 קלפים) מופרשת בצד - קלף אחד נחשף בכל סיבוב וקובע את חלפת
-                        הפתיחה.
+                        חפיסת המלך מופרשת בצד. בתחילת המשחק המלך שולף
+                        <strong>שני קלפים</strong>: אחד קובע את <strong>צבע ההובלה</strong> ואחד
+                        את <strong>צבע הטראמפ</strong>.
                     </p>
                 </section>
 
                 <section>
                     <h3>מהלך הסיבוב</h3>
                     <p>
-                        השחקן הראשון מניח כל קלף מידו. בכיוון השעון, כל שחקן חייב
-                        <strong>לעקוב אחרי החלפה</strong> (לשחק אותו צבע) אם ביכולתו; אחרת הוא
-                        רשאי לשחק כל קלף.
+                        שחקן אקראי מוביל את הסיבוב הראשון. בכיוון השעון, כל שחקן חייב
+                        <strong>לעקוב אחרי צבע ההובלה של המלך</strong> (לשחק אותו צבע) אם
+                        ביכולתו; אחרת הוא רשאי לשחק כל קלף.
                     </p>
                     <p>
                         כל שחקן יכול גם לצרף כל מספר של קוביותיו - ערכי הקוביות מתווספים לסכום
@@ -103,13 +114,19 @@
                 <section>
                     <h3>ניצחון בטריק</h3>
                     <ul>
-                        <li>רק מהלכים בחלפת הפתיחה מתחרים על הניצחון.</li>
                         <li>
-                            מביניהם, השחקן עם <strong>סכום הקוביות הגבוה ביותר</strong> מנצח.
+                            <strong>קלפי טראמפ גוברים על הכול</strong> - אם שוחקו כאלה, רק הם
+                            מתחרים על הניצחון.
+                        </li>
+                        <li>אחרת, רק מהלכים בצבע ההובלה מתחרים.</li>
+                        <li>
+                            מבין המהלכים המתחרים, השחקן עם
+                            <strong>סכום הקוביות הגבוה ביותר</strong> מנצח.
                         </li>
                         <li>שוויון הולך לשחקן שניגן ראשון.</li>
                         <li>
-                            אם אף אחד לא עקב אחרי החלפה, הסכום הגבוה ביותר מכל המהלכים מנצח.
+                            אם אף אחד לא שיחק טראמפ ולא עקב אחרי צבע ההובלה, הסכום הגבוה ביותר
+                            מכל המהלכים מנצח.
                         </li>
                     </ul>
                 </section>
@@ -120,6 +137,10 @@
                         כל הקוביות שהונחו עוברות לבריכה משותפת. המנצח מוביל את הסיבוב הבא.
                         המפסידים יכולים לבחור קוביות מהבריכה לפי הסדר - המפסיד עם הסכום הגבוה
                         ביותר בוחר ראשון.
+                    </p>
+                    <p>
+                        <strong>קלף ההובלה של הסיבוב הופך לטראמפ של הסיבוב הבא</strong>, והמלך
+                        חושף קלף הובלה חדש.
                     </p>
                 </section>
 
