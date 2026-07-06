@@ -31,15 +31,12 @@
         </div>
 
         <button class="btn-pass" @click="pass">{{ t('pass') }}</button>
-
-        <CreditsFooter />
     </div>
 </template>
 
 <script setup>
 import PlayerBoard from './PlayerBoard.vue'
 import TileComponent from './TileComponent.vue'
-import CreditsFooter from './CreditsFooter.vue'
 import { useGameState } from '../composables/useGameState.js'
 import { useLang } from '../composables/useLang.js'
 
