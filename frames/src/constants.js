@@ -16,6 +16,7 @@ export const TRACKS = {
 export const STARTING_TIME_TOKENS = 5
 export const MARKET_SIZE = 4
 export const TILES_PER_PLAYER = 12
+export const MIN_TILE_DECK = 36
 
 export const POINTS_PER_PHOTO = 1
 
@@ -76,7 +77,7 @@ function shuffle(arr) {
 }
 
 export function buildTileDeck(playerCount) {
-  const targetCount = playerCount * TILES_PER_PLAYER
+  const targetCount = Math.max(MIN_TILE_DECK, playerCount * TILES_PER_PLAYER)
   const tiles = []
   for (let i = 0; i < targetCount; i++) {
     const template = PHOTO_TEMPLATES[i % PHOTO_TEMPLATES.length]
