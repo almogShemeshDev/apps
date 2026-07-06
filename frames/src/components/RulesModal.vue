@@ -19,7 +19,13 @@
                     <h3>Setup</h3>
                     <p>
                         Each player starts with <strong>5 Time tokens</strong>, an empty player
-                        board, and an empty bag. 4 tiles are revealed to the shared market.
+                        board, and an empty bag. The tile supply holds
+                        <strong>12 tiles per player</strong> (minimum 36), and 4 of them are
+                        revealed to the shared market.
+                    </p>
+                    <p>
+                        A <strong>random player takes the first turn</strong>; play then proceeds
+                        clockwise.
                     </p>
                 </section>
 
@@ -110,8 +116,13 @@
                 <section>
                     <h3>הכנה</h3>
                     <p>
-                        כל שחקן מתחיל עם <strong>5 אסימוני זמן</strong>, לוח שחקן ריק ושק ריקה.
-                        4 אריחים נחשפים לשוק המשותף.
+                        כל שחקן מתחיל עם <strong>5 אסימוני זמן</strong>, לוח שחקן ריק ושק ריק.
+                        מלאי האריחים מכיל <strong>12 אריחים לכל שחקן</strong> (מינימום 36),
+                        ו-4 מהם נחשפים לשוק המשותף.
+                    </p>
+                    <p>
+                        <strong>שחקן אקראי פותח את המשחק</strong>; מכאן המשחק ממשיך בכיוון
+                        השעון.
                     </p>
                 </section>
 
