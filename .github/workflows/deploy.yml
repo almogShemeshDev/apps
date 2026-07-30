@@ -57,11 +57,13 @@ jobs:
           mkdir -p _site/one-two-tree
           mkdir -p _site/mansas-tribute
           mkdir -p _site/frames
+          mkdir -p _site/candy-points
           cp -r mage-knight-player-aid/dist/. _site/mage-knight-player-aid/
           cp -r milky-way/dist/. _site/milky-way/
           cp -r one-two-tree/dist/. _site/one-two-tree/
           cp -r mansas-tribute/dist/. _site/mansas-tribute/
           cp -r frames/dist/. _site/frames/
+          cp -r candy-points/. _site/candy-points/
 
       - uses: actions/upload-pages-artifact@v3
         with:

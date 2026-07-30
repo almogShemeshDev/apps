@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>נקודות הממתקים שלי</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Rubik:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg-deep: #241530;
+    --bg-panel: #33203f;
+    --bg-panel-2: #3d2549;
+    --pink: #ff6fa5;
+    --mint: #6fe7c0;
+    --gold: #ffc857;
+    --cream: #f6efe7;
+    --muted: #c9b8d1;
+    --line: rgba(246,239,231,0.12);
+    --shadow: 0 10px 30px rgba(0,0,0,0.35);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(circle at 15% -10%, rgba(255,111,165,0.18), transparent 45%),
+      radial-gradient(circle at 110% 10%, rgba(111,231,192,0.12), transparent 40%),
+      var(--bg-deep);
+    color:var(--cream);
+    font-family:'Rubik', sans-serif;
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    padding:28px 16px 60px;
+  }
+  .app{
+    width:100%;
+    max-width:480px;
+  }
+  header{
+    text-align:center;
+    margin-bottom:22px;
+  }
+  .eyebrow{
+    font-size:13px;
+    letter-spacing:0.08em;
+    color:var(--muted);
+    margin-bottom:6px;
+  }
+  h1{
+    font-family:'Baloo 2', sans-serif;
+    font-weight:800;
+    font-size:30px;
+    margin:0;
+    background:linear-gradient(90deg, var(--pink), var(--gold));
+    -webkit-background-clip:text;
+    background-clip:text;
+    color:transparent;
+  }
+  .date-line{
+    margin-top:8px;
+    font-size:14px;
+    color:var(--muted);
+  }
+
+  /* Jar */
+  .jar-wrap{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    margin:22px 0 18px;
+  }
+  .jar{
+    position:relative;
+    width:180px;
+    height:190px;
+  }
+  .jar-glass{
+    position:absolute;
+    inset:0;
+    border-radius:22px 22px 34px 34px;
+    background:linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
+    border:3px solid rgba(246,239,231,0.28);
+    box-shadow: inset 0 0 24px rgba(0,0,0,0.25), var(--shadow);
+    overflow:hidden;
+  }
+  .jar-lid{
+    position:absolute;
+    top:-10px;
+    left:50%;
+    transform:translateX(-50%);
+    width:96px;
+    height:16px;
+    background:linear-gradient(180deg, var(--gold), #d99e2b);
+    border-radius:8px;
+    box-shadow: var(--shadow);
+  }
+  .jar-candies{
+    position:absolute;
+    inset:8px;
+    display:flex;
+    flex-wrap:wrap-reverse;
+    align-content:flex-start;
+    gap:6px;
+    padding:8px;
+    overflow:hidden;
+  }
+  .candy{
+    width:22px;
+    height:22px;
+    border-radius:50%;
+    box-shadow: inset -2px -2px 4px rgba(0,0,0,0.25), inset 2px 2px 3px rgba(255,255,255,0.35);
+    flex:0 0 auto;
+    animation: drop 0.35s ease;
+  }
+  .candy.half{
+    opacity:0.5;
+  }
+  @keyframes drop{
+    from{ transform: translateY(-14px) scale(0.6); opacity:0; }
+    to{ transform: translateY(0) scale(1); opacity:1; }
+  }
+  .jar-empty-msg{
+    position:absolute;
+    inset:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    font-size:13px;
+    color:var(--muted);
+    padding:0 20px;
+  }
+
+  .stats{
+    display:flex;
+    gap:10px;
+    margin-top:16px;
+    width:100%;
+  }
+  .stat{
+    flex:1;
+    background:var(--bg-panel);
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:10px 8px;
+    text-align:center;
+  }
+  .stat .num{
+    font-family:'Baloo 2', sans-serif;
+    font-weight:700;
+    font-size:20px;
+  }
+  .stat .lbl{
+    font-size:11px;
+    color:var(--muted);
+    margin-top:2px;
+  }
+
+  .eat-btn{
+    margin-top:16px;
+    width:100%;
+    padding:14px;
+    border:none;
+    border-radius:16px;
+    font-family:'Baloo 2', sans-serif;
+    font-weight:700;
+    font-size:16px;
+    cursor:pointer;
+    background:linear-gradient(90deg, var(--pink), #ff9dc0);
+    color:#2a1030;
+    box-shadow: var(--shadow);
+    transition:transform 0.15s ease, filter 0.15s ease;
+  }
+  .eat-btn:disabled{
+    background:var(--bg-panel-2);
+    color:var(--muted);
+    box-shadow:none;
+    cursor:not-allowed;
+  }
+  .eat-btn:not(:disabled):active{
+    transform:scale(0.97);
+  }
+
+  .tasks-toggle{
+    margin-top:12px;
+    width:100%;
+    padding:14px;
+    border:2px solid var(--mint);
+    border-radius:16px;
+    background:transparent;
+    color:var(--mint);
+    font-family:'Baloo 2', sans-serif;
+    font-weight:700;
+    font-size:16px;
+    cursor:pointer;
+    transition: background 0.15s ease, color 0.15s ease;
+  }
+  .tasks-toggle:hover{
+    background:rgba(111,231,192,0.1);
+  }
+
+  .panel{
+    margin-top:16px;
+    background:var(--bg-panel);
+    border:1px solid var(--line);
+    border-radius:18px;
+    padding:16px;
+    box-shadow:var(--shadow);
+    display:none;
+  }
+  .panel.open{ display:block; }
+
+  .panel-title{
+    font-family:'Baloo 2', sans-serif;
+    font-weight:700;
+    font-size:17px;
+    margin:0 0 12px;
+    color:var(--gold);
+  }
+
+  .task-row{
+    background:var(--bg-panel-2);
+    border-radius:14px;
+    padding:12px;
+    margin-bottom:10px;
+    border:1px solid var(--line);
+  }
+  .task-row.done{
+    border-color:var(--mint);
+    background:linear-gradient(90deg, rgba(111,231,192,0.14), rgba(111,231,192,0.04));
+  }
+  .task-top{
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .task-num{
+    width:26px;
+    height:26px;
+    border-radius:50%;
+    background:var(--pink);
+    color:#2a1030;
+    font-family:'Baloo 2', sans-serif;
+    font-weight:700;
+    font-size:13px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex:0 0 auto;
+  }
+  .task-text{
+    flex:1;
+    background:transparent;
+    border:none;
+    border-bottom:1px solid var(--line);
+    color:var(--cream);
+    font-family:'Rubik', sans-serif;
+    font-size:14px;
+    padding:6px 2px;
+    outline:none;
+  }
+  .task-text::placeholder{ color:var(--muted); }
+  .task-text:focus{ border-bottom-color:var(--mint); }
+  .task-remove{
+    background:none;
+    border:none;
+    color:var(--muted);
+    font-size:18px;
+    cursor:pointer;
+    flex:0 0 auto;
+    line-height:1;
+    padding:4px;
+  }
+  .task-remove:hover{ color:var(--pink); }
+
+  .task-bottom{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin-top:10px;
+    gap:8px;
+  }
+  .value-toggle{
+    display:flex;
+    gap:6px;
+  }
+  .value-btn{
+    padding:6px 10px;
+    border-radius:10px;
+    border:1px solid var(--line);
+    background:transparent;
+    color:var(--muted);
+    font-size:12px;
+    font-weight:600;
+    cursor:pointer;
+  }
+  .value-btn.active{
+    background:var(--gold);
+    color:#2a1030;
+    border-color:var(--gold);
+  }
+  .complete-btn{
+    padding:7px 14px;
+    border-radius:10px;
+    border:none;
+    background:var(--mint);
+    color:#183329;
+    font-family:'Baloo 2', sans-serif;
+    font-weight:700;
+    font-size:13px;
+    cursor:pointer;
+  }
+  .complete-btn.done{
+    background:transparent;
+    border:1px solid var(--mint);
+    color:var(--mint);
+  }
+
+  .add-task-btn{
+    width:100%;
+    padding:12px;
+    border-radius:12px;
+    border:1.5px dashed var(--muted);
+    background:transparent;
+    color:var(--muted);
+    font-family:'Rubik', sans-serif;
+    font-weight:600;
+    font-size:14px;
+    cursor:pointer;
+    margin-top:4px;
+  }
+  .add-task-btn:hover{
+    border-color:var(--pink);
+    color:var(--pink);
+  }
+  .add-task-btn:disabled{
+    opacity:0.4;
+    cursor:not-allowed;
+  }
+
+  .empty-tasks{
+    text-align:center;
+    color:var(--muted);
+    font-size:13px;
+    padding:18px 0;
+  }
+
+  footer{
+    text-align:center;
+    margin-top:26px;
+    font-size:11px;
+    color:var(--muted);
+    opacity:0.7;
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div class="eyebrow">🍬 מעקב משימות ותגמולים</div>
+    <h1>נקודות הממתקים שלי</h1>
+    <div class="date-line" id="dateLine"></div>
+  </header>
+
+  <div class="jar-wrap">
+    <div class="jar">
+      <div class="jar-lid"></div>
+      <div class="jar-glass">
+        <div class="jar-candies" id="jarCandies"></div>
+        <div class="jar-empty-msg" id="jarEmptyMsg">הצנצנת ריקה — השלימו משימות כדי למלא אותה!</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="stats">
+    <div class="stat">
+      <div class="num" id="statPoints">0.0</div>
+      <div class="lbl">נקודות</div>
+    </div>
+    <div class="stat">
+      <div class="num" id="statCandies">0</div>
+      <div class="lbl">ממתקים זמינים</div>
+    </div>
+    <div class="stat">
+      <div class="num" id="statEaten">0</div>
+      <div class="lbl">ממתקים שנאכלו</div>
+    </div>
+  </div>
+
+  <button class="eat-btn" id="eatBtn">אכלתי ממתק 🍭</button>
+  <button class="tasks-toggle" id="tasksToggle">משימות להיום ✏️</button>
+
+  <div class="panel" id="tasksPanel">
+    <div class="panel-title">המשימות שלי להיום</div>
+    <div id="taskList"></div>
+    <div class="empty-tasks" id="emptyTasksMsg">עדיין אין משימות. לחצו על "הוסף משימה" כדי להתחיל.</div>
+    <button class="add-task-btn" id="addTaskBtn">+ הוסף משימה</button>
+  </div>
+
+  <footer>הנתונים נשמרים בדפדפן שלכם בלבד, בשעון ישראל 🇮🇱</footer>
+</div>
+
+<script>
+  const STORAGE_KEY = 'candyPointsApp_v1';
+  const CANDY_COLORS = ['#ff6fa5', '#ffc857', '#6fe7c0', '#c48bff', '#ff9d6f'];
+
+  function loadState(){
+    try{
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if(raw) return JSON.parse(raw);
+    }catch(e){}
+    return { totalPoints: 0, candiesEaten: 0, tasksByDate: {} };
+  }
+
+  function saveState(){
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  }
+
+  function getIsraelDateKey(){
+    return new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Jerusalem' });
+  }
+
+  function getIsraelDateDisplay(){
+    return new Date().toLocaleDateString('he-IL', {
+      timeZone: 'Asia/Jerusalem',
+      weekday: 'long',
+      day: 'numeric',
+      month: 'long'
+    });
+  }
+
+  let state = loadState();
+  let todayKey = getIsraelDateKey();
+
+  function getTodayTasks(){
+    if(!state.tasksByDate[todayKey]) state.tasksByDate[todayKey] = [];
+    return state.tasksByDate[todayKey];
+  }
+
+  function uid(){
+    return 't' + Date.now() + Math.random().toString(36).slice(2,7);
+  }
+
+  // --- Rendering ---
+  function render(){
+    document.getElementById('dateLine').textContent = getIsraelDateDisplay();
+
+    const points = state.totalPoints;
+    const wholeCandies = Math.floor(points + 1e-9);
+    const fraction = +(points - wholeCandies).toFixed(1);
+
+    document.getElementById('statPoints').textContent = points.toFixed(1);
+    document.getElementById('statCandies').textContent = wholeCandies;
+    document.getElementById('statEaten').textContent = state.candiesEaten;
+
+    const eatBtn = document.getElementById('eatBtn');
+    eatBtn.disabled = points < 1.0;
+
+    // jar
+    const jar = document.getElementById('jarCandies');
+    const emptyMsg = document.getElementById('jarEmptyMsg');
+    jar.innerHTML = '';
+    if(wholeCandies === 0 && fraction === 0){
+      emptyMsg.style.display = 'flex';
+    } else {
+      emptyMsg.style.display = 'none';
+      for(let i=0;i<wholeCandies;i++){
+        const c = document.createElement('div');
+        c.className = 'candy';
+        c.style.background = CANDY_COLORS[i % CANDY_COLORS.length];
+        jar.appendChild(c);
+      }
+      if(fraction >= 0.5){
+        const c = document.createElement('div');
+        c.className = 'candy half';
+        c.style.background = CANDY_COLORS[wholeCandies % CANDY_COLORS.length];
+        jar.appendChild(c);
+      }
+    }
+
+    renderTasks();
+    saveState();
+  }
+
+  function renderTasks(){
+    const tasks = getTodayTasks();
+    const list = document.getElementById('taskList');
+    const emptyMsg = document.getElementById('emptyTasksMsg');
+    const addBtn = document.getElementById('addTaskBtn');
+    list.innerHTML = '';
+
+    emptyMsg.style.display = tasks.length === 0 ? 'block' : 'none';
+    addBtn.disabled = tasks.length >= 5;
+    addBtn.textContent = tasks.length >= 5 ? 'הגעתם למקסימום של 5 משימות' : '+ הוסף משימה';
+
+    tasks.forEach((task, idx) => {
+      const row = document.createElement('div');
+      row.className = 'task-row' + (task.done ? ' done' : '');
+
+      row.innerHTML = `
+        <div class="task-top">
+          <div class="task-num">${idx+1}</div>
+          <input class="task-text" type="text" placeholder="מה המשימה?" value="${escapeHtml(task.text)}" ${task.done ? 'disabled' : ''} data-id="${task.id}">
+          <button class="task-remove" data-id="${task.id}" title="הסר משימה">✕</button>
+        </div>
+        <div class="task-bottom">
+          <div class="value-toggle">
+            <button class="value-btn ${task.value === 0.5 ? 'active' : ''}" data-id="${task.id}" data-val="0.5" ${task.done ? 'disabled' : ''}>0.5</button>
+            <button class="value-btn ${task.value === 1.0 ? 'active' : ''}" data-id="${task.id}" data-val="1.0" ${task.done ? 'disabled' : ''}>1.0</button>
+          </div>
+          <button class="complete-btn ${task.done ? 'done' : ''}" data-id="${task.id}">
+            ${task.done ? 'בוטל שוב? ↺' : 'הושלם ✓'}
+          </button>
+        </div>
+      `;
+      list.appendChild(row);
+    });
+
+    // bind events
+    list.querySelectorAll('.task-text').forEach(inp => {
+      inp.addEventListener('input', e => {
+        const t = tasks.find(t => t.id === e.target.dataset.id);
+        if(t) t.text = e.target.value;
+        saveState();
+      });
+    });
+    list.querySelectorAll('.task-remove').forEach(btn => {
+      btn.addEventListener('click', e => {
+        const id = e.target.dataset.id;
+        const t = tasks.find(t => t.id === id);
+        if(t && t.done){
+          state.totalPoints = +(state.totalPoints - t.value).toFixed(1);
+          if(state.totalPoints < 0) state.totalPoints = 0;
+        }
+        state.tasksByDate[todayKey] = tasks.filter(t => t.id !== id);
+        render();
+      });
+    });
+    list.querySelectorAll('.value-btn').forEach(btn => {
+      btn.addEventListener('click', e => {
+        const t = tasks.find(t => t.id === e.target.dataset.id);
+        if(t && !t.done){
+          t.value = parseFloat(e.target.dataset.val);
+          render();
+        }
+      });
+    });
+    list.querySelectorAll('.complete-btn').forEach(btn => {
+      btn.addEventListener('click', e => {
+        const id = e.target.dataset.id;
+        const t = tasks.find(t => t.id === id);
+        if(!t) return;
+        if(!t.done){
+          t.done = true;
+          state.totalPoints = +(state.totalPoints + t.value).toFixed(1);
+        } else {
+          t.done = false;
+          state.totalPoints = +(state.totalPoints - t.value).toFixed(1);
+          if(state.totalPoints < 0) state.totalPoints = 0;
+        }
+        render();
+      });
+    });
+  }
+
+  function escapeHtml(str){
+    const div = document.createElement('div');
+    div.textContent = str || '';
+    return div.innerHTML;
+  }
+
+  // --- Actions ---
+  document.getElementById('eatBtn').addEventListener('click', () => {
+    if(state.totalPoints >= 1.0){
+      state.totalPoints = +(state.totalPoints - 1.0).toFixed(1);
+      state.candiesEaten += 1;
+      render();
+    }
+  });
+
+  document.getElementById('tasksToggle').addEventListener('click', () => {
+    document.getElementById('tasksPanel').classList.toggle('open');
+  });
+
+  document.getElementById('addTaskBtn').addEventListener('click', () => {
+    const tasks = getTodayTasks();
+    if(tasks.length >= 5) return;
+    tasks.push({ id: uid(), text: '', value: 0.5, done: false });
+    render();
+    document.getElementById('tasksPanel').classList.add('open');
+  });
+
+  // refresh date/tasks automatically at midnight (Israel time)
+  setInterval(() => {
+    const newKey = getIsraelDateKey();
+    if(newKey !== todayKey){
+      todayKey = newKey;
+      render();
+    } else {
+      document.getElementById('dateLine').textContent = getIsraelDateDisplay();
+    }
+  }, 60 * 1000);
+
+  render();
+</script>
+</body>
+</html>
