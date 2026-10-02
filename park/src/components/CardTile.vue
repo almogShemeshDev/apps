@@ -4,7 +4,18 @@
         <div class="card-name">{{ t('cardName', cardId) }}</div>
 
         <div v-for="option in options" :key="option.id" class="option" :class="{ used: isExhausted(option) }">
-            <div class="option-line">{{ formatUse(option.use, t) }} → {{ formatBenefits(option.benefits, t) }}</div>
+            <div class="chips-row">
+                <span v-for="(c, i) in useChips(option.use, t)" :key="'u' + i" class="chip" :title="c.title">
+                    {{ c.icon }}<sup v-if="c.count > 1">{{ c.count }}</sup>
+                </span>
+                <span class="arrow">→</span>
+                <span v-for="(c, i) in benefitChips(option.benefits, t)" :key="'b' + i" class="chip" :title="c.title">
+                    {{ c.icon }}<sup v-if="c.count > 1">{{ c.count }}</sup>
+                </span>
+            </div>
+            <div v-if="captionsFor(option.benefits, t).length" class="caption">
+                {{ captionsFor(option.benefits, t).join(' · ') }}
+            </div>
 
             <template v-if="mode === 'tableau'">
                 <div v-if="(option.maxUsesPerTurn ?? 1) > 1 || options.length > 1" class="option-uses">
@@ -23,7 +34,7 @@
         <template v-if="mode === 'market'">
             <div class="card-remaining">{{ remaining > 0 ? t('remainingLabel', remaining) : t('soldOut') }}</div>
             <button class="card-btn" :disabled="!canBuy" @click="$emit('buy')">
-                {{ t('buy') }} · {{ t('costLabel', def.cost) }}
+                {{ t('buy') }} <span class="chip" :title="t('goldLabel')">💰<sup v-if="def.cost > 1">{{ def.cost }}</sup></span>
             </button>
         </template>
     </div>
@@ -33,7 +44,7 @@
 import { computed } from 'vue'
 import { CARD_DEFS, getCardOptions } from '../constants.js'
 import { useLang } from '../composables/useLang.js'
-import { formatUse, formatBenefits } from '../cardFormat.js'
+import { useChips, benefitChips, captionsFor } from '../cardFormat.js'
 
 const props = defineProps({
     cardId: { type: String, required: true },
@@ -101,10 +112,38 @@ function isExhausted(option) {
     }
 }
 
-.option-line {
-    font-size: 0.68rem;
+.chips-row {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.chip {
+    display: inline-flex;
+    align-items: flex-start;
+    font-size: 1rem;
+    line-height: 1;
+
+    sup {
+        font-size: 0.6rem;
+        color: $text;
+        font-weight: 700;
+    }
+}
+
+.arrow {
+    color: $text-dim;
+    font-size: 0.8rem;
+    margin: 0 2px;
+}
+
+.caption {
+    font-size: 0.62rem;
     color: $text-dim;
     text-align: center;
+    font-style: italic;
 }
 
 .option-uses {
@@ -128,7 +167,14 @@ function isExhausted(option) {
     font-size: 0.78rem;
     font-weight: 700;
     cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
     transition: background 0.15s;
+
+    .chip sup {
+        color: $bg-dark;
+    }
 
     &:hover:not(:disabled) {
         background: $gold-light;

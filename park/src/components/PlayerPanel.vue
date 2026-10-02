@@ -8,7 +8,7 @@
         <div class="stats">
             <span>💰 {{ t('goldLabel') }}: {{ player.gold }}</span>
             <span>🏆 {{ t('vpLabel') }}: {{ player.vp }}</span>
-            <span v-if="player.negativeVp">⚠️ {{ t('negativeVpLabel') }}: -{{ player.negativeVp }}</span>
+            <span>📉 {{ t('negativeVpLabel') }}: {{ player.negativeVp > 0 ? '-' + player.negativeVp : 0 }}</span>
             <span>🎒 {{ t('bagLabel') }}: {{ player.bag.length }}</span>
             <span>🗑️ {{ t('discardLabel') }}: {{ player.discard.length }}</span>
             <span v-if="player.trashedCount">❌ {{ t('trashedLabel') }}: {{ player.trashedCount }}</span>
@@ -49,6 +49,10 @@
                 />
             </div>
         </div>
+
+        <button v-if="isActive" class="btn-end-turn" :disabled="!!pendingChoice" @click="$emit('end-turn')">
+            {{ t('endTurn') }}
+        </button>
     </div>
 </template>
 
@@ -64,7 +68,7 @@ defineProps({
     pendingChoice: { type: Object, default: null },
     canActivateOption: { type: Function, required: true },
 })
-defineEmits(['activate-card', 'toggle-disc'])
+defineEmits(['activate-card', 'toggle-disc', 'end-turn'])
 
 const { t } = useLang()
 </script>
@@ -157,5 +161,27 @@ const { t } = useLang()
     display: flex;
     gap: 8px;
     flex-wrap: wrap;
+}
+
+.btn-end-turn {
+    align-self: center;
+    background: $bg-dark;
+    color: $text;
+    border: 1px solid $border;
+    border-radius: 8px;
+    padding: 8px 20px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.15s;
+
+    &:hover:not(:disabled) {
+        background: rgba(255, 255, 255, 0.08);
+    }
+
+    &:disabled {
+        opacity: 0.35;
+        cursor: default;
+    }
 }
 </style>

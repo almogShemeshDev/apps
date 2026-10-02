@@ -170,6 +170,13 @@ function activateOption(uid, optionId) {
     } else if (effect.type === 'drawDiscs') drawNInto(player, effect.amount)
     else if (effect.type === 'discardDiscs') pendingDiscard += effect.amount
     else if (effect.type === 'trashDiscs') pendingTrash += effect.amount
+    else if (effect.type === 'convertNegativeVp') {
+      const amt = Math.min(effect.amount, player.negativeVp)
+      player.negativeVp -= amt
+      player.vp += amt
+    } else if (effect.type === 'removeNegativeVp') {
+      player.negativeVp -= Math.min(effect.amount, player.negativeVp)
+    }
   }
 
   if (pendingDiscard > 0) state.pendingChoice = { kind: 'discard', remaining: pendingDiscard }

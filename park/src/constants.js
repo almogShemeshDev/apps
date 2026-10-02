@@ -21,6 +21,8 @@ export const DISCS_PER_DRAW = 5
 //   { type: 'discardDiscs', amount }         -- player chooses N discs from hand -> discard pile
 //   { type: 'trashDiscs', amount }           -- player chooses N discs from hand -> removed from game
 //   { type: 'gainDisc', disc, amount }       -- add N discs of `disc` type to discard pile
+//   { type: 'convertNegativeVp', amount }    -- remove N negative VP tokens and gain that many VP
+//   { type: 'removeNegativeVp', amount }     -- remove N negative VP tokens (no VP gain)
 // A card with multiple alternative abilities (e.g. Spinning Cups) defines
 // `options: [{ id, use, benefits, maxUsesPerTurn }, ...]` instead of use/benefits/maxUsesPerTurn.
 export const CARD_DEFS = {
@@ -167,6 +169,48 @@ export const CARD_DEFS = {
     cost: 1,
     use: { discs: [{ type: 'gardener', amount: 2 }], gold: 1 },
     benefits: [{ type: 'vp', amount: 1 }],
+  },
+  freeFall: {
+    id: 'freeFall',
+    icon: '🪂',
+    cost: 4,
+    use: { discs: [{ type: 'visitor', amount: 1 }, { type: 'worker', amount: 2 }] },
+    benefits: [{ type: 'vp', amount: 2 }, { type: 'discardDiscs', amount: 1 }],
+  },
+  gardener: {
+    id: 'gardener',
+    icon: '🧑‍🌾',
+    cost: 2,
+    use: { discs: [{ type: 'money', amount: 2 }] },
+    benefits: [{ type: 'gainDisc', disc: 'gardener', amount: 1 }],
+  },
+  birthdayParty: {
+    id: 'birthdayParty',
+    icon: '🎂',
+    cost: 4,
+    use: { discs: [{ type: 'money', amount: 1 }] },
+    benefits: [{ type: 'gold', amount: 2 }],
+  },
+  iceCream: {
+    id: 'iceCream',
+    icon: '🍦',
+    cost: 5,
+    use: { discs: [{ type: 'visitor', amount: 2 }, { type: 'worker', amount: 1 }] },
+    benefits: [{ type: 'convertNegativeVp', amount: 1 }],
+  },
+  souvenirs: {
+    id: 'souvenirs',
+    icon: '🛍️',
+    cost: 5,
+    use: { discs: [{ type: 'money', amount: 1 }, { type: 'visitor', amount: 1 }] },
+    benefits: [{ type: 'removeNegativeVp', amount: 1 }],
+  },
+  flyingChairs: {
+    id: 'flyingChairs',
+    icon: '🪑',
+    cost: 2,
+    use: { discs: [{ type: 'worker', amount: 1 }, { type: 'visitor', amount: 2 }] },
+    benefits: [{ type: 'discardDiscs', amount: 2 }, { type: 'vp', amount: 1 }],
   },
 }
 

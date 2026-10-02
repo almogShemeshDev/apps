@@ -20,6 +20,12 @@ const CARD_NAMES = {
     ghostsRiders: 'Ghosts Riders',
     spinningCups: 'Spinning Cups',
     cleaningStaff: 'Cleaning Staff',
+    freeFall: 'Free Fall',
+    gardener: 'Gardener',
+    birthdayParty: 'Birthday Party',
+    iceCream: 'Ice Cream',
+    souvenirs: 'Souvenirs',
+    flyingChairs: 'Flying Chairs',
   },
   he: {
     carousel: 'קרוסלה',
@@ -40,6 +46,12 @@ const CARD_NAMES = {
     ghostsRiders: 'רוכבי רוחות',
     spinningCups: 'כוסות מסתובבות',
     cleaningStaff: 'צוות ניקיון',
+    freeFall: 'נפילה חופשית',
+    gardener: 'גנן',
+    birthdayParty: 'מסיבת יום הולדת',
+    iceCream: 'גלידה',
+    souvenirs: 'מזכרות',
+    flyingChairs: 'כיסאות מעופפים',
   },
 }
 
@@ -77,6 +89,8 @@ const strings = {
     discardDiscsEffect: n => `Discard ${n} disc${n !== 1 ? 's' : ''}`,
     trashDiscsEffect: n => `Trash ${n} disc${n !== 1 ? 's' : ''}`,
     gainDiscEffect: (n, discType) => `Gain ${n} ${strings.en.discName(discType)} disc${n !== 1 ? 's' : ''}`,
+    convertNegativeVpEffect: n => `Convert ${n} Negative VP token${n !== 1 ? 's' : ''} into VP`,
+    removeNegativeVpEffect: n => `Remove ${n} Negative VP token${n !== 1 ? 's' : ''}`,
 
     pendingChoiceDiscard: n => `Choose ${n} disc${n !== 1 ? 's' : ''} to discard`,
     pendingChoiceTrash: n => `Choose ${n} disc${n !== 1 ? 's' : ''} to trash`,
@@ -120,6 +134,8 @@ const strings = {
     discardDiscsEffect: n => `השלך ${n} דיסקיות`,
     trashDiscsEffect: n => `השמד ${n} דיסקיות`,
     gainDiscEffect: (n, discType) => `קבל ${n} דיסקיות ${strings.he.discName(discType)}`,
+    convertNegativeVpEffect: n => `המר ${n} אסימוני נק׳ שליליות לנק׳ ניצחון`,
+    removeNegativeVpEffect: n => `הסר ${n} אסימוני נק׳ שליליות`,
 
     pendingChoiceDiscard: n => `בחר ${n} דיסקיות להשלכה`,
     pendingChoiceTrash: n => `בחר ${n} דיסקיות להשמדה`,

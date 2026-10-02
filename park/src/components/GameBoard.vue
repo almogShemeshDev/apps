@@ -16,12 +16,11 @@
                 :can-activate-option="canActivateOption"
                 @activate-card="(uid, optionId) => activateOption(uid, optionId)"
                 @toggle-disc="toggleDiscSelection"
+                @end-turn="endTurn"
             />
         </div>
 
         <MarketPanel :market="state.market" :can-buy-card="canBuyCard" @buy-card="buyCard" />
-
-        <button class="btn-end-turn" :disabled="!!state.pendingChoice" @click="endTurn">{{ t('endTurn') }}</button>
     </div>
 </template>
 
@@ -82,26 +81,5 @@ const { t } = useLang()
     gap: 12px;
     width: 100%;
     max-width: 900px;
-}
-
-.btn-end-turn {
-    background: $bg-panel;
-    color: $text;
-    border: 1px solid $border;
-    border-radius: 8px;
-    padding: 10px 24px;
-    font-size: 0.9rem;
-    font-weight: 700;
-    cursor: pointer;
-    transition: background 0.15s;
-
-    &:hover:not(:disabled) {
-        background: rgba(255, 255, 255, 0.08);
-    }
-
-    &:disabled {
-        opacity: 0.35;
-        cursor: default;
-    }
 }
 </style>
