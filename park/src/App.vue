@@ -4,27 +4,44 @@
             <button class="btn-ctrl btn-lang" @click="toggleLang">
                 {{ lang === 'en' ? 'עב' : 'EN' }}
             </button>
+            <button v-if="state.phase === 'playing'" class="btn-ctrl btn-new-game" @click="confirmNewGame">
+                {{ t('newGame') }}
+            </button>
         </header>
 
-        <div class="setup">
-            <h1 class="title">🎡 Park</h1>
-            <p class="subtitle">{{ t('subtitle') }}</p>
+        <GameSetup v-if="state.phase === 'setup'" @start="startGame" />
 
-            <div class="form">
-                <p class="coming-soon">{{ t('comingSoon') }}</p>
-                <button class="btn-start" disabled>{{ t('startGame') }}</button>
-            </div>
-        </div>
+        <GameBoard v-else-if="state.phase === 'playing'" />
 
         <CreditsFooter />
     </div>
 </template>
 
 <script setup>
+import { watch } from 'vue'
+import GameSetup from './components/GameSetup.vue'
+import GameBoard from './components/GameBoard.vue'
 import CreditsFooter from './components/CreditsFooter.vue'
+import { useGameState } from './composables/useGameState.js'
 import { useLang } from './composables/useLang.js'
 
+const { state, startGame, resetGame } = useGameState()
 const { lang, t, dir, toggleLang } = useLang()
+
+watch(
+    lang,
+    (v) => {
+        document.documentElement.setAttribute('dir', v === 'he' ? 'rtl' : 'ltr')
+        document.documentElement.setAttribute('lang', v)
+    },
+    { immediate: true }
+)
+
+function confirmNewGame() {
+    if (window.confirm(t('confirmNewGame'))) {
+        resetGame()
+    }
+}
 </script>
 
 <style lang="scss" scoped>
@@ -32,8 +49,6 @@ const { lang, t, dir, toggleLang } = useLang()
 
 #app {
     min-height: 100vh;
-    display: flex;
-    flex-direction: column;
     background: $bg-dark;
 }
 
@@ -62,58 +77,12 @@ const { lang, t, dir, toggleLang } = useLang()
     }
 }
 
-.setup {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 16px;
-    padding: 24px;
-}
+.btn-new-game {
+    margin-inline-start: auto;
 
-.title {
-    font-size: 2.6rem;
-    font-weight: 700;
-    color: $gold;
-    letter-spacing: 0.04em;
-}
-
-.subtitle {
-    color: $text-dim;
-    font-size: 0.9rem;
-    text-align: center;
-    max-width: 360px;
-}
-
-.form {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 16px;
-    background: $bg-panel;
-    border: 1px solid $border;
-    padding: 28px 32px;
-    border-radius: 16px;
-    min-width: 300px;
-}
-
-.coming-soon {
-    color: $text-dim;
-    font-size: 0.85rem;
-    text-align: center;
-}
-
-.btn-start {
-    background: $gold;
-    color: $bg-dark;
-    border: none;
-    padding: 13px 24px;
-    border-radius: 8px;
-    font-size: 1rem;
-    font-weight: 700;
-    cursor: not-allowed;
-    letter-spacing: 0.04em;
-    opacity: 0.6;
+    &:hover {
+        background: rgba(220, 53, 69, 0.6);
+        border-color: transparent;
+    }
 }
 </style>
