@@ -12,16 +12,16 @@
                 :player="p"
                 :is-active="i === state.activePlayerIndex"
                 :selected-indices="state.selectedDiscIndices"
-                :can-activate-card="canActivateCard"
-                :max-uses-per-turn="maxUsesPerTurn"
-                @activate-card="activateCard"
+                :pending-choice="state.pendingChoice"
+                :can-activate-option="canActivateOption"
+                @activate-card="(uid, optionId) => activateOption(uid, optionId)"
                 @toggle-disc="toggleDiscSelection"
             />
         </div>
 
         <MarketPanel :market="state.market" :can-buy-card="canBuyCard" @buy-card="buyCard" />
 
-        <button class="btn-end-turn" @click="endTurn">{{ t('endTurn') }}</button>
+        <button class="btn-end-turn" :disabled="!!state.pendingChoice" @click="endTurn">{{ t('endTurn') }}</button>
     </div>
 </template>
 
@@ -34,10 +34,9 @@ import { useLang } from '../composables/useLang.js'
 const {
     state,
     activePlayer,
-    maxUsesPerTurn,
     toggleDiscSelection,
-    canActivateCard,
-    activateCard,
+    canActivateOption,
+    activateOption,
     canBuyCard,
     buyCard,
     endTurn,
@@ -96,8 +95,13 @@ const { t } = useLang()
     cursor: pointer;
     transition: background 0.15s;
 
-    &:hover {
+    &:hover:not(:disabled) {
         background: rgba(255, 255, 255, 0.08);
+    }
+
+    &:disabled {
+        opacity: 0.35;
+        cursor: default;
     }
 }
 </style>

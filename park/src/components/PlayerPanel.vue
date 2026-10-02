@@ -8,8 +8,16 @@
         <div class="stats">
             <span>💰 {{ t('goldLabel') }}: {{ player.gold }}</span>
             <span>🏆 {{ t('vpLabel') }}: {{ player.vp }}</span>
+            <span v-if="player.negativeVp">⚠️ {{ t('negativeVpLabel') }}: -{{ player.negativeVp }}</span>
             <span>🎒 {{ t('bagLabel') }}: {{ player.bag.length }}</span>
             <span>🗑️ {{ t('discardLabel') }}: {{ player.discard.length }}</span>
+            <span v-if="player.trashedCount">❌ {{ t('trashedLabel') }}: {{ player.trashedCount }}</span>
+        </div>
+
+        <div v-if="isActive && pendingChoice" class="pending-banner">
+            {{ pendingChoice.kind === 'discard'
+                ? t('pendingChoiceDiscard', pendingChoice.remaining)
+                : t('pendingChoiceTrash', pendingChoice.remaining) }}
         </div>
 
         <div class="drawn">
@@ -20,7 +28,7 @@
                     :key="i"
                     :type="disc"
                     :selectable="isActive"
-                    :selected="isActive && selectedIndices.includes(i)"
+                    :selected="isActive && !pendingChoice && selectedIndices.includes(i)"
                     @toggle="$emit('toggle-disc', i)"
                 />
                 <span v-if="!player.drawn.length" class="none">—</span>
@@ -36,9 +44,8 @@
                     mode="tableau"
                     :card-id="card.cardId"
                     :uses-this-turn="card.usesThisTurn"
-                    :max-uses="maxUsesPerTurn(card.cardId)"
-                    :can-act="isActive && canActivateCard(card)"
-                    @activate="$emit('activate-card', card.uid)"
+                    :can-activate-option="(optionId) => isActive && canActivateOption(card, optionId)"
+                    @activate="(optionId) => $emit('activate-card', card.uid, optionId)"
                 />
             </div>
         </div>
@@ -54,8 +61,8 @@ defineProps({
     player: { type: Object, required: true },
     isActive: { type: Boolean, default: false },
     selectedIndices: { type: Array, default: () => [] },
-    canActivateCard: { type: Function, required: true },
-    maxUsesPerTurn: { type: Function, required: true },
+    pendingChoice: { type: Object, default: null },
+    canActivateOption: { type: Function, required: true },
 })
 defineEmits(['activate-card', 'toggle-disc'])
 
@@ -111,6 +118,17 @@ const { t } = useLang()
     gap: 12px;
     font-size: 0.8rem;
     color: $text-dim;
+}
+
+.pending-banner {
+    background: rgba(255, 182, 39, 0.15);
+    border: 1px solid $gold;
+    color: $gold;
+    border-radius: 8px;
+    padding: 6px 10px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-align: center;
 }
 
 .drawn-label,

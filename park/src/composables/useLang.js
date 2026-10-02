@@ -1,5 +1,48 @@
 import { ref, computed } from 'vue'
 
+const CARD_NAMES = {
+  en: {
+    carousel: 'Carousel',
+    cashier: 'Cashier',
+    familyDay: 'Family Day',
+    popcorn: 'Popcorn',
+    poster: 'Poster',
+    hotdogs: 'Hotdogs',
+    ferrisWheel: 'Ferris Wheel',
+    flowersGarden: 'Flowers Garden',
+    bushesSculptures: 'Bushes Sculptures',
+    electricCars: 'Electric Cars',
+    bullsEye: "Bull's Eye",
+    recruit: 'Recruit',
+    rollercoaster: 'Rollercoaster',
+    juggling: 'Juggling',
+    pirateBoat: 'Pirate Boat',
+    ghostsRiders: 'Ghosts Riders',
+    spinningCups: 'Spinning Cups',
+    cleaningStaff: 'Cleaning Staff',
+  },
+  he: {
+    carousel: 'קרוסלה',
+    cashier: 'קופאי',
+    familyDay: 'יום משפחה',
+    popcorn: 'פופקורן',
+    poster: 'דוכן פוסטרים',
+    hotdogs: 'נקניקיות',
+    ferrisWheel: 'גלגל ענק',
+    flowersGarden: 'גינת פרחים',
+    bushesSculptures: 'פסלי שיחים',
+    electricCars: 'מכוניות חשמליות',
+    bullsEye: 'מטרה',
+    recruit: 'גיוס',
+    rollercoaster: 'רכבת הרים',
+    juggling: 'ג׳אגלינג',
+    pirateBoat: 'ספינת פיראטים',
+    ghostsRiders: 'רוכבי רוחות',
+    spinningCups: 'כוסות מסתובבות',
+    cleaningStaff: 'צוות ניקיון',
+  },
+}
+
 const lang = ref('en')
 
 const strings = {
@@ -17,17 +60,26 @@ const strings = {
 
     goldLabel: 'Gold',
     vpLabel: 'VP',
+    negativeVpLabel: 'Negative VP',
     bagLabel: 'Bag',
     discardLabel: 'Discard',
+    trashedLabel: 'Trashed',
     drawnLabel: 'Drawn discs',
 
     tableauLabel: 'Tableau',
-    cardName: id => ({ carousel: 'Carousel', cashier: 'Cashier' }[id] ?? id),
+    cardName: id => CARD_NAMES.en[id] ?? id,
     discName: id => ({ visitor: 'Visitor', worker: 'Worker', gardener: 'Gardener', money: 'Money' }[id] ?? id),
-    useLabel: (amount, disc) => `Use: ${amount} ${strings.en.discName(disc)}`,
-    benefitLabel: (type, amount) => `Benefit: +${amount} ${type === 'gold' ? 'Gold' : 'VP'}`,
     activate: 'Activate',
     usesLabel: (used, max) => `${used}/${max} used this turn`,
+
+    negativeVpEffect: n => `-${n} VP token`,
+    pullDiscsEffect: n => `Pull ${n} disc${n !== 1 ? 's' : ''} from bag`,
+    discardDiscsEffect: n => `Discard ${n} disc${n !== 1 ? 's' : ''}`,
+    trashDiscsEffect: n => `Trash ${n} disc${n !== 1 ? 's' : ''}`,
+    gainDiscEffect: (n, discType) => `Gain ${n} ${strings.en.discName(discType)} disc${n !== 1 ? 's' : ''}`,
+
+    pendingChoiceDiscard: n => `Choose ${n} disc${n !== 1 ? 's' : ''} to discard`,
+    pendingChoiceTrash: n => `Choose ${n} disc${n !== 1 ? 's' : ''} to trash`,
 
     marketLabel: 'Market',
     costLabel: n => `Cost: ${n} Gold`,
@@ -51,17 +103,26 @@ const strings = {
 
     goldLabel: 'זהב',
     vpLabel: 'נק׳ ניצחון',
+    negativeVpLabel: 'נק׳ ניצחון שליליות',
     bagLabel: 'שק',
     discardLabel: 'ערימת פסולת',
+    trashedLabel: 'הושמדו',
     drawnLabel: 'דיסקיות שנשלפו',
 
     tableauLabel: 'קלפים',
-    cardName: id => ({ carousel: 'קרוסלה', cashier: 'קופאי' }[id] ?? id),
+    cardName: id => CARD_NAMES.he[id] ?? id,
     discName: id => ({ visitor: 'מבקר', worker: 'עובד', gardener: 'גנן', money: 'כסף' }[id] ?? id),
-    useLabel: (amount, disc) => `עלות: ${amount} ${strings.he.discName(disc)}`,
-    benefitLabel: (type, amount) => `תועלת: +${amount} ${type === 'gold' ? 'זהב' : 'נק׳'}`,
     activate: 'הפעל',
     usesLabel: (used, max) => `${used}/${max} שימושים בתור זה`,
+
+    negativeVpEffect: n => `-${n} אסימון נק׳ ניצחון`,
+    pullDiscsEffect: n => `שלוף ${n} דיסקיות משק`,
+    discardDiscsEffect: n => `השלך ${n} דיסקיות`,
+    trashDiscsEffect: n => `השמד ${n} דיסקיות`,
+    gainDiscEffect: (n, discType) => `קבל ${n} דיסקיות ${strings.he.discName(discType)}`,
+
+    pendingChoiceDiscard: n => `בחר ${n} דיסקיות להשלכה`,
+    pendingChoiceTrash: n => `בחר ${n} דיסקיות להשמדה`,
 
     marketLabel: 'שוק',
     costLabel: n => `עלות: ${n} זהב`,

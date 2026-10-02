@@ -8,7 +8,7 @@
                 mode="market"
                 :card-id="cardId"
                 :remaining="market[cardId]"
-                :can-act="canBuyCard(cardId)"
+                :can-buy="canBuyCard(cardId)"
                 @buy="$emit('buy-card', cardId)"
             />
         </div>
