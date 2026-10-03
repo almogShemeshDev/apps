@@ -5,6 +5,8 @@ import {
   MARKET_INITIAL_SUPPLY,
   CARD_DEFS,
   DISCS_PER_DRAW,
+  VICTORY_VP,
+  SOLO_TURN_LIMIT,
   getCardOptions,
   shuffle,
 } from '../constants.js'
@@ -12,16 +14,19 @@ import {
 let nextCardUid = 1
 
 const state = reactive({
-  phase: 'setup', // 'setup' | 'playing'
+  phase: 'setup', // 'setup' | 'playing' | 'game-over'
   players: [],
   activePlayerIndex: 0,
   round: 1,
   market: {},
   selectedDiscIndices: [],
-  pendingChoice: null, // { kind: 'discard' | 'trash', remaining }
+  pendingChoice: null, // { kind: 'discard' | 'trash', remaining, filter? }
+  winTriggerRound: null, // multiplayer only: round the 25VP threshold was first crossed
+  outcome: null, // solo only: 'win' | 'loss'
 })
 
 const activePlayer = computed(() => state.players[state.activePlayerIndex])
+const isSolo = computed(() => state.players.length === 1)
 
 function initUsesThisTurn(cardId) {
   const options = getCardOptions(CARD_DEFS[cardId])
@@ -36,7 +41,6 @@ function createPlayer(name) {
     drawn: [],
     gold: 0,
     vp: 0,
-    negativeVp: 0,
     trashedCount: 0,
     tableau: STARTING_TABLEAU.map((cardId) => ({
       uid: nextCardUid++,
@@ -73,6 +77,8 @@ function startGame(playerNames) {
   state.market = { ...MARKET_INITIAL_SUPPLY }
   state.selectedDiscIndices = []
   state.pendingChoice = null
+  state.winTriggerRound = null
+  state.outcome = null
   state.phase = 'playing'
   drawForActivePlayer()
 }
@@ -80,6 +86,7 @@ function startGame(playerNames) {
 function resolvePendingChoice(index) {
   const player = activePlayer.value
   if (index < 0 || index >= player.drawn.length) return
+  if (state.pendingChoice.filter && player.drawn[index] !== state.pendingChoice.filter) return
   const [disc] = player.drawn.splice(index, 1)
   if (state.pendingChoice.kind === 'discard') {
     player.discard.push(disc)
@@ -144,6 +151,12 @@ function canActivateOption(card, optionId) {
   return multisetsEqual(required, selected)
 }
 
+function checkWinTrigger(player) {
+  if (!isSolo.value && state.winTriggerRound === null && player.vp >= VICTORY_VP) {
+    state.winTriggerRound = state.round
+  }
+}
+
 function activateOption(uid, optionId) {
   if (state.phase !== 'playing') return
   const player = activePlayer.value
@@ -160,34 +173,35 @@ function activateOption(uid, optionId) {
   card.usesThisTurn[optionId] = (card.usesThisTurn[optionId] ?? 0) + 1
 
   let pendingDiscard = 0
-  let pendingTrash = 0
+  let pendingTrash = null // { amount, filter? }
   for (const effect of option.benefits) {
-    if (effect.type === 'vp') player.vp += effect.amount
-    else if (effect.type === 'gold') player.gold += effect.amount
-    else if (effect.type === 'negativeVp') player.negativeVp += effect.amount
+    if (effect.type === 'vp') {
+      player.vp += effect.amount
+      checkWinTrigger(player)
+    } else if (effect.type === 'gold') player.gold += effect.amount
     else if (effect.type === 'gainDisc') {
       for (let i = 0; i < effect.amount; i++) player.discard.push(effect.disc)
     } else if (effect.type === 'drawDiscs') drawNInto(player, effect.amount)
     else if (effect.type === 'discardDiscs') pendingDiscard += effect.amount
-    else if (effect.type === 'trashDiscs') pendingTrash += effect.amount
-    else if (effect.type === 'convertNegativeVp') {
-      const amt = Math.min(effect.amount, player.negativeVp)
-      player.negativeVp -= amt
-      player.vp += amt
-    } else if (effect.type === 'removeNegativeVp') {
-      player.negativeVp -= Math.min(effect.amount, player.negativeVp)
+    else if (effect.type === 'trashDiscs') {
+      if (effect.filter) {
+        const hasMatch = player.drawn.some((d) => d === effect.filter)
+        if (hasMatch) pendingTrash = { amount: (pendingTrash?.amount ?? 0) + effect.amount, filter: effect.filter }
+      } else {
+        pendingTrash = { amount: (pendingTrash?.amount ?? 0) + effect.amount, filter: pendingTrash?.filter }
+      }
     }
   }
 
   if (pendingDiscard > 0) state.pendingChoice = { kind: 'discard', remaining: pendingDiscard }
-  else if (pendingTrash > 0) state.pendingChoice = { kind: 'trash', remaining: pendingTrash }
+  else if (pendingTrash) state.pendingChoice = { kind: 'trash', remaining: pendingTrash.amount, filter: pendingTrash.filter }
 }
 
 function canBuyCard(cardId) {
   const player = activePlayer.value
   if (!player || state.pendingChoice) return false
   const def = CARD_DEFS[cardId]
-  return state.market[cardId] > 0 && player.gold >= def.cost
+  return (state.market[cardId] ?? 0) > 0 && player.gold >= def.cost
 }
 
 function buyCard(cardId) {
@@ -213,7 +227,25 @@ function endTurn() {
   state.selectedDiscIndices = []
 
   const nextIndex = (state.activePlayerIndex + 1) % state.players.length
-  if (nextIndex === 0) state.round++
+
+  if (nextIndex === 0) {
+    if (isSolo.value) {
+      if (player.vp >= VICTORY_VP) {
+        state.phase = 'game-over'
+        state.outcome = 'win'
+        return
+      }
+      if (state.round >= SOLO_TURN_LIMIT) {
+        state.phase = 'game-over'
+        state.outcome = 'loss'
+        return
+      }
+    } else if (state.winTriggerRound !== null) {
+      state.phase = 'game-over'
+      return
+    }
+    state.round++
+  }
   state.activePlayerIndex = nextIndex
   drawForActivePlayer()
 }
@@ -226,12 +258,15 @@ function resetGame() {
   state.market = {}
   state.selectedDiscIndices = []
   state.pendingChoice = null
+  state.winTriggerRound = null
+  state.outcome = null
 }
 
 export function useGameState() {
   return {
     state,
     activePlayer,
+    isSolo,
     startGame,
     toggleDiscSelection,
     canActivateOption,
