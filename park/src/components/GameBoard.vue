@@ -9,6 +9,12 @@
 
         <MarketPanel :market="state.market" :can-buy-card="canBuyCard" @buy-card="buyCard" />
 
+        <ExitMarketPanel
+            :exit-market="state.exitMarket"
+            :can-buy-exit-card="canBuyExitCard"
+            @buy-exit-card="buyExitCard"
+        />
+
         <PlayerPanel
             :player="activePlayer"
             :is-active="true"
@@ -26,20 +32,21 @@
 import { computed } from 'vue'
 import PlayerPanel from './PlayerPanel.vue'
 import MarketPanel from './MarketPanel.vue'
+import ExitMarketPanel from './ExitMarketPanel.vue'
 import OtherPlayersStrip from './OtherPlayersStrip.vue'
 import { useGameState } from '../composables/useGameState.js'
 import { useLang } from '../composables/useLang.js'
-import { SOLO_TURN_LIMIT } from '../constants.js'
 
 const {
     state,
     activePlayer,
-    isSolo,
     toggleDiscSelection,
     canActivateOption,
     activateOption,
     canBuyCard,
     buyCard,
+    canBuyExitCard,
+    buyExitCard,
     endTurn,
 } = useGameState()
 const { t } = useLang()
@@ -48,9 +55,7 @@ const otherPlayers = computed(() =>
     state.players.filter((_, i) => i !== state.activePlayerIndex)
 )
 
-const roundText = computed(() =>
-    isSolo.value ? t('turnLabel', state.round, SOLO_TURN_LIMIT) : t('roundLabel', state.round)
-)
+const roundText = computed(() => t('roundLabel', state.round))
 </script>
 
 <style lang="scss" scoped>

@@ -3,10 +3,10 @@ import {
   STARTING_BAG,
   STARTING_TABLEAU,
   MARKET_INITIAL_SUPPLY,
+  EXIT_MARKET_INITIAL_SUPPLY,
+  EXIT_CARD_DEFS,
   CARD_DEFS,
   DISCS_PER_DRAW,
-  VICTORY_VP,
-  SOLO_TURN_LIMIT,
   getCardOptions,
   shuffle,
 } from '../constants.js'
@@ -19,14 +19,13 @@ const state = reactive({
   activePlayerIndex: 0,
   round: 1,
   market: {},
+  exitMarket: {},
   selectedDiscIndices: [],
   pendingChoice: null, // { kind: 'discard' | 'trash', remaining, filter? }
-  winTriggerRound: null, // multiplayer only: round the 25VP threshold was first crossed
-  outcome: null, // solo only: 'win' | 'loss'
+  exitDepletedRound: null, // round the exit-card supply first ran out
 })
 
 const activePlayer = computed(() => state.players[state.activePlayerIndex])
-const isSolo = computed(() => state.players.length === 1)
 
 function initUsesThisTurn(cardId) {
   const options = getCardOptions(CARD_DEFS[cardId])
@@ -75,10 +74,10 @@ function startGame(playerNames) {
   state.activePlayerIndex = 0
   state.round = 1
   state.market = { ...MARKET_INITIAL_SUPPLY }
+  state.exitMarket = { ...EXIT_MARKET_INITIAL_SUPPLY }
   state.selectedDiscIndices = []
   state.pendingChoice = null
-  state.winTriggerRound = null
-  state.outcome = null
+  state.exitDepletedRound = null
   state.phase = 'playing'
   drawForActivePlayer()
 }
@@ -151,9 +150,13 @@ function canActivateOption(card, optionId) {
   return multisetsEqual(required, selected)
 }
 
-function checkWinTrigger(player) {
-  if (!isSolo.value && state.winTriggerRound === null && player.vp >= VICTORY_VP) {
-    state.winTriggerRound = state.round
+function totalExitRemaining() {
+  return Object.values(state.exitMarket).reduce((sum, n) => sum + n, 0)
+}
+
+function checkExitDepletion() {
+  if (state.exitDepletedRound === null && totalExitRemaining() === 0) {
+    state.exitDepletedRound = state.round
   }
 }
 
@@ -175,10 +178,7 @@ function activateOption(uid, optionId) {
   let pendingDiscard = 0
   let pendingTrash = null // { amount, filter? }
   for (const effect of option.benefits) {
-    if (effect.type === 'vp') {
-      player.vp += effect.amount
-      checkWinTrigger(player)
-    } else if (effect.type === 'gold') player.gold += effect.amount
+    if (effect.type === 'gold') player.gold += effect.amount
     else if (effect.type === 'gainDisc') {
       for (let i = 0; i < effect.amount; i++) player.discard.push(effect.disc)
     } else if (effect.type === 'drawDiscs') drawNInto(player, effect.amount)
@@ -215,6 +215,32 @@ function buyCard(cardId) {
   player.tableau.push({ uid: nextCardUid++, cardId, usesThisTurn: initUsesThisTurn(cardId) })
 }
 
+function canBuyExitCard(cardId) {
+  const player = activePlayer.value
+  if (!player || state.pendingChoice) return false
+  if ((state.exitMarket[cardId] ?? 0) <= 0) return false
+  const def = EXIT_CARD_DEFS[cardId]
+  const selected = selectedDiscMultiset(player)
+  const types = Object.keys(selected)
+  return types.length === 1 && types[0] === 'pink' && selected.pink === def.pinkCost
+}
+
+function buyExitCard(cardId) {
+  if (state.phase !== 'playing') return
+  const player = activePlayer.value
+  if (!canBuyExitCard(cardId)) return
+
+  const def = EXIT_CARD_DEFS[cardId]
+  const sortedIndices = [...state.selectedDiscIndices].sort((a, b) => b - a)
+  for (const idx of sortedIndices) {
+    player.discard.push(player.drawn.splice(idx, 1)[0])
+  }
+  state.selectedDiscIndices = []
+  state.exitMarket[cardId] -= 1
+  player.vp += def.vp
+  checkExitDepletion()
+}
+
 function endTurn() {
   if (state.phase !== 'playing' || state.pendingChoice) return
   const player = activePlayer.value
@@ -229,18 +255,7 @@ function endTurn() {
   const nextIndex = (state.activePlayerIndex + 1) % state.players.length
 
   if (nextIndex === 0) {
-    if (isSolo.value) {
-      if (player.vp >= VICTORY_VP) {
-        state.phase = 'game-over'
-        state.outcome = 'win'
-        return
-      }
-      if (state.round >= SOLO_TURN_LIMIT) {
-        state.phase = 'game-over'
-        state.outcome = 'loss'
-        return
-      }
-    } else if (state.winTriggerRound !== null) {
+    if (state.exitDepletedRound !== null) {
       state.phase = 'game-over'
       return
     }
@@ -256,23 +271,24 @@ function resetGame() {
   state.activePlayerIndex = 0
   state.round = 1
   state.market = {}
+  state.exitMarket = {}
   state.selectedDiscIndices = []
   state.pendingChoice = null
-  state.winTriggerRound = null
-  state.outcome = null
+  state.exitDepletedRound = null
 }
 
 export function useGameState() {
   return {
     state,
     activePlayer,
-    isSolo,
     startGame,
     toggleDiscSelection,
     canActivateOption,
     activateOption,
     canBuyCard,
     buyCard,
+    canBuyExitCard,
+    buyExitCard,
     endTurn,
     resetGame,
   }

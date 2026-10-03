@@ -27,8 +27,6 @@
         <GameOver
             v-else-if="state.phase === 'game-over'"
             :players="state.players"
-            :is-solo="isSolo"
-            :outcome="state.outcome"
             @play-again="resetGame"
         />
 
@@ -45,7 +43,7 @@ import CreditsFooter from './components/CreditsFooter.vue'
 import { useGameState } from './composables/useGameState.js'
 import { useLang } from './composables/useLang.js'
 
-const { state, isSolo, startGame, resetGame } = useGameState()
+const { state, startGame, resetGame } = useGameState()
 const { lang, t, dir, toggleLang } = useLang()
 
 watch(

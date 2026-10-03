@@ -55,6 +55,19 @@ const CARD_NAMES = {
   },
 }
 
+const EXIT_CARD_NAMES = {
+  en: {
+    nice: 'Nice',
+    soFun: 'So Fun!',
+    fantastic: 'Fantastic!!',
+  },
+  he: {
+    nice: 'יפה',
+    soFun: 'כיף גדול!',
+    fantastic: 'מעולה!!',
+  },
+}
+
 const lang = ref('en')
 
 const strings = {
@@ -62,14 +75,11 @@ const strings = {
     subtitle: 'A bag-building theme-park tycoon game',
     playerLabel: i => `Player ${i}`,
     playersLabel: 'Players',
-    soloMode: 'Solo (1 Player)',
-    duoMode: 'Duo (2 Players)',
     startGame: 'Start Game',
     newGame: 'New Game',
     confirmNewGame: 'Start a new game? Current progress will be lost.',
 
     roundLabel: n => `Round ${n}`,
-    turnLabel: (n, max) => `Turn ${n} / ${max}`,
     yourTurn: name => `${name}'s turn`,
     activeBadge: 'Active',
     endTurn: 'End Turn',
@@ -83,7 +93,8 @@ const strings = {
 
     tableauLabel: 'Tableau',
     cardName: id => CARD_NAMES.en[id] ?? id,
-    discName: id => ({ visitor: 'Visitor', worker: 'Worker', gardener: 'Gardener', money: 'Money', grey: 'Grey' }[id] ?? id),
+    exitCardName: id => EXIT_CARD_NAMES.en[id] ?? id,
+    discName: id => ({ visitor: 'Visitor', worker: 'Worker', gardener: 'Gardener', money: 'Money', grey: 'Grey', pink: 'Happy Visitor' }[id] ?? id),
     activate: 'Activate',
     usesLabel: (used, max) => `${used}/${max} used this turn`,
 
@@ -99,6 +110,7 @@ const strings = {
       : `Choose ${n} disc${n !== 1 ? 's' : ''} to trash`,
 
     marketLabel: 'Market',
+    exitMarketLabel: 'Park Exits',
     costLabel: n => `Cost: ${n} Gold`,
     remainingLabel: n => `${n} left`,
     soldOut: 'Sold out',
@@ -107,8 +119,6 @@ const strings = {
     otherPlayers: 'Other Players',
 
     gameOverTitle: 'Game Over',
-    youWin: n => `🎉 You reached ${n} VP — You win!`,
-    youLose: n => `You didn't reach the VP goal in time (ended with ${n} VP)`,
     finalStandings: 'Final Standings',
     winnerLabel: name => `🏆 ${name} wins!`,
     tiedLabel: 'Tied!',
@@ -120,14 +130,11 @@ const strings = {
     subtitle: 'משחק טייקון פארק שעשועים מבוסס בניית שק',
     playerLabel: i => `שחקן ${i}`,
     playersLabel: 'שחקנים',
-    soloMode: 'יחיד (שחקן אחד)',
-    duoMode: 'זוגי (שני שחקנים)',
     startGame: 'התחל משחק',
     newGame: 'משחק חדש',
     confirmNewGame: 'להתחיל משחק חדש? ההתקדמות הנוכחית תאבד.',
 
     roundLabel: n => `סיבוב ${n}`,
-    turnLabel: (n, max) => `תור ${n} / ${max}`,
     yourTurn: name => `תור ${name}`,
     activeBadge: 'פעיל',
     endTurn: 'סיים תור',
@@ -141,7 +148,8 @@ const strings = {
 
     tableauLabel: 'קלפים',
     cardName: id => CARD_NAMES.he[id] ?? id,
-    discName: id => ({ visitor: 'מבקר', worker: 'עובד', gardener: 'גנן', money: 'כסף', grey: 'אפור' }[id] ?? id),
+    exitCardName: id => EXIT_CARD_NAMES.he[id] ?? id,
+    discName: id => ({ visitor: 'מבקר', worker: 'עובד', gardener: 'גנן', money: 'כסף', grey: 'אפור', pink: 'מבקר שמח' }[id] ?? id),
     activate: 'הפעל',
     usesLabel: (used, max) => `${used}/${max} שימושים בתור זה`,
 
@@ -157,6 +165,7 @@ const strings = {
       : `בחר ${n} דיסקיות להשמדה`,
 
     marketLabel: 'שוק',
+    exitMarketLabel: 'יציאות מהפארק',
     costLabel: n => `עלות: ${n} זהב`,
     remainingLabel: n => `נותרו ${n}`,
     soldOut: 'אזל המלאי',
@@ -165,8 +174,6 @@ const strings = {
     otherPlayers: 'שחקנים אחרים',
 
     gameOverTitle: 'סוף המשחק',
-    youWin: n => `🎉 הגעת ל-${n} נק׳ ניצחון — ניצחת!`,
-    youLose: n => `לא הגעת ליעד נק׳ הניצחון בזמן (סיימת עם ${n} נק׳)`,
     finalStandings: 'תוצאות סופיות',
     winnerLabel: name => `🏆 ${name} ניצח!`,
     tiedLabel: 'תיקו!',
