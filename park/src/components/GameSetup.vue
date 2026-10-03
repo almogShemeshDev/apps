@@ -6,13 +6,10 @@
         <div class="form">
             <div class="field">
                 <label>{{ t('playersLabel') }}</label>
-                <div class="mode-picker">
-                    <button :class="{ active: playerCount === 1 }" @click="playerCount = 1">
-                        {{ t('soloMode') }}
-                    </button>
-                    <button :class="{ active: playerCount === 2 }" @click="playerCount = 2">
-                        {{ t('duoMode') }}
-                    </button>
+                <div class="player-stepper">
+                    <button type="button" :disabled="playerCount <= MIN_PLAYERS" @click="playerCount--">−</button>
+                    <span class="count">{{ playerCount }}</span>
+                    <button type="button" :disabled="playerCount >= MAX_PLAYERS" @click="playerCount++">+</button>
                 </div>
             </div>
 
@@ -29,12 +26,13 @@
 <script setup>
 import { ref } from 'vue'
 import { useLang } from '../composables/useLang.js'
+import { MIN_PLAYERS, MAX_PLAYERS } from '../constants.js'
 
 const emit = defineEmits(['start'])
 const { t } = useLang()
 
 const playerCount = ref(2)
-const names = ref(['Player 1', 'Player 2'])
+const names = ref(['Player 1', 'Player 2', 'Player 3', 'Player 4'])
 
 function start() {
     const players = names.value.slice(0, playerCount.value).map((n, i) => n.trim() || `Player ${i + 1}`)
@@ -108,33 +106,40 @@ function start() {
     }
 }
 
-.mode-picker {
+.player-stepper {
     display: flex;
-    border-radius: 8px;
-    overflow: hidden;
-    border: 1px solid $border;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
 
     button {
-        flex: 1;
-        padding: 9px 10px;
-        border: none;
+        width: 36px;
+        height: 36px;
+        border-radius: 8px;
+        border: 1px solid $border;
         background: transparent;
-        color: $text-dim;
-        font-size: 0.82rem;
-        font-weight: 600;
+        color: $text;
+        font-size: 1.1rem;
+        font-weight: 700;
         cursor: pointer;
-        transition:
-            background 0.15s,
-            color 0.15s;
+        transition: background 0.15s;
 
-        &.active {
-            background: $gold;
-            color: $bg-dark;
+        &:hover:not(:disabled) {
+            background: rgba(255, 255, 255, 0.08);
         }
 
-        &:not(.active):hover {
-            color: $text;
+        &:disabled {
+            opacity: 0.35;
+            cursor: default;
         }
+    }
+
+    .count {
+        min-width: 24px;
+        text-align: center;
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: $gold;
     }
 }
 

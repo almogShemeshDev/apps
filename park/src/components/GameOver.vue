@@ -2,11 +2,7 @@
     <div class="game-over">
         <h1 class="title">{{ t('gameOverTitle') }}</h1>
 
-        <div v-if="isSolo" class="solo-result">
-            <p class="outcome">{{ outcome === 'win' ? t('youWin', players[0].vp) : t('youLose', players[0].vp) }}</p>
-        </div>
-
-        <div v-else class="standings">
+        <div class="standings">
             <p class="standings-label">{{ t('finalStandings') }}</p>
             <div v-for="p in sortedPlayers" :key="p.name" class="row" :class="{ winner: p.vp === topVp }">
                 <span class="name">{{ p.name }}</span>
@@ -27,8 +23,6 @@ import { useLang } from '../composables/useLang.js'
 
 const props = defineProps({
     players: { type: Array, required: true },
-    isSolo: { type: Boolean, default: false },
-    outcome: { type: String, default: null },
 })
 defineEmits(['play-again'])
 
@@ -59,7 +53,6 @@ const tiedForFirst = computed(() => sortedPlayers.value.filter((p) => p.vp === t
     letter-spacing: 0.04em;
 }
 
-.solo-result,
 .standings {
     background: $bg-panel;
     border: 1px solid $border;
@@ -70,12 +63,6 @@ const tiedForFirst = computed(() => sortedPlayers.value.filter((p) => p.vp === t
     flex-direction: column;
     align-items: center;
     gap: 12px;
-}
-
-.outcome {
-    font-size: 1.05rem;
-    text-align: center;
-    color: $text;
 }
 
 .standings-label {

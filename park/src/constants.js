@@ -4,6 +4,7 @@ export const DISC_TYPES = {
   gardener: { id: 'gardener', icon: '🟢', color: '#27ae60' },
   money: { id: 'money', icon: '🟡', color: '#f1c40f' },
   grey: { id: 'grey', icon: '⚫', color: '#6b7280' },
+  pink: { id: 'pink', icon: '🩷', color: '#ec4899' },
 }
 
 export const STARTING_BAG = [
@@ -13,8 +14,8 @@ export const STARTING_BAG = [
 
 export const DISCS_PER_DRAW = 5
 
-export const VICTORY_VP = 25
-export const SOLO_TURN_LIMIT = 20
+export const MIN_PLAYERS = 1
+export const MAX_PLAYERS = 4
 
 // use: { discs: [{ type, amount }], gold?: number }
 // benefits: array of effects, each one of:
@@ -34,7 +35,7 @@ export const CARD_DEFS = {
     id: 'carousel',
     icon: '🎠',
     use: { discs: [{ type: 'visitor', amount: 3 }] },
-    benefits: [{ type: 'vp', amount: 1 }],
+    benefits: [{ type: 'gainDisc', disc: 'pink', amount: 1 }],
   },
   cashier: {
     id: 'cashier',
@@ -78,28 +79,28 @@ export const CARD_DEFS = {
     icon: '🎡',
     cost: 2,
     use: { discs: [{ type: 'visitor', amount: 2 }] },
-    benefits: [{ type: 'vp', amount: 2 }],
+    benefits: [{ type: 'gainDisc', disc: 'pink', amount: 2 }],
   },
   flowersGarden: {
     id: 'flowersGarden',
     icon: '🌷',
     cost: 2,
     use: { discs: [{ type: 'gardener', amount: 2 }] },
-    benefits: [{ type: 'vp', amount: 1 }],
+    benefits: [{ type: 'gainDisc', disc: 'pink', amount: 1 }],
   },
   bushesSculptures: {
     id: 'bushesSculptures',
     icon: '🌳',
     cost: 3,
     use: { discs: [{ type: 'gardener', amount: 1 }] },
-    benefits: [{ type: 'vp', amount: 1 }],
+    benefits: [{ type: 'gainDisc', disc: 'pink', amount: 1 }],
   },
   electricCars: {
     id: 'electricCars',
     icon: '🚗',
     cost: 4,
     use: { discs: [{ type: 'visitor', amount: 1 }, { type: 'worker', amount: 1 }] },
-    benefits: [{ type: 'vp', amount: 3 }],
+    benefits: [{ type: 'gainDisc', disc: 'pink', amount: 3 }],
   },
   bullsEye: {
     id: 'bullsEye',
@@ -120,7 +121,7 @@ export const CARD_DEFS = {
     icon: '🎢',
     cost: 4,
     use: { discs: [{ type: 'visitor', amount: 2 }, { type: 'worker', amount: 1 }] },
-    benefits: [{ type: 'vp', amount: 3 }, { type: 'gainDisc', disc: 'grey', amount: 1 }],
+    benefits: [{ type: 'gainDisc', disc: 'pink', amount: 3 }, { type: 'gainDisc', disc: 'grey', amount: 1 }],
   },
   juggling: {
     id: 'juggling',
@@ -134,7 +135,7 @@ export const CARD_DEFS = {
     icon: '🏴‍☠️',
     cost: 3,
     use: { discs: [{ type: 'visitor', amount: 3 }] },
-    benefits: [{ type: 'discardDiscs', amount: 1 }, { type: 'vp', amount: 1 }],
+    benefits: [{ type: 'discardDiscs', amount: 1 }, { type: 'gainDisc', disc: 'pink', amount: 1 }],
   },
   ghostsRiders: {
     id: 'ghostsRiders',
@@ -142,7 +143,7 @@ export const CARD_DEFS = {
     cost: 2,
     use: { discs: [{ type: 'visitor', amount: 2 }] },
     benefits: [
-      { type: 'vp', amount: 2 },
+      { type: 'gainDisc', disc: 'pink', amount: 2 },
       { type: 'gold', amount: 1 },
       { type: 'trashDiscs', amount: 1 },
       { type: 'gainDisc', disc: 'grey', amount: 1 },
@@ -156,12 +157,12 @@ export const CARD_DEFS = {
       {
         id: 'a',
         use: { discs: [{ type: 'visitor', amount: 1 }] },
-        benefits: [{ type: 'vp', amount: 1 }],
+        benefits: [{ type: 'gainDisc', disc: 'pink', amount: 1 }],
       },
       {
         id: 'b',
         use: { discs: [{ type: 'visitor', amount: 2 }] },
-        benefits: [{ type: 'vp', amount: 1 }],
+        benefits: [{ type: 'gainDisc', disc: 'pink', amount: 1 }],
       },
     ],
   },
@@ -170,14 +171,14 @@ export const CARD_DEFS = {
     icon: '🧹',
     cost: 1,
     use: { discs: [{ type: 'money', amount: 1 }, { type: 'gardener', amount: 2 }] },
-    benefits: [{ type: 'vp', amount: 1 }],
+    benefits: [{ type: 'gainDisc', disc: 'pink', amount: 1 }],
   },
   freeFall: {
     id: 'freeFall',
     icon: '🪂',
     cost: 4,
     use: { discs: [{ type: 'visitor', amount: 1 }, { type: 'worker', amount: 2 }] },
-    benefits: [{ type: 'vp', amount: 2 }, { type: 'discardDiscs', amount: 1 }],
+    benefits: [{ type: 'gainDisc', disc: 'pink', amount: 2 }, { type: 'discardDiscs', amount: 1 }],
   },
   gardener: {
     id: 'gardener',
@@ -198,7 +199,7 @@ export const CARD_DEFS = {
     icon: '🍦',
     cost: 5,
     use: { discs: [{ type: 'visitor', amount: 2 }, { type: 'worker', amount: 1 }] },
-    benefits: [{ type: 'vp', amount: 1 }, { type: 'trashDiscs', amount: 1, filter: 'grey' }],
+    benefits: [{ type: 'gainDisc', disc: 'pink', amount: 1 }, { type: 'trashDiscs', amount: 1, filter: 'grey' }],
   },
   souvenirs: {
     id: 'souvenirs',
@@ -212,9 +213,24 @@ export const CARD_DEFS = {
     icon: '🪑',
     cost: 2,
     use: { discs: [{ type: 'worker', amount: 1 }, { type: 'visitor', amount: 2 }] },
-    benefits: [{ type: 'discardDiscs', amount: 2 }, { type: 'vp', amount: 1 }],
+    benefits: [{ type: 'discardDiscs', amount: 2 }, { type: 'gainDisc', disc: 'pink', amount: 1 }],
   },
 }
+
+// Exit cards are bought with pink "Happy Visitor" discs (never gold) and
+// immediately award their printed VP. Depleting the whole exit supply
+// triggers the end of the game.
+export const EXIT_CARD_DEFS = {
+  nice: { id: 'nice', icon: '🚪', pinkCost: 3, vp: 3 },
+  soFun: { id: 'soFun', icon: '🎉', pinkCost: 4, vp: 5 },
+  fantastic: { id: 'fantastic', icon: '🌟', pinkCost: 5, vp: 7 },
+}
+
+export const EXIT_CARD_SUPPLY = 3
+
+export const EXIT_MARKET_INITIAL_SUPPLY = Object.fromEntries(
+  Object.keys(EXIT_CARD_DEFS).map((id) => [id, EXIT_CARD_SUPPLY])
+)
 
 export function getCardOptions(def) {
   if (def.options) return def.options
