@@ -19,33 +19,25 @@ function benefitChip(effect, t) {
       return { icon: '🏆', count: effect.amount, title: t('vpLabel') }
     case 'gold':
       return { icon: '💰', count: effect.amount, title: t('goldLabel') }
-    case 'negativeVp':
-      return { icon: '📉', count: effect.amount, title: t('negativeVpLabel') }
     case 'drawDiscs':
       return { icon: '📥', count: effect.amount, title: t('pullDiscsEffect', effect.amount) }
     case 'discardDiscs':
       return { icon: '🗑️', count: effect.amount, title: t('discardDiscsEffect', effect.amount) }
     case 'trashDiscs':
+      if (effect.filter) {
+        return {
+          icon: `❌${DISC_TYPES[effect.filter].icon}`,
+          count: effect.amount,
+          title: t('trashDiscsFilteredEffect', effect.amount, effect.filter),
+          caption: t('trashDiscsFilteredEffect', effect.amount, effect.filter),
+        }
+      }
       return { icon: '❌', count: effect.amount, title: t('trashDiscsEffect', effect.amount) }
     case 'gainDisc':
       return {
         icon: `➕${DISC_TYPES[effect.disc].icon}`,
         count: effect.amount,
         title: t('gainDiscEffect', effect.amount, effect.disc),
-      }
-    case 'convertNegativeVp':
-      return {
-        icon: '📉➡️🏆',
-        count: effect.amount,
-        title: t('convertNegativeVpEffect', effect.amount),
-        caption: t('convertNegativeVpEffect', effect.amount),
-      }
-    case 'removeNegativeVp':
-      return {
-        icon: '📉❌',
-        count: effect.amount,
-        title: t('removeNegativeVpEffect', effect.amount),
-        caption: t('removeNegativeVpEffect', effect.amount),
       }
     default:
       return { icon: '', count: effect.amount, title: '' }

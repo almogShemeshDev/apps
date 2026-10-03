@@ -8,7 +8,6 @@
         <div class="stats">
             <span>💰 {{ t('goldLabel') }}: {{ player.gold }}</span>
             <span>🏆 {{ t('vpLabel') }}: {{ player.vp }}</span>
-            <span>📉 {{ t('negativeVpLabel') }}: {{ player.negativeVp > 0 ? '-' + player.negativeVp : 0 }}</span>
             <span>🎒 {{ t('bagLabel') }}: {{ player.bag.length }}</span>
             <span>🗑️ {{ t('discardLabel') }}: {{ player.discard.length }}</span>
             <span v-if="player.trashedCount">❌ {{ t('trashedLabel') }}: {{ player.trashedCount }}</span>
@@ -17,7 +16,7 @@
         <div v-if="isActive && pendingChoice" class="pending-banner">
             {{ pendingChoice.kind === 'discard'
                 ? t('pendingChoiceDiscard', pendingChoice.remaining)
-                : t('pendingChoiceTrash', pendingChoice.remaining) }}
+                : t('pendingChoiceTrash', pendingChoice.remaining, pendingChoice.filter) }}
         </div>
 
         <div class="drawn">
@@ -84,8 +83,8 @@ const { t } = useLang()
     border: 1px solid $border;
     border-radius: 16px;
     padding: 16px;
-    flex: 1;
-    min-width: 280px;
+    width: 100%;
+    box-sizing: border-box;
 
     &.active {
         border-color: $gold;

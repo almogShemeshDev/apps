@@ -26,6 +26,23 @@ const { t } = useLang()
 </script>
 
 <style lang="scss" scoped>
+@keyframes disc-pop {
+    0% {
+        transform: scale(0) translateY(6px);
+        opacity: 0;
+    }
+    55% {
+        transform: scale(1.3) translateY(-3px);
+        opacity: 1;
+    }
+    75% {
+        transform: scale(0.9) translateY(0);
+    }
+    100% {
+        transform: scale(1) translateY(0);
+    }
+}
+
 .disc-pill {
     display: inline-flex;
     align-items: center;
@@ -38,6 +55,7 @@ const { t } = useLang()
     padding: 0;
     box-shadow: inset 0 0 0 2px rgba(0, 0, 0, 0.25);
     cursor: default;
+    animation: disc-pop 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
     transition:
         transform 0.1s,
         box-shadow 0.1s;

@@ -61,18 +61,21 @@ const strings = {
   en: {
     subtitle: 'A bag-building theme-park tycoon game',
     playerLabel: i => `Player ${i}`,
+    playersLabel: 'Players',
+    soloMode: 'Solo (1 Player)',
+    duoMode: 'Duo (2 Players)',
     startGame: 'Start Game',
     newGame: 'New Game',
     confirmNewGame: 'Start a new game? Current progress will be lost.',
 
     roundLabel: n => `Round ${n}`,
+    turnLabel: (n, max) => `Turn ${n} / ${max}`,
     yourTurn: name => `${name}'s turn`,
     activeBadge: 'Active',
     endTurn: 'End Turn',
 
     goldLabel: 'Gold',
     vpLabel: 'VP',
-    negativeVpLabel: 'Negative VP',
     bagLabel: 'Bag',
     discardLabel: 'Discard',
     trashedLabel: 'Trashed',
@@ -80,20 +83,20 @@ const strings = {
 
     tableauLabel: 'Tableau',
     cardName: id => CARD_NAMES.en[id] ?? id,
-    discName: id => ({ visitor: 'Visitor', worker: 'Worker', gardener: 'Gardener', money: 'Money' }[id] ?? id),
+    discName: id => ({ visitor: 'Visitor', worker: 'Worker', gardener: 'Gardener', money: 'Money', grey: 'Grey' }[id] ?? id),
     activate: 'Activate',
     usesLabel: (used, max) => `${used}/${max} used this turn`,
 
-    negativeVpEffect: n => `-${n} VP token`,
     pullDiscsEffect: n => `Pull ${n} disc${n !== 1 ? 's' : ''} from bag`,
     discardDiscsEffect: n => `Discard ${n} disc${n !== 1 ? 's' : ''}`,
     trashDiscsEffect: n => `Trash ${n} disc${n !== 1 ? 's' : ''}`,
+    trashDiscsFilteredEffect: (n, discType) => `Trash ${n} ${strings.en.discName(discType)} disc${n !== 1 ? 's' : ''} from hand (if you have one)`,
     gainDiscEffect: (n, discType) => `Gain ${n} ${strings.en.discName(discType)} disc${n !== 1 ? 's' : ''}`,
-    convertNegativeVpEffect: n => `Convert ${n} Negative VP token${n !== 1 ? 's' : ''} into VP`,
-    removeNegativeVpEffect: n => `Remove ${n} Negative VP token${n !== 1 ? 's' : ''}`,
 
     pendingChoiceDiscard: n => `Choose ${n} disc${n !== 1 ? 's' : ''} to discard`,
-    pendingChoiceTrash: n => `Choose ${n} disc${n !== 1 ? 's' : ''} to trash`,
+    pendingChoiceTrash: (n, filterType) => filterType
+      ? `Choose ${n} ${strings.en.discName(filterType)} disc${n !== 1 ? 's' : ''} to trash`
+      : `Choose ${n} disc${n !== 1 ? 's' : ''} to trash`,
 
     marketLabel: 'Market',
     costLabel: n => `Cost: ${n} Gold`,
@@ -101,23 +104,36 @@ const strings = {
     soldOut: 'Sold out',
     buy: 'Buy',
 
+    otherPlayers: 'Other Players',
+
+    gameOverTitle: 'Game Over',
+    youWin: n => `🎉 You reached ${n} VP — You win!`,
+    youLose: n => `You didn't reach the VP goal in time (ended with ${n} VP)`,
+    finalStandings: 'Final Standings',
+    winnerLabel: name => `🏆 ${name} wins!`,
+    tiedLabel: 'Tied!',
+    playAgain: 'Play Again',
+
     credits: '© 2026 Almog Shemesh · Game Design & Concept · All rights reserved',
   },
   he: {
     subtitle: 'משחק טייקון פארק שעשועים מבוסס בניית שק',
     playerLabel: i => `שחקן ${i}`,
+    playersLabel: 'שחקנים',
+    soloMode: 'יחיד (שחקן אחד)',
+    duoMode: 'זוגי (שני שחקנים)',
     startGame: 'התחל משחק',
     newGame: 'משחק חדש',
     confirmNewGame: 'להתחיל משחק חדש? ההתקדמות הנוכחית תאבד.',
 
     roundLabel: n => `סיבוב ${n}`,
+    turnLabel: (n, max) => `תור ${n} / ${max}`,
     yourTurn: name => `תור ${name}`,
     activeBadge: 'פעיל',
     endTurn: 'סיים תור',
 
     goldLabel: 'זהב',
     vpLabel: 'נק׳ ניצחון',
-    negativeVpLabel: 'נק׳ ניצחון שליליות',
     bagLabel: 'שק',
     discardLabel: 'ערימת פסולת',
     trashedLabel: 'הושמדו',
@@ -125,26 +141,36 @@ const strings = {
 
     tableauLabel: 'קלפים',
     cardName: id => CARD_NAMES.he[id] ?? id,
-    discName: id => ({ visitor: 'מבקר', worker: 'עובד', gardener: 'גנן', money: 'כסף' }[id] ?? id),
+    discName: id => ({ visitor: 'מבקר', worker: 'עובד', gardener: 'גנן', money: 'כסף', grey: 'אפור' }[id] ?? id),
     activate: 'הפעל',
     usesLabel: (used, max) => `${used}/${max} שימושים בתור זה`,
 
-    negativeVpEffect: n => `-${n} אסימון נק׳ ניצחון`,
     pullDiscsEffect: n => `שלוף ${n} דיסקיות משק`,
     discardDiscsEffect: n => `השלך ${n} דיסקיות`,
     trashDiscsEffect: n => `השמד ${n} דיסקיות`,
+    trashDiscsFilteredEffect: (n, discType) => `השמד ${n} דיסקיות ${strings.he.discName(discType)} מהיד (אם יש)`,
     gainDiscEffect: (n, discType) => `קבל ${n} דיסקיות ${strings.he.discName(discType)}`,
-    convertNegativeVpEffect: n => `המר ${n} אסימוני נק׳ שליליות לנק׳ ניצחון`,
-    removeNegativeVpEffect: n => `הסר ${n} אסימוני נק׳ שליליות`,
 
     pendingChoiceDiscard: n => `בחר ${n} דיסקיות להשלכה`,
-    pendingChoiceTrash: n => `בחר ${n} דיסקיות להשמדה`,
+    pendingChoiceTrash: (n, filterType) => filterType
+      ? `בחר ${n} דיסקיות ${strings.he.discName(filterType)} להשמדה`
+      : `בחר ${n} דיסקיות להשמדה`,
 
     marketLabel: 'שוק',
     costLabel: n => `עלות: ${n} זהב`,
     remainingLabel: n => `נותרו ${n}`,
     soldOut: 'אזל המלאי',
     buy: 'קנה',
+
+    otherPlayers: 'שחקנים אחרים',
+
+    gameOverTitle: 'סוף המשחק',
+    youWin: n => `🎉 הגעת ל-${n} נק׳ ניצחון — ניצחת!`,
+    youLose: n => `לא הגעת ליעד נק׳ הניצחון בזמן (סיימת עם ${n} נק׳)`,
+    finalStandings: 'תוצאות סופיות',
+    winnerLabel: name => `🏆 ${name} ניצח!`,
+    tiedLabel: 'תיקו!',
+    playAgain: 'שחק שוב',
 
     credits: '© 2026 אלמוג שמש · עיצוב ורעיון המשחק · כל הזכויות שמורות',
   },

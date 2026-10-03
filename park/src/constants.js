@@ -3,6 +3,7 @@ export const DISC_TYPES = {
   worker: { id: 'worker', icon: '🔴', color: '#e74c3c' },
   gardener: { id: 'gardener', icon: '🟢', color: '#27ae60' },
   money: { id: 'money', icon: '🟡', color: '#f1c40f' },
+  grey: { id: 'grey', icon: '⚫', color: '#6b7280' },
 }
 
 export const STARTING_BAG = [
@@ -12,34 +13,35 @@ export const STARTING_BAG = [
 
 export const DISCS_PER_DRAW = 5
 
+export const VICTORY_VP = 25
+export const SOLO_TURN_LIMIT = 20
+
 // use: { discs: [{ type, amount }], gold?: number }
 // benefits: array of effects, each one of:
 //   { type: 'vp', amount }
 //   { type: 'gold', amount }
-//   { type: 'negativeVp', amount }           -- tracked separately from vp
-//   { type: 'drawDiscs', amount }            -- pull N discs from bag into hand
-//   { type: 'discardDiscs', amount }         -- player chooses N discs from hand -> discard pile
-//   { type: 'trashDiscs', amount }           -- player chooses N discs from hand -> removed from game
-//   { type: 'gainDisc', disc, amount }       -- add N discs of `disc` type to discard pile
-//   { type: 'convertNegativeVp', amount }    -- remove N negative VP tokens and gain that many VP
-//   { type: 'removeNegativeVp', amount }     -- remove N negative VP tokens (no VP gain)
+//   { type: 'drawDiscs', amount }                        -- pull N discs from bag into hand
+//   { type: 'discardDiscs', amount }                      -- player chooses N discs from hand -> discard pile
+//   { type: 'trashDiscs', amount, filter? }                -- player chooses N discs from hand -> removed from game;
+//                                                              if `filter` is a disc type, only discs of that type
+//                                                              are eligible, and the effect is skipped entirely if
+//                                                              the player has none of that type in hand
+//   { type: 'gainDisc', disc, amount }                     -- add N discs of `disc` type to the discard pile
 // A card with multiple alternative abilities (e.g. Spinning Cups) defines
 // `options: [{ id, use, benefits, maxUsesPerTurn }, ...]` instead of use/benefits/maxUsesPerTurn.
 export const CARD_DEFS = {
   carousel: {
     id: 'carousel',
     icon: '🎠',
-    cost: 2,
-    use: { discs: [{ type: 'visitor', amount: 1 }] },
+    use: { discs: [{ type: 'visitor', amount: 3 }] },
     benefits: [{ type: 'vp', amount: 1 }],
   },
   cashier: {
     id: 'cashier',
     icon: '💵',
-    cost: 2,
     use: { discs: [{ type: 'money', amount: 1 }] },
     benefits: [{ type: 'gold', amount: 1 }],
-    maxUsesPerTurn: 3,
+    maxUsesPerTurn: 2,
   },
   familyDay: {
     id: 'familyDay',
@@ -118,7 +120,7 @@ export const CARD_DEFS = {
     icon: '🎢',
     cost: 4,
     use: { discs: [{ type: 'visitor', amount: 2 }, { type: 'worker', amount: 1 }] },
-    benefits: [{ type: 'vp', amount: 3 }, { type: 'negativeVp', amount: 1 }],
+    benefits: [{ type: 'vp', amount: 3 }, { type: 'gainDisc', disc: 'grey', amount: 1 }],
   },
   juggling: {
     id: 'juggling',
@@ -143,7 +145,7 @@ export const CARD_DEFS = {
       { type: 'vp', amount: 2 },
       { type: 'gold', amount: 1 },
       { type: 'trashDiscs', amount: 1 },
-      { type: 'negativeVp', amount: 1 },
+      { type: 'gainDisc', disc: 'grey', amount: 1 },
     ],
   },
   spinningCups: {
@@ -167,7 +169,7 @@ export const CARD_DEFS = {
     id: 'cleaningStaff',
     icon: '🧹',
     cost: 1,
-    use: { discs: [{ type: 'gardener', amount: 2 }], gold: 1 },
+    use: { discs: [{ type: 'money', amount: 1 }, { type: 'gardener', amount: 2 }] },
     benefits: [{ type: 'vp', amount: 1 }],
   },
   freeFall: {
@@ -196,14 +198,14 @@ export const CARD_DEFS = {
     icon: '🍦',
     cost: 5,
     use: { discs: [{ type: 'visitor', amount: 2 }, { type: 'worker', amount: 1 }] },
-    benefits: [{ type: 'convertNegativeVp', amount: 1 }],
+    benefits: [{ type: 'vp', amount: 1 }, { type: 'trashDiscs', amount: 1, filter: 'grey' }],
   },
   souvenirs: {
     id: 'souvenirs',
     icon: '🛍️',
     cost: 5,
     use: { discs: [{ type: 'money', amount: 1 }, { type: 'visitor', amount: 1 }] },
-    benefits: [{ type: 'removeNegativeVp', amount: 1 }],
+    benefits: [{ type: 'trashDiscs', amount: 1, filter: 'grey' }],
   },
   flyingChairs: {
     id: 'flyingChairs',
@@ -221,8 +223,15 @@ export function getCardOptions(def) {
 
 export const STARTING_TABLEAU = ['carousel', 'cashier']
 
+// Carousel and Cashier are starter cards every player already begins with one
+// copy of; they're not purchasable from the market.
+const NOT_IN_MARKET = new Set(['carousel', 'cashier'])
+export const MARKET_CARD_SUPPLY = 3
+
 export const MARKET_INITIAL_SUPPLY = Object.fromEntries(
-  Object.keys(CARD_DEFS).map((id) => [id, 5])
+  Object.keys(CARD_DEFS)
+    .filter((id) => !NOT_IN_MARKET.has(id))
+    .map((id) => [id, MARKET_CARD_SUPPLY])
 )
 
 export function shuffle(arr) {

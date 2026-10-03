@@ -1,38 +1,40 @@
 <template>
     <div class="game-board">
         <div class="header">
-            <div class="round-info">{{ t('roundLabel', state.round) }}</div>
+            <div class="round-info">{{ roundText }}</div>
             <div class="turn-info">{{ t('yourTurn', activePlayer.name) }}</div>
         </div>
 
-        <div class="players-panel">
-            <PlayerPanel
-                v-for="(p, i) in state.players"
-                :key="p.name + i"
-                :player="p"
-                :is-active="i === state.activePlayerIndex"
-                :selected-indices="state.selectedDiscIndices"
-                :pending-choice="state.pendingChoice"
-                :can-activate-option="canActivateOption"
-                @activate-card="(uid, optionId) => activateOption(uid, optionId)"
-                @toggle-disc="toggleDiscSelection"
-                @end-turn="endTurn"
-            />
-        </div>
+        <OtherPlayersStrip v-if="otherPlayers.length" :players="otherPlayers" />
 
         <MarketPanel :market="state.market" :can-buy-card="canBuyCard" @buy-card="buyCard" />
+
+        <PlayerPanel
+            :player="activePlayer"
+            :is-active="true"
+            :selected-indices="state.selectedDiscIndices"
+            :pending-choice="state.pendingChoice"
+            :can-activate-option="canActivateOption"
+            @activate-card="(uid, optionId) => activateOption(uid, optionId)"
+            @toggle-disc="toggleDiscSelection"
+            @end-turn="endTurn"
+        />
     </div>
 </template>
 
 <script setup>
+import { computed } from 'vue'
 import PlayerPanel from './PlayerPanel.vue'
 import MarketPanel from './MarketPanel.vue'
+import OtherPlayersStrip from './OtherPlayersStrip.vue'
 import { useGameState } from '../composables/useGameState.js'
 import { useLang } from '../composables/useLang.js'
+import { SOLO_TURN_LIMIT } from '../constants.js'
 
 const {
     state,
     activePlayer,
+    isSolo,
     toggleDiscSelection,
     canActivateOption,
     activateOption,
@@ -41,6 +43,14 @@ const {
     endTurn,
 } = useGameState()
 const { t } = useLang()
+
+const otherPlayers = computed(() =>
+    state.players.filter((_, i) => i !== state.activePlayerIndex)
+)
+
+const roundText = computed(() =>
+    isSolo.value ? t('turnLabel', state.round, SOLO_TURN_LIMIT) : t('roundLabel', state.round)
+)
 </script>
 
 <style lang="scss" scoped>
@@ -61,7 +71,6 @@ const { t } = useLang()
     justify-content: space-between;
     align-items: center;
     width: 100%;
-    max-width: 900px;
 }
 
 .round-info {
@@ -73,13 +82,5 @@ const { t } = useLang()
     font-size: 1.1rem;
     font-weight: 700;
     color: $gold;
-}
-
-.players-panel {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 12px;
-    width: 100%;
-    max-width: 900px;
 }
 </style>

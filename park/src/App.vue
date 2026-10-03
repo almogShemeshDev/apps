@@ -4,7 +4,18 @@
             <button class="btn-ctrl btn-lang" @click="toggleLang">
                 {{ lang === 'en' ? 'עב' : 'EN' }}
             </button>
-            <button v-if="state.phase === 'playing'" class="btn-ctrl btn-new-game" @click="confirmNewGame">
+            <button
+                v-if="state.phase === 'playing'"
+                class="btn-ctrl btn-new-game"
+                @click="confirmNewGame"
+            >
+                {{ t('newGame') }}
+            </button>
+            <button
+                v-else-if="state.phase === 'game-over'"
+                class="btn-ctrl btn-new-game"
+                @click="resetGame"
+            >
                 {{ t('newGame') }}
             </button>
         </header>
@@ -12,6 +23,14 @@
         <GameSetup v-if="state.phase === 'setup'" @start="startGame" />
 
         <GameBoard v-else-if="state.phase === 'playing'" />
+
+        <GameOver
+            v-else-if="state.phase === 'game-over'"
+            :players="state.players"
+            :is-solo="isSolo"
+            :outcome="state.outcome"
+            @play-again="resetGame"
+        />
 
         <CreditsFooter />
     </div>
@@ -21,11 +40,12 @@
 import { watch } from 'vue'
 import GameSetup from './components/GameSetup.vue'
 import GameBoard from './components/GameBoard.vue'
+import GameOver from './components/GameOver.vue'
 import CreditsFooter from './components/CreditsFooter.vue'
 import { useGameState } from './composables/useGameState.js'
 import { useLang } from './composables/useLang.js'
 
-const { state, startGame, resetGame } = useGameState()
+const { state, isSolo, startGame, resetGame } = useGameState()
 const { lang, t, dir, toggleLang } = useLang()
 
 watch(

@@ -4,7 +4,19 @@
         <p class="subtitle">{{ t('subtitle') }}</p>
 
         <div class="form">
-            <div v-for="i in 2" :key="i" class="field">
+            <div class="field">
+                <label>{{ t('playersLabel') }}</label>
+                <div class="mode-picker">
+                    <button :class="{ active: playerCount === 1 }" @click="playerCount = 1">
+                        {{ t('soloMode') }}
+                    </button>
+                    <button :class="{ active: playerCount === 2 }" @click="playerCount = 2">
+                        {{ t('duoMode') }}
+                    </button>
+                </div>
+            </div>
+
+            <div v-for="i in playerCount" :key="i" class="field">
                 <label>{{ t('playerLabel', i) }}</label>
                 <input v-model="names[i - 1]" :placeholder="`Player ${i}`" />
             </div>
@@ -21,10 +33,11 @@ import { useLang } from '../composables/useLang.js'
 const emit = defineEmits(['start'])
 const { t } = useLang()
 
+const playerCount = ref(2)
 const names = ref(['Player 1', 'Player 2'])
 
 function start() {
-    const players = names.value.map((n, i) => n.trim() || `Player ${i + 1}`)
+    const players = names.value.slice(0, playerCount.value).map((n, i) => n.trim() || `Player ${i + 1}`)
     emit('start', players)
 }
 </script>
@@ -91,6 +104,36 @@ function start() {
 
         &:focus {
             border-color: $gold;
+        }
+    }
+}
+
+.mode-picker {
+    display: flex;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid $border;
+
+    button {
+        flex: 1;
+        padding: 9px 10px;
+        border: none;
+        background: transparent;
+        color: $text-dim;
+        font-size: 0.82rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition:
+            background 0.15s,
+            color 0.15s;
+
+        &.active {
+            background: $gold;
+            color: $bg-dark;
+        }
+
+        &:not(.active):hover {
+            color: $text;
         }
     }
 }
