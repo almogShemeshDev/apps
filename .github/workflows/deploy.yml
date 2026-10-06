@@ -55,6 +55,11 @@ jobs:
       - run: npm run build
         working-directory: park
 
+      - run: npm ci
+        working-directory: potions
+      - run: npm run build
+        working-directory: potions
+
       - name: Arrange site structure
         run: |
           mkdir -p _site/mage-knight-player-aid
@@ -64,6 +69,7 @@ jobs:
           mkdir -p _site/frames
           mkdir -p _site/candy-points
           mkdir -p _site/park
+          mkdir -p _site/potions
           cp -r mage-knight-player-aid/dist/. _site/mage-knight-player-aid/
           cp -r milky-way/dist/. _site/milky-way/
           cp -r one-two-tree/dist/. _site/one-two-tree/
@@ -71,6 +77,7 @@ jobs:
           cp -r frames/dist/. _site/frames/
           cp -r candy-points/. _site/candy-points/
           cp -r park/dist/. _site/park/
+          cp -r potions/dist/. _site/potions/
 
       - uses: actions/upload-pages-artifact@v3
         with:
