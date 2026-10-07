@@ -118,7 +118,12 @@ function moveGroupCardToGroup(fromGroupId, cardId, toGroupId) {
 }
 
 function canConfirmGroups() {
-  return state.phase === 'dealing' && state.pool.length === 0 && !state.pendingBlueReturn
+  return (
+    state.phase === 'dealing' &&
+    state.pool.length === 0 &&
+    !state.pendingBlueReturn &&
+    state.groups.every((g) => g.cards.length > 0)
+  )
 }
 
 function confirmGroups() {
@@ -205,28 +210,28 @@ function endRound() {
 
 // --- Abilities ---
 
-function canTrashFour(playerIndex, color) {
+function canTrashThree(playerIndex, color) {
   if (!isActionWindow(playerIndex)) return false
-  return countColor(state.players[playerIndex].hand, color) >= 4
+  return countColor(state.players[playerIndex].hand, color) >= 3
 }
 
-function trashFour(playerIndex, color) {
-  if (!canTrashFour(playerIndex, color)) return
+function trashThree(playerIndex, color) {
+  if (!canTrashThree(playerIndex, color)) return
   const player = state.players[playerIndex]
-  removeFromHand(player.hand, color, 4)
-  state.discardByColor[color] += 4
+  removeFromHand(player.hand, color, 3)
+  state.discardByColor[color] += 3
 }
 
 function canUseBlueAbility(playerIndex) {
   if (!isActionWindow(playerIndex) || state.pendingBlueReturn) return false
-  return countColor(state.players[playerIndex].hand, 'blue') >= 2 && state.deck.length > 0
+  return countColor(state.players[playerIndex].hand, 'blue') >= 4 && state.deck.length > 0
 }
 
 function useBlueAbilityDraw(playerIndex) {
   if (!canUseBlueAbility(playerIndex)) return
   const player = state.players[playerIndex]
-  removeFromHand(player.hand, 'blue', 2)
-  state.discardByColor.blue += 2
+  removeFromHand(player.hand, 'blue', 4)
+  state.discardByColor.blue += 4
   const drawn = state.deck.shift()
   player.hand.push(drawn)
   state.pendingBlueReturn = { playerIndex }
@@ -253,16 +258,16 @@ function canUseRedAbility(playerIndex) {
 
 function redAbilityTargets(playerIndex) {
   const hand = [...state.players[playerIndex].hand]
-  if (countColor(hand, 'red') < 2) return []
-  removeFromHand(hand, 'red', 2)
+  if (countColor(hand, 'red') < 4) return []
+  removeFromHand(hand, 'red', 4)
   return [...new Set(hand)]
 }
 
 function useRedAbility(playerIndex, trashColor) {
   if (!redAbilityTargets(playerIndex).includes(trashColor)) return
   const player = state.players[playerIndex]
-  removeFromHand(player.hand, 'red', 2)
-  state.discardByColor.red += 2
+  removeFromHand(player.hand, 'red', 4)
+  state.discardByColor.red += 4
   removeFromHand(player.hand, trashColor, 1)
   state.discardByColor[trashColor] += 1
 }
@@ -274,8 +279,8 @@ function canUseYellowAbility(playerIndex) {
 
 function yellowTargetCandidates(playerIndex) {
   const hand = [...state.players[playerIndex].hand]
-  if (countColor(hand, 'yellow') < 2) return []
-  removeFromHand(hand, 'yellow', 2)
+  if (countColor(hand, 'yellow') < 4) return []
+  removeFromHand(hand, 'yellow', 4)
   const others = COLORS.filter((c) => c !== 'yellow')
   const counts = others.map((c) => ({ color: c, count: countColor(hand, c) })).filter((x) => x.count > 0)
   if (counts.length === 0) return []
@@ -286,8 +291,8 @@ function yellowTargetCandidates(playerIndex) {
 function useYellowAbility(playerIndex, chosenColor) {
   if (!yellowTargetCandidates(playerIndex).includes(chosenColor)) return
   const player = state.players[playerIndex]
-  removeFromHand(player.hand, 'yellow', 2)
-  state.discardByColor.yellow += 2
+  removeFromHand(player.hand, 'yellow', 4)
+  state.discardByColor.yellow += 4
   const n = countColor(player.hand, chosenColor)
   removeFromHand(player.hand, chosenColor, n)
   state.discardByColor[chosenColor] += n
@@ -296,7 +301,7 @@ function useYellowAbility(playerIndex, chosenColor) {
 function canUseGreenAbility(playerIndex) {
   if (!isActionWindow(playerIndex) || state.pendingBlueReturn) return false
   if (state.phase !== 'picking' && state.phase !== 'dealer-final') return false
-  if (countColor(state.players[playerIndex].hand, 'green') < 2) return false
+  if (countColor(state.players[playerIndex].hand, 'green') < 4) return false
   return state.groups.some((g) => g.cards.length > 0)
 }
 
@@ -307,15 +312,14 @@ function useGreenAbility(playerIndex, groupId, cardId) {
   const idx = group.cards.findIndex((c) => c.id === cardId)
   if (idx === -1) return
   const player = state.players[playerIndex]
-  removeFromHand(player.hand, 'green', 2)
-  state.discardByColor.green += 2
+  removeFromHand(player.hand, 'green', 4)
+  state.discardByColor.green += 4
   const [card] = group.cards.splice(idx, 1)
   player.hand.push(card.color)
 }
 
-// The 2 white potions together count as 1 more card of a color the player
-// chooses, so paired with 3 real cards of that color they total a 4-of-a-kind
-// that gets trashed (5 physical cards leave the hand: the 2 white plus the 3 real).
+// Activating costs 4 white potions; the action itself then trashes 3 more
+// cards of a color the player chooses (7 physical cards leave the hand total).
 function canUseWhiteAbility(playerIndex) {
   if (!isActionWindow(playerIndex) || state.pendingBlueReturn) return false
   return whiteColorOptions(playerIndex).length > 0
@@ -323,15 +327,15 @@ function canUseWhiteAbility(playerIndex) {
 
 function whiteColorOptions(playerIndex) {
   const hand = state.players[playerIndex].hand
-  if (countColor(hand, 'white') < 2) return []
+  if (countColor(hand, 'white') < 4) return []
   return COLORS.filter((c) => c !== 'white' && countColor(hand, c) >= 3)
 }
 
 function useWhiteAbility(playerIndex, color) {
   if (!whiteColorOptions(playerIndex).includes(color)) return
   const player = state.players[playerIndex]
-  removeFromHand(player.hand, 'white', 2)
-  state.discardByColor.white += 2
+  removeFromHand(player.hand, 'white', 4)
+  state.discardByColor.white += 4
   removeFromHand(player.hand, color, 3)
   state.discardByColor[color] += 3
 }
@@ -375,8 +379,8 @@ export function useGameState() {
     claimFinalGroup,
     canEndRound,
     endRound,
-    canTrashFour,
-    trashFour,
+    canTrashThree,
+    trashThree,
     canUseBlueAbility,
     useBlueAbilityDraw,
     blueReturnCandidates,

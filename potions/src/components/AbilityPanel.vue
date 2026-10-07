@@ -35,11 +35,11 @@
             <div class="ability-buttons">
                 <button
                     v-for="color in trashableColors"
-                    :key="'t4-' + color"
+                    :key="'t3-' + color"
                     class="ability-btn"
-                    @click="trashFour(playerIndex, color)"
+                    @click="trashThree(playerIndex, color)"
                 >
-                    {{ t('trashFourBtn', color) }}
+                    {{ t('trashThreeBtn', color) }}
                 </button>
 
                 <button v-if="canUseBlueAbility(playerIndex)" class="ability-btn" @click="useBlueAbilityDraw(playerIndex)">
@@ -139,8 +139,8 @@ defineEmits(['green-start'])
 
 const {
     state,
-    canTrashFour,
-    trashFour,
+    canTrashThree,
+    trashThree,
     canUseBlueAbility,
     useBlueAbilityDraw,
     blueReturnCandidates,
@@ -162,7 +162,7 @@ const player = computed(() => state.players[props.playerIndex])
 const pendingBlue = computed(
     () => state.pendingBlueReturn && state.pendingBlueReturn.playerIndex === props.playerIndex
 )
-const trashableColors = computed(() => COLORS.filter((c) => canTrashFour(props.playerIndex, c)))
+const trashableColors = computed(() => COLORS.filter((c) => canTrashThree(props.playerIndex, c)))
 const hasAnyAbility = computed(
     () =>
         trashableColors.value.length > 0 ||

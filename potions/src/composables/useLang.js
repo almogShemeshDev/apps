@@ -9,7 +9,7 @@ const COLOR_NAMES = {
 
 const strings = {
   en: {
-    subtitle: 'A potion-drafting push-your-luck card game',
+    subtitle: 'A potion I cut, you choose card game',
     playerLabel: (i) => `Player ${i}`,
     playersLabel: 'Players',
     startGame: 'Start Game',
@@ -25,7 +25,7 @@ const strings = {
 
     dealingTitle: (name) => `${name} is dealing`,
     dealingHint:
-        'Drag each potion into a group, or tap a potion then tap a group (or the pool) to drop it there. Every potion must be placed.',
+        'Drag each potion into a group, or tap a potion then tap a group (or the pool) to drop it there. Every potion must be placed, and every group needs at least 1 potion.',
     poolLabel: 'Dealt potions',
     groupLabel: (letter) => `Group ${letter}`,
     emptyGroup: 'Empty',
@@ -44,7 +44,7 @@ const strings = {
     cardsLeftLabel: (n) => `${n} card${n !== 1 ? 's' : ''}`,
 
     abilitiesLabel: 'Abilities',
-    trashFourBtn: (color) => `Trash 4 ${strings.en.colorName(color)}`,
+    trashThreeBtn: (color) => `Trash 3 ${strings.en.colorName(color)}`,
     blueAbilityBtn: 'Blue: draw & return',
     blueReturnPrompt: 'Choose a potion to return to the bottom of the deck',
     redAbilityBtn: 'Red: trash 1',
@@ -54,7 +54,7 @@ const strings = {
     greenAbilityBtn: 'Green: snipe from a group',
     greenPickPrompt: 'Choose a potion from any group to take',
     whiteAbilityBtn: 'White: convert & trash',
-    whiteChoosePrompt: 'Choose a color — your 2 white count as 1 more, trashing 4 of that color total',
+    whiteChoosePrompt: 'Choose a color — trash 3 of it along with your 4 white',
     cancel: 'Cancel',
 
     otherPlayers: 'Other Players',
@@ -69,7 +69,7 @@ const strings = {
     credits: '© 2026 Almog Shemesh · Game Design & Concept · All rights reserved',
   },
   he: {
-    subtitle: 'משחק קלפים של עירוי שיקויים ולקיחת סיכונים',
+    subtitle: 'משחק רקיחת שיקויים — אני מחלק, אחרים בוחרים',
     playerLabel: (i) => `שחקן ${i}`,
     playersLabel: 'שחקנים',
     startGame: 'התחל משחק',
@@ -85,7 +85,7 @@ const strings = {
 
     dealingTitle: (name) => `${name} מחלק קלפים`,
     dealingHint:
-        'גרור כל שיקוי לקבוצה, או הקש על שיקוי ואז על קבוצה (או על המאגר) כדי להניח אותו שם. כל השיקויים חייבים להיות ממוקמים.',
+        'גרור כל שיקוי לקבוצה, או הקש על שיקוי ואז על קבוצה (או על המאגר) כדי להניח אותו שם. כל השיקויים חייבים להיות ממוקמים, ובכל קבוצה חייב להיות לפחות שיקוי אחד.',
     poolLabel: 'שיקויים שחולקו',
     groupLabel: (letter) => `קבוצה ${letter}`,
     emptyGroup: 'ריקה',
@@ -104,7 +104,7 @@ const strings = {
     cardsLeftLabel: (n) => `${n} קלפים`,
 
     abilitiesLabel: 'יכולות',
-    trashFourBtn: (color) => `השמד 4 ${strings.he.colorName(color)}`,
+    trashThreeBtn: (color) => `השמד 3 ${strings.he.colorName(color)}`,
     blueAbilityBtn: 'כחול: שלוף והחזר',
     blueReturnPrompt: 'בחר שיקוי להחזיר לתחתית החבילה',
     redAbilityBtn: 'אדום: השמד 1',
@@ -114,7 +114,7 @@ const strings = {
     greenAbilityBtn: 'ירוק: חטוף מקבוצה',
     greenPickPrompt: 'בחר שיקוי מכל קבוצה לקחת',
     whiteAbilityBtn: 'לבן: המר והשמד',
-    whiteChoosePrompt: 'בחר צבע — 2 הלבנים נחשבים לעוד קלף אחד, ובסך הכל יושמדו 4 קלפים מהצבע',
+    whiteChoosePrompt: 'בחר צבע — יושמדו ממנו 3 קלפים יחד עם 4 הלבנים שלך',
     cancel: 'בטל',
 
     otherPlayers: 'שחקנים אחרים',
