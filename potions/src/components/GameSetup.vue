@@ -15,7 +15,17 @@
 
             <div v-for="i in playerCount" :key="i" class="field">
                 <label>{{ t('playerLabel', i) }}</label>
-                <input v-model="names[i - 1]" :placeholder="`Player ${i}`" />
+                <div class="player-row">
+                    <input v-model="names[i - 1]" :placeholder="i === 1 ? 'Player 1' : `Bot ${i}`" />
+                    <div v-if="i > 1" class="bot-toggle">
+                        <button type="button" :class="{ active: !bots[i - 1] }" @click="bots[i - 1] = false">
+                            {{ t('human') }}
+                        </button>
+                        <button type="button" :class="{ active: bots[i - 1] }" @click="bots[i - 1] = true">
+                            {{ t('bot') }}
+                        </button>
+                    </div>
+                </div>
             </div>
 
             <button class="btn-start" @click="start">{{ t('startGame') }}</button>
@@ -33,9 +43,13 @@ const { t } = useLang()
 
 const playerCount = ref(2)
 const names = ref(['Player 1', 'Player 2', 'Player 3', 'Player 4'])
+const bots = ref([false, true, true, true])
 
 function start() {
-    const players = names.value.slice(0, playerCount.value).map((n, i) => n.trim() || `Player ${i + 1}`)
+    const players = names.value.slice(0, playerCount.value).map((n, i) => ({
+        name: n.trim() || (i === 0 ? 'Player 1' : `Bot ${i + 1}`),
+        isBot: i === 0 ? false : bots.value[i],
+    }))
     emit('start', players)
 }
 </script>
@@ -91,6 +105,8 @@ function start() {
     }
 
     input {
+        flex: 1;
+        min-width: 0;
         background: rgba(255, 255, 255, 0.07);
         border: 1px solid $border;
         border-radius: 8px;
@@ -102,6 +118,42 @@ function start() {
 
         &:focus {
             border-color: $gold;
+        }
+    }
+}
+
+.player-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.bot-toggle {
+    display: flex;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid $border;
+    flex-shrink: 0;
+
+    button {
+        padding: 8px 10px;
+        border: none;
+        background: transparent;
+        color: $text-dim;
+        font-size: 0.78rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition:
+            background 0.15s,
+            color 0.15s;
+
+        &.active {
+            background: $gold;
+            color: $bg-dark;
+        }
+
+        &:not(.active):hover {
+            color: $text;
         }
     }
 }

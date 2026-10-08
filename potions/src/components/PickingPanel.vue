@@ -7,7 +7,9 @@
                     : t('pickingTitle', turnPlayer.name)
             }}
         </h2>
-        <p class="hint">{{ greenPicking ? t('greenPickPrompt') : t('pickingHint') }}</p>
+        <div v-if="turnPlayer.isBot" class="bot-thinking">{{ t('botThinking', turnPlayer.name) }}</div>
+
+        <p v-else class="hint">{{ greenPicking ? t('greenPickPrompt') : t('pickingHint') }}</p>
 
         <div class="groups">
             <div v-for="(group, gi) in state.groups" :key="group.id" class="group">
@@ -22,42 +24,46 @@
                     />
                     <span v-if="!group.cards.length" class="none">{{ t('emptyGroup') }}</span>
                 </div>
-                <button
-                    v-if="!greenPicking && state.phase === 'picking' && canPickGroup(turnPlayerIndex, group.id)"
-                    class="btn-pick"
-                    @click="pickGroup(turnPlayerIndex, group.id)"
-                >
-                    {{ t('pickGroupBtn') }}
-                </button>
-                <button
-                    v-if="!greenPicking && state.phase === 'dealer-final' && canClaimFinalGroup(turnPlayerIndex)"
-                    class="btn-pick"
-                    @click="claimFinalGroup(turnPlayerIndex)"
-                >
-                    {{ t('claimFinalBtn') }}
-                </button>
+                <template v-if="!turnPlayer.isBot">
+                    <button
+                        v-if="!greenPicking && state.phase === 'picking' && canPickGroup(turnPlayerIndex, group.id)"
+                        class="btn-pick"
+                        @click="pickGroup(turnPlayerIndex, group.id)"
+                    >
+                        {{ t('pickGroupBtn') }}
+                    </button>
+                    <button
+                        v-if="!greenPicking && state.phase === 'dealer-final' && canClaimFinalGroup(turnPlayerIndex)"
+                        class="btn-pick"
+                        @click="claimFinalGroup(turnPlayerIndex)"
+                    >
+                        {{ t('claimFinalBtn') }}
+                    </button>
+                </template>
             </div>
         </div>
 
-        <button v-if="greenPicking" class="btn-cancel" @click="greenPicking = false">{{ t('cancel') }}</button>
+        <template v-if="!turnPlayer.isBot">
+            <button v-if="greenPicking" class="btn-cancel" @click="greenPicking = false">{{ t('cancel') }}</button>
 
-        <AbilityPanel
-            v-else
-            :key="'picker-' + turnPlayerIndex + '-' + state.round + '-' + state.pickPointer"
-            :player-index="turnPlayerIndex"
-            @green-start="greenPicking = true"
-        />
+            <AbilityPanel
+                v-else
+                :key="'picker-' + turnPlayerIndex + '-' + state.round + '-' + state.pickPointer"
+                :player-index="turnPlayerIndex"
+                @green-start="greenPicking = true"
+            />
 
-        <button
-            v-if="state.phase === 'picking' && canConfirmPickerTurn(turnPlayerIndex)"
-            class="btn-confirm"
-            @click="confirmPickerTurn(turnPlayerIndex)"
-        >
-            {{ t('confirmTurnBtn') }}
-        </button>
-        <button v-if="state.phase === 'dealer-final' && canEndRound(turnPlayerIndex)" class="btn-confirm" @click="endRound">
-            {{ t('endRoundBtn') }}
-        </button>
+            <button
+                v-if="state.phase === 'picking' && canConfirmPickerTurn(turnPlayerIndex)"
+                class="btn-confirm"
+                @click="confirmPickerTurn(turnPlayerIndex)"
+            >
+                {{ t('confirmTurnBtn') }}
+            </button>
+            <button v-if="state.phase === 'dealer-final' && canEndRound(turnPlayerIndex)" class="btn-confirm" @click="endRound">
+                {{ t('endRoundBtn') }}
+            </button>
+        </template>
     </div>
 </template>
 
@@ -121,6 +127,14 @@ function onGreenPick(groupId, cardId) {
     font-size: 0.78rem;
     color: $text-dim;
     text-align: center;
+}
+
+.bot-thinking {
+    font-size: 0.9rem;
+    color: $text-dim;
+    font-style: italic;
+    text-align: center;
+    padding: 4px 0;
 }
 
 .group-label {

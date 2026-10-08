@@ -2,6 +2,7 @@ import { reactive, computed } from 'vue'
 import { COLORS, setupDeck } from '../constants.js'
 
 let nextCardUid = 1
+let nextLogId = 1
 
 const state = reactive({
   phase: 'setup', // 'setup' | 'dealing' | 'picking' | 'dealer-final' | 'game-over'
@@ -20,7 +21,25 @@ const state = reactive({
   pickerHasPicked: false,
   dealerHasClaimedFinal: false,
   pendingBlueReturn: null, // { playerIndex } while a blue-ability draw awaits its return-to-deck choice
+  log: [], // [{ id, type, round, ...typeSpecificData }], oldest first
 })
+
+// Turn order within the current round: the dealer deals first (and claims the
+// leftover group last), then everyone else picks in clockwise order.
+const turnOrder = computed(() => {
+  const n = state.players.length
+  if (!n) return []
+  const d = state.dealerIndex
+  return [d, ...Array.from({ length: n - 1 }, (_, i) => (d + 1 + i) % n)]
+})
+
+function letterForIndex(i) {
+  return String.fromCharCode(65 + i)
+}
+
+function pushLog(type, data) {
+  state.log.push({ id: nextLogId++, type, round: state.round, ...data })
+}
 
 const turnPlayerIndex = computed(() => {
   if (state.phase === 'dealing' || state.phase === 'dealer-final') return state.dealerIndex
@@ -46,8 +65,10 @@ function removeFromHand(hand, color, n) {
   }
 }
 
-function createPlayer(name) {
-  return { name, hand: [] }
+function createPlayer(input) {
+  const name = typeof input === 'string' ? input : input.name
+  const isBot = typeof input === 'string' ? false : !!input.isBot
+  return { name, isBot, hand: [] }
 }
 
 // The dealer cannot use abilities while splitting the dealt cards into groups —
@@ -68,12 +89,13 @@ function startDealingRound() {
   state.pickerHasPicked = false
   state.dealerHasClaimedFinal = false
   state.phase = 'dealing'
+  pushLog('round-start', { playerName: state.players[state.dealerIndex].name })
 }
 
-function startGame(playerNames) {
-  const n = playerNames.length
+function startGame(playerInputs) {
+  const n = playerInputs.length
   const { deck, removedCount, cardsPerRound, totalRounds } = setupDeck(n)
-  state.players = playerNames.map(createPlayer)
+  state.players = playerInputs.map(createPlayer)
   state.dealerIndex = Math.floor(Math.random() * n)
   state.round = 1
   state.totalRounds = totalRounds
@@ -82,6 +104,7 @@ function startGame(playerNames) {
   state.removedCount = removedCount
   state.discardByColor = Object.fromEntries(COLORS.map((c) => [c, 0]))
   state.pendingBlueReturn = null
+  state.log = []
   startDealingRound()
 }
 
@@ -133,6 +156,7 @@ function confirmGroups() {
   state.pickPointer = 0
   state.pickerHasPicked = false
   state.phase = 'picking'
+  pushLog('deal', { playerName: state.players[state.dealerIndex].name })
 }
 
 // --- Picking phase: clockwise from the dealer's left, then the dealer takes what's left ---
@@ -146,9 +170,12 @@ function canPickGroup(playerIndex, groupId) {
 function pickGroup(playerIndex, groupId) {
   if (!canPickGroup(playerIndex, groupId)) return
   const idx = state.groups.findIndex((g) => g.id === groupId)
+  const letter = letterForIndex(idx)
   const [group] = state.groups.splice(idx, 1)
-  state.players[playerIndex].hand.push(...group.cards.map((c) => c.color))
+  const colors = group.cards.map((c) => c.color)
+  state.players[playerIndex].hand.push(...colors)
   state.pickerHasPicked = true
+  pushLog('pick', { playerName: state.players[playerIndex].name, letter, colors })
 }
 
 function canConfirmPickerTurn(playerIndex) {
@@ -183,8 +210,10 @@ function canClaimFinalGroup(playerIndex) {
 function claimFinalGroup(playerIndex) {
   if (!canClaimFinalGroup(playerIndex)) return
   const [group] = state.groups.splice(0, 1)
-  state.players[playerIndex].hand.push(...group.cards.map((c) => c.color))
+  const colors = group.cards.map((c) => c.color)
+  state.players[playerIndex].hand.push(...colors)
   state.dealerHasClaimedFinal = true
+  pushLog('claim-final', { playerName: state.players[playerIndex].name, colors })
 }
 
 function canEndRound(playerIndex) {
@@ -200,6 +229,7 @@ function endRound() {
   if (!canEndRound(state.dealerIndex)) return
   if (state.deck.length === 0) {
     state.phase = 'game-over'
+    pushLog('game-over', {})
     return
   }
   const n = state.players.length
@@ -220,6 +250,7 @@ function trashThree(playerIndex, color) {
   const player = state.players[playerIndex]
   removeFromHand(player.hand, color, 3)
   state.discardByColor[color] += 3
+  pushLog('trash-three', { playerName: player.name, color })
 }
 
 function canUseBlueAbility(playerIndex) {
@@ -235,6 +266,7 @@ function useBlueAbilityDraw(playerIndex) {
   const drawn = state.deck.shift()
   player.hand.push(drawn)
   state.pendingBlueReturn = { playerIndex }
+  pushLog('blue-draw', { playerName: player.name, color: drawn })
 }
 
 function blueReturnCandidates(playerIndex) {
@@ -249,6 +281,7 @@ function resolveBlueReturn(playerIndex, color) {
   removeFromHand(player.hand, color, 1)
   state.deck.push(color)
   state.pendingBlueReturn = null
+  pushLog('blue-return', { playerName: player.name, color })
 }
 
 function canUseRedAbility(playerIndex) {
@@ -270,6 +303,7 @@ function useRedAbility(playerIndex, trashColor) {
   state.discardByColor.red += 4
   removeFromHand(player.hand, trashColor, 1)
   state.discardByColor[trashColor] += 1
+  pushLog('red', { playerName: player.name, color: trashColor })
 }
 
 function canUseYellowAbility(playerIndex) {
@@ -296,6 +330,7 @@ function useYellowAbility(playerIndex, chosenColor) {
   const n = countColor(player.hand, chosenColor)
   removeFromHand(player.hand, chosenColor, n)
   state.discardByColor[chosenColor] += n
+  pushLog('yellow', { playerName: player.name, color: chosenColor, count: n })
 }
 
 function canUseGreenAbility(playerIndex) {
@@ -316,6 +351,7 @@ function useGreenAbility(playerIndex, groupId, cardId) {
   state.discardByColor.green += 4
   const [card] = group.cards.splice(idx, 1)
   player.hand.push(card.color)
+  pushLog('green', { playerName: player.name, color: card.color })
 }
 
 // Activating costs 4 white potions; the action itself then trashes 3 more
@@ -338,6 +374,7 @@ function useWhiteAbility(playerIndex, color) {
   state.discardByColor.white += 4
   removeFromHand(player.hand, color, 3)
   state.discardByColor[color] += 3
+  pushLog('white', { playerName: player.name, color })
 }
 
 function resetGame() {
@@ -357,6 +394,7 @@ function resetGame() {
   state.pickerHasPicked = false
   state.dealerHasClaimedFinal = false
   state.pendingBlueReturn = null
+  state.log = []
 }
 
 export function useGameState() {
@@ -364,6 +402,7 @@ export function useGameState() {
     state,
     turnPlayerIndex,
     turnPlayer,
+    turnOrder,
     countColor,
     startGame,
     assignPoolCardToGroup,
