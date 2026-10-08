@@ -118,6 +118,14 @@ const strings = {
 
     otherPlayers: 'Other Players',
 
+    logTitle: 'Game Log',
+    logEmpty: 'No actions yet',
+    logTurnStart: (round, name) => `Round ${round} — ${name}'s turn`,
+    logActivate: (name, icon, cardName, chips) => `${name} used ${icon} ${cardName}: ${chips}`,
+    logBuyCard: (name, icon, cardName, cost) => `${name} bought ${icon} ${cardName} (-${cost}💰)`,
+    logBuyExitCard: (name, icon, cardName, cost, vp) => `${name} bought ${icon} ${cardName} (-${cost}🩷 +${vp}🏆)`,
+    logGameOver: 'Game over',
+
     gameOverTitle: 'Game Over',
     finalStandings: 'Final Standings',
     winnerLabel: name => `🏆 ${name} wins!`,
@@ -172,6 +180,14 @@ const strings = {
     buy: 'קנה',
 
     otherPlayers: 'שחקנים אחרים',
+
+    logTitle: 'יומן משחק',
+    logEmpty: 'אין פעולות עדיין',
+    logTurnStart: (round, name) => `סיבוב ${round} — תור ${name}`,
+    logActivate: (name, icon, cardName, chips) => `${name} הפעיל ${icon} ${cardName}: ${chips}`,
+    logBuyCard: (name, icon, cardName, cost) => `${name} קנה ${icon} ${cardName} (-${cost}💰)`,
+    logBuyExitCard: (name, icon, cardName, cost, vp) => `${name} קנה ${icon} ${cardName} (-${cost}🩷 +${vp}🏆)`,
+    logGameOver: 'המשחק הסתיים',
 
     gameOverTitle: 'סוף המשחק',
     finalStandings: 'תוצאות סופיות',

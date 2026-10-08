@@ -5,26 +5,32 @@
             <div class="turn-info">{{ t('yourTurn', activePlayer.name) }}</div>
         </div>
 
-        <OtherPlayersStrip v-if="otherPlayers.length" :players="otherPlayers" />
+        <div class="layout">
+            <div class="main-column">
+                <OtherPlayersStrip v-if="otherPlayers.length" :players="otherPlayers" />
 
-        <MarketPanel :market="state.market" :can-buy-card="canBuyCard" @buy-card="buyCard" />
+                <MarketPanel :market="state.market" :can-buy-card="canBuyCard" @buy-card="buyCard" />
 
-        <ExitMarketPanel
-            :exit-market="state.exitMarket"
-            :can-buy-exit-card="canBuyExitCard"
-            @buy-exit-card="buyExitCard"
-        />
+                <ExitMarketPanel
+                    :exit-market="state.exitMarket"
+                    :can-buy-exit-card="canBuyExitCard"
+                    @buy-exit-card="buyExitCard"
+                />
 
-        <PlayerPanel
-            :player="activePlayer"
-            :is-active="true"
-            :selected-indices="state.selectedDiscIndices"
-            :pending-choice="state.pendingChoice"
-            :can-activate-option="canActivateOption"
-            @activate-card="(uid, optionId) => activateOption(uid, optionId)"
-            @toggle-disc="toggleDiscSelection"
-            @end-turn="endTurn"
-        />
+                <PlayerPanel
+                    :player="activePlayer"
+                    :is-active="true"
+                    :selected-indices="state.selectedDiscIndices"
+                    :pending-choice="state.pendingChoice"
+                    :can-activate-option="canActivateOption"
+                    @activate-card="(uid, optionId) => activateOption(uid, optionId)"
+                    @toggle-disc="toggleDiscSelection"
+                    @end-turn="endTurn"
+                />
+            </div>
+
+            <GameLog class="log-column" />
+        </div>
     </div>
 </template>
 
@@ -34,6 +40,7 @@ import PlayerPanel from './PlayerPanel.vue'
 import MarketPanel from './MarketPanel.vue'
 import ExitMarketPanel from './ExitMarketPanel.vue'
 import OtherPlayersStrip from './OtherPlayersStrip.vue'
+import GameLog from './GameLog.vue'
 import { useGameState } from '../composables/useGameState.js'
 import { useLang } from '../composables/useLang.js'
 
@@ -87,5 +94,38 @@ const roundText = computed(() => t('roundLabel', state.round))
     font-size: 1.1rem;
     font-weight: 700;
     color: $gold;
+}
+
+.layout {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    width: 100%;
+    max-width: 1200px;
+}
+
+.main-column {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+}
+
+.log-column {
+    width: 300px;
+    flex-shrink: 0;
+}
+
+@media screen and (max-width: 960px) {
+    .layout {
+        flex-direction: column;
+    }
+
+    .log-column {
+        width: 100%;
+        max-height: 280px;
+    }
 }
 </style>
