@@ -1,6 +1,10 @@
 <template>
     <div class="dealing-panel">
         <h2 class="panel-title">{{ t('dealingTitle', dealer.name) }}</h2>
+
+        <div v-if="dealer.isBot" class="bot-thinking">{{ t('botThinking', dealer.name) }}</div>
+
+        <template v-else>
         <p class="hint">{{ t('dealingHint') }}</p>
 
         <div class="pool">
@@ -48,6 +52,7 @@
         <button class="btn-confirm" :disabled="!canConfirmGroups()" @click="confirmGroups">
             {{ t('confirmGroupsBtn') }}
         </button>
+        </template>
     </div>
 </template>
 
@@ -135,6 +140,14 @@ function onDropToPool() {
     font-size: 0.78rem;
     color: $text-dim;
     text-align: center;
+}
+
+.bot-thinking {
+    font-size: 0.9rem;
+    color: $text-dim;
+    font-style: italic;
+    text-align: center;
+    padding: 12px 0;
 }
 
 .pool-label,

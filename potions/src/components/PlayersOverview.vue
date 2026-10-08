@@ -7,6 +7,7 @@
             :class="{ turn: i === turnPlayerIndex }"
         >
             <div class="player-header">
+                <span class="badge order-badge">{{ t('orderBadge', orderOf(i)) }}</span>
                 <span class="name">{{ p.name }}</span>
                 <span v-if="i === state.dealerIndex" class="badge dealer">{{ t('dealerBadge') }}</span>
                 <span v-if="i === turnPlayerIndex" class="badge turn-badge">{{ t('turnBadge') }}</span>
@@ -32,8 +33,12 @@ import { COLOR_META, handCounts } from '../constants.js'
 import { useGameState } from '../composables/useGameState.js'
 import { useLang } from '../composables/useLang.js'
 
-const { state, turnPlayerIndex } = useGameState()
+const { state, turnPlayerIndex, turnOrder } = useGameState()
 const { t } = useLang()
+
+function orderOf(playerIndex) {
+    return turnOrder.value.indexOf(playerIndex) + 1
+}
 </script>
 
 <style lang="scss" scoped>
@@ -91,6 +96,15 @@ const { t } = useLang()
 .badge.turn-badge {
     background: $gold;
     color: $bg-dark;
+}
+
+.badge.order-badge {
+    background: rgba(255, 255, 255, 0.08);
+    color: $text-dim;
+    border: 1px solid $border;
+    border-radius: 999px;
+    min-width: 16px;
+    text-align: center;
 }
 
 .hand-chips {

@@ -33,9 +33,11 @@ import GameBoard from './components/GameBoard.vue'
 import GameOver from './components/GameOver.vue'
 import CreditsFooter from './components/CreditsFooter.vue'
 import { useGameState } from './composables/useGameState.js'
+import { useBotAI } from './composables/useBotAI.js'
 import { useLang } from './composables/useLang.js'
 
 const { state, startGame, resetGame } = useGameState()
+useBotAI()
 const { lang, t, dir, toggleLang } = useLang()
 
 watch(
