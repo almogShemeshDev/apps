@@ -12,6 +12,7 @@ import {
 } from '../constants.js'
 
 let nextCardUid = 1
+let nextLogId = 1
 
 const state = reactive({
   phase: 'setup', // 'setup' | 'playing' | 'game-over'
@@ -23,18 +24,26 @@ const state = reactive({
   selectedDiscIndices: [],
   pendingChoice: null, // { kind: 'discard' | 'trash', remaining, filter? }
   exitDepletedRound: null, // round the exit-card supply first ran out
+  log: [], // [{ id, type, round, ...typeSpecificData }], oldest first
 })
 
 const activePlayer = computed(() => state.players[state.activePlayerIndex])
+
+function pushLog(type, data) {
+  state.log.push({ id: nextLogId++, type, round: state.round, ...data })
+}
 
 function initUsesThisTurn(cardId) {
   const options = getCardOptions(CARD_DEFS[cardId])
   return Object.fromEntries(options.map((o) => [o.id, 0]))
 }
 
-function createPlayer(name) {
+function createPlayer(input) {
+  const name = typeof input === 'string' ? input : input.name
+  const isBot = typeof input === 'string' ? false : !!input.isBot
   return {
     name,
+    isBot,
     bag: shuffle(STARTING_BAG),
     discard: [],
     drawn: [],
@@ -69,8 +78,8 @@ function drawForActivePlayer() {
   drawNInto(player, DISCS_PER_DRAW)
 }
 
-function startGame(playerNames) {
-  state.players = playerNames.map((name) => createPlayer(name))
+function startGame(playerInputs) {
+  state.players = playerInputs.map((input) => createPlayer(input))
   state.activePlayerIndex = 0
   state.round = 1
   state.market = { ...MARKET_INITIAL_SUPPLY }
@@ -79,7 +88,9 @@ function startGame(playerNames) {
   state.pendingChoice = null
   state.exitDepletedRound = null
   state.phase = 'playing'
+  state.log = []
   drawForActivePlayer()
+  pushLog('turn-start', { playerName: state.players[state.activePlayerIndex].name })
 }
 
 function resolvePendingChoice(index) {
@@ -195,6 +206,8 @@ function activateOption(uid, optionId) {
 
   if (pendingDiscard > 0) state.pendingChoice = { kind: 'discard', remaining: pendingDiscard }
   else if (pendingTrash) state.pendingChoice = { kind: 'trash', remaining: pendingTrash.amount, filter: pendingTrash.filter }
+
+  pushLog('activate', { playerName: player.name, cardId: card.cardId, benefits: option.benefits })
 }
 
 function canBuyCard(cardId) {
@@ -213,6 +226,7 @@ function buyCard(cardId) {
   player.gold -= def.cost
   state.market[cardId] -= 1
   player.tableau.push({ uid: nextCardUid++, cardId, usesThisTurn: initUsesThisTurn(cardId) })
+  pushLog('buy-card', { playerName: player.name, cardId, cost: def.cost })
 }
 
 function canBuyExitCard(cardId) {
@@ -239,6 +253,7 @@ function buyExitCard(cardId) {
   state.exitMarket[cardId] -= 1
   player.vp += def.vp
   checkExitDepletion()
+  pushLog('buy-exit-card', { playerName: player.name, cardId, pinkCost: def.pinkCost, vp: def.vp })
 }
 
 function endTurn() {
@@ -257,12 +272,14 @@ function endTurn() {
   if (nextIndex === 0) {
     if (state.exitDepletedRound !== null) {
       state.phase = 'game-over'
+      pushLog('game-over', {})
       return
     }
     state.round++
   }
   state.activePlayerIndex = nextIndex
   drawForActivePlayer()
+  pushLog('turn-start', { playerName: state.players[nextIndex].name })
 }
 
 function resetGame() {
@@ -275,6 +292,7 @@ function resetGame() {
   state.selectedDiscIndices = []
   state.pendingChoice = null
   state.exitDepletedRound = null
+  state.log = []
 }
 
 export function useGameState() {

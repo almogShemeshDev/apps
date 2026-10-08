@@ -75,6 +75,8 @@ const strings = {
     subtitle: 'A bag-building theme-park tycoon game',
     playerLabel: i => `Player ${i}`,
     playersLabel: 'Players',
+    human: 'Human',
+    bot: 'Bot',
     startGame: 'Start Game',
     newGame: 'New Game',
     confirmNewGame: 'Start a new game? Current progress will be lost.',
@@ -83,6 +85,7 @@ const strings = {
     yourTurn: name => `${name}'s turn`,
     activeBadge: 'Active',
     endTurn: 'End Turn',
+    botThinking: name => `🤖 ${name} is thinking...`,
 
     goldLabel: 'Gold',
     vpLabel: 'VP',
@@ -118,6 +121,14 @@ const strings = {
 
     otherPlayers: 'Other Players',
 
+    logTitle: 'Game Log',
+    logEmpty: 'No actions yet',
+    logTurnStart: (round, name) => `Round ${round} — ${name}'s turn`,
+    logActivate: (name, icon, cardName, chips) => `${name} used ${icon} ${cardName}: ${chips}`,
+    logBuyCard: (name, icon, cardName, cost) => `${name} bought ${icon} ${cardName} (-${cost}💰)`,
+    logBuyExitCard: (name, icon, cardName, cost, vp) => `${name} bought ${icon} ${cardName} (-${cost}🩷 +${vp}🏆)`,
+    logGameOver: 'Game over',
+
     gameOverTitle: 'Game Over',
     finalStandings: 'Final Standings',
     winnerLabel: name => `🏆 ${name} wins!`,
@@ -130,6 +141,8 @@ const strings = {
     subtitle: 'משחק טייקון פארק שעשועים מבוסס בניית שק',
     playerLabel: i => `שחקן ${i}`,
     playersLabel: 'שחקנים',
+    human: 'אנושי',
+    bot: 'בוט',
     startGame: 'התחל משחק',
     newGame: 'משחק חדש',
     confirmNewGame: 'להתחיל משחק חדש? ההתקדמות הנוכחית תאבד.',
@@ -138,6 +151,7 @@ const strings = {
     yourTurn: name => `תור ${name}`,
     activeBadge: 'פעיל',
     endTurn: 'סיים תור',
+    botThinking: name => `🤖 ${name} חושב...`,
 
     goldLabel: 'זהב',
     vpLabel: 'נק׳ ניצחון',
@@ -172,6 +186,14 @@ const strings = {
     buy: 'קנה',
 
     otherPlayers: 'שחקנים אחרים',
+
+    logTitle: 'יומן משחק',
+    logEmpty: 'אין פעולות עדיין',
+    logTurnStart: (round, name) => `סיבוב ${round} — תור ${name}`,
+    logActivate: (name, icon, cardName, chips) => `${name} הפעיל ${icon} ${cardName}: ${chips}`,
+    logBuyCard: (name, icon, cardName, cost) => `${name} קנה ${icon} ${cardName} (-${cost}💰)`,
+    logBuyExitCard: (name, icon, cardName, cost, vp) => `${name} קנה ${icon} ${cardName} (-${cost}🩷 +${vp}🏆)`,
+    logGameOver: 'המשחק הסתיים',
 
     gameOverTitle: 'סוף המשחק',
     finalStandings: 'תוצאות סופיות',
