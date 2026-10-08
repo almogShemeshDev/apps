@@ -5,18 +5,10 @@
             <div class="turn-info">{{ t('yourTurn', activePlayer.name) }}</div>
         </div>
 
-        <div class="layout">
-            <div class="main-column">
-                <OtherPlayersStrip v-if="otherPlayers.length" :players="otherPlayers" />
+        <OtherPlayersStrip v-if="otherPlayers.length" :players="otherPlayers" />
 
-                <MarketPanel :market="state.market" :can-buy-card="safeCanBuyCard" @buy-card="buyCard" />
-
-                <ExitMarketPanel
-                    :exit-market="state.exitMarket"
-                    :can-buy-exit-card="safeCanBuyExitCard"
-                    @buy-exit-card="buyExitCard"
-                />
-
+        <div class="columns">
+            <div class="player-col">
                 <PlayerPanel
                     :player="activePlayer"
                     :is-active="true"
@@ -29,7 +21,17 @@
                 />
             </div>
 
-            <GameLog class="log-column" />
+            <div class="market-col">
+                <MarketPanel :market="state.market" :can-buy-card="safeCanBuyCard" @buy-card="buyCard" />
+
+                <ExitMarketPanel
+                    :exit-market="state.exitMarket"
+                    :can-buy-exit-card="safeCanBuyExitCard"
+                    @buy-exit-card="buyExitCard"
+                />
+            </div>
+
+            <GameLog class="log-col" />
         </div>
     </div>
 </template>
@@ -84,7 +86,8 @@ const roundText = computed(() => t('roundLabel', state.round))
     align-items: center;
     gap: 16px;
     padding: 16px;
-    min-height: 100vh;
+    height: 100vh;
+    max-height: calc(100vh - 100px);
     background: $bg-dark;
 }
 
@@ -106,34 +109,44 @@ const roundText = computed(() => t('roundLabel', state.round))
     color: $gold;
 }
 
-.layout {
+.columns {
     display: flex;
     align-items: flex-start;
     gap: 16px;
     width: 100%;
-    max-width: 1200px;
 }
 
-.main-column {
+.player-col {
     flex: 1;
+    min-width: 0;
+}
+
+.market-col {
+    flex: 1.6;
     min-width: 0;
     display: flex;
     flex-direction: column;
-    align-items: center;
     gap: 16px;
+    max-height: calc(100vh - 200px);
+    overflow-y: auto;
 }
 
-.log-column {
-    width: 300px;
+.log-col {
+    width: 320px;
     flex-shrink: 0;
 }
 
-@media screen and (max-width: 960px) {
-    .layout {
+@media screen and (max-width: 1100px) {
+    .columns {
         flex-direction: column;
     }
 
-    .log-column {
+    .market-col {
+        max-height: none;
+        overflow: visible;
+    }
+
+    .log-col {
         width: 100%;
         max-height: 280px;
     }

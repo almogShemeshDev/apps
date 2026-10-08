@@ -46,9 +46,9 @@ const { t } = useLang()
 }
 
 .market-cards {
-    display: flex;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
     gap: 12px;
-    flex-wrap: wrap;
-    justify-content: center;
+    width: 100%;
 }
 </style>

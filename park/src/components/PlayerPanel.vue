@@ -169,9 +169,9 @@ const { t } = useLang()
 }
 
 .tableau-cards {
-    display: flex;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
     gap: 8px;
-    flex-wrap: wrap;
 }
 
 .btn-end-turn {

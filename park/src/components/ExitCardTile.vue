@@ -51,7 +51,8 @@ const vpChips = computed(() => benefitChips([{ type: 'vp', amount: def.value.vp 
     border: 1px solid $border;
     border-radius: 12px;
     padding: 12px;
-    min-width: 150px;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .card-icon {
