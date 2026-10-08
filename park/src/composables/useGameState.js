@@ -38,9 +38,12 @@ function initUsesThisTurn(cardId) {
   return Object.fromEntries(options.map((o) => [o.id, 0]))
 }
 
-function createPlayer(name) {
+function createPlayer(input) {
+  const name = typeof input === 'string' ? input : input.name
+  const isBot = typeof input === 'string' ? false : !!input.isBot
   return {
     name,
+    isBot,
     bag: shuffle(STARTING_BAG),
     discard: [],
     drawn: [],
@@ -75,8 +78,8 @@ function drawForActivePlayer() {
   drawNInto(player, DISCS_PER_DRAW)
 }
 
-function startGame(playerNames) {
-  state.players = playerNames.map((name) => createPlayer(name))
+function startGame(playerInputs) {
+  state.players = playerInputs.map((input) => createPlayer(input))
   state.activePlayerIndex = 0
   state.round = 1
   state.market = { ...MARKET_INITIAL_SUPPLY }

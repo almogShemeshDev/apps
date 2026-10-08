@@ -75,6 +75,8 @@ const strings = {
     subtitle: 'A bag-building theme-park tycoon game',
     playerLabel: i => `Player ${i}`,
     playersLabel: 'Players',
+    human: 'Human',
+    bot: 'Bot',
     startGame: 'Start Game',
     newGame: 'New Game',
     confirmNewGame: 'Start a new game? Current progress will be lost.',
@@ -83,6 +85,7 @@ const strings = {
     yourTurn: name => `${name}'s turn`,
     activeBadge: 'Active',
     endTurn: 'End Turn',
+    botThinking: name => `🤖 ${name} is thinking...`,
 
     goldLabel: 'Gold',
     vpLabel: 'VP',
@@ -138,6 +141,8 @@ const strings = {
     subtitle: 'משחק טייקון פארק שעשועים מבוסס בניית שק',
     playerLabel: i => `שחקן ${i}`,
     playersLabel: 'שחקנים',
+    human: 'אנושי',
+    bot: 'בוט',
     startGame: 'התחל משחק',
     newGame: 'משחק חדש',
     confirmNewGame: 'להתחיל משחק חדש? ההתקדמות הנוכחית תאבד.',
@@ -146,6 +151,7 @@ const strings = {
     yourTurn: name => `תור ${name}`,
     activeBadge: 'פעיל',
     endTurn: 'סיים תור',
+    botThinking: name => `🤖 ${name} חושב...`,
 
     goldLabel: 'זהב',
     vpLabel: 'נק׳ ניצחון',

@@ -9,11 +9,11 @@
             <div class="main-column">
                 <OtherPlayersStrip v-if="otherPlayers.length" :players="otherPlayers" />
 
-                <MarketPanel :market="state.market" :can-buy-card="canBuyCard" @buy-card="buyCard" />
+                <MarketPanel :market="state.market" :can-buy-card="safeCanBuyCard" @buy-card="buyCard" />
 
                 <ExitMarketPanel
                     :exit-market="state.exitMarket"
-                    :can-buy-exit-card="canBuyExitCard"
+                    :can-buy-exit-card="safeCanBuyExitCard"
                     @buy-exit-card="buyExitCard"
                 />
 
@@ -61,6 +61,16 @@ const { t } = useLang()
 const otherPlayers = computed(() =>
     state.players.filter((_, i) => i !== state.activePlayerIndex)
 )
+
+// Block clicks from reaching the market/exit buy actions while a bot is
+// taking its turn, since those buttons otherwise act on whoever is active.
+function safeCanBuyCard(cardId) {
+    return !activePlayer.value.isBot && canBuyCard(cardId)
+}
+
+function safeCanBuyExitCard(cardId) {
+    return !activePlayer.value.isBot && canBuyExitCard(cardId)
+}
 
 const roundText = computed(() => t('roundLabel', state.round))
 </script>

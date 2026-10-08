@@ -13,45 +13,49 @@
             <span v-if="player.trashedCount">❌ {{ t('trashedLabel') }}: {{ player.trashedCount }}</span>
         </div>
 
-        <div v-if="isActive && pendingChoice" class="pending-banner">
-            {{ pendingChoice.kind === 'discard'
-                ? t('pendingChoiceDiscard', pendingChoice.remaining)
-                : t('pendingChoiceTrash', pendingChoice.remaining, pendingChoice.filter) }}
-        </div>
+        <div v-if="isActive && player.isBot" class="bot-thinking">{{ t('botThinking', player.name) }}</div>
 
-        <div class="drawn">
-            <span class="drawn-label">{{ t('drawnLabel') }}</span>
-            <div class="drawn-pills">
-                <DiscPill
-                    v-for="(disc, i) in player.drawn"
-                    :key="i"
-                    :type="disc"
-                    :selectable="isActive"
-                    :selected="isActive && !pendingChoice && selectedIndices.includes(i)"
-                    @toggle="$emit('toggle-disc', i)"
-                />
-                <span v-if="!player.drawn.length" class="none">—</span>
+        <template v-else>
+            <div v-if="isActive && pendingChoice" class="pending-banner">
+                {{ pendingChoice.kind === 'discard'
+                    ? t('pendingChoiceDiscard', pendingChoice.remaining)
+                    : t('pendingChoiceTrash', pendingChoice.remaining, pendingChoice.filter) }}
             </div>
-        </div>
 
-        <div class="tableau">
-            <span class="tableau-label">{{ t('tableauLabel') }}</span>
-            <div class="tableau-cards">
-                <CardTile
-                    v-for="card in player.tableau"
-                    :key="card.uid"
-                    mode="tableau"
-                    :card-id="card.cardId"
-                    :uses-this-turn="card.usesThisTurn"
-                    :can-activate-option="(optionId) => isActive && canActivateOption(card, optionId)"
-                    @activate="(optionId) => $emit('activate-card', card.uid, optionId)"
-                />
+            <div class="drawn">
+                <span class="drawn-label">{{ t('drawnLabel') }}</span>
+                <div class="drawn-pills">
+                    <DiscPill
+                        v-for="(disc, i) in player.drawn"
+                        :key="i"
+                        :type="disc"
+                        :selectable="isActive"
+                        :selected="isActive && !pendingChoice && selectedIndices.includes(i)"
+                        @toggle="$emit('toggle-disc', i)"
+                    />
+                    <span v-if="!player.drawn.length" class="none">—</span>
+                </div>
             </div>
-        </div>
 
-        <button v-if="isActive" class="btn-end-turn" :disabled="!!pendingChoice" @click="$emit('end-turn')">
-            {{ t('endTurn') }}
-        </button>
+            <div class="tableau">
+                <span class="tableau-label">{{ t('tableauLabel') }}</span>
+                <div class="tableau-cards">
+                    <CardTile
+                        v-for="card in player.tableau"
+                        :key="card.uid"
+                        mode="tableau"
+                        :card-id="card.cardId"
+                        :uses-this-turn="card.usesThisTurn"
+                        :can-activate-option="(optionId) => isActive && canActivateOption(card, optionId)"
+                        @activate="(optionId) => $emit('activate-card', card.uid, optionId)"
+                    />
+                </div>
+            </div>
+
+            <button v-if="isActive" class="btn-end-turn" :disabled="!!pendingChoice" @click="$emit('end-turn')">
+                {{ t('endTurn') }}
+            </button>
+        </template>
     </div>
 </template>
 
@@ -132,6 +136,14 @@ const { t } = useLang()
     font-size: 0.78rem;
     font-weight: 700;
     text-align: center;
+}
+
+.bot-thinking {
+    font-size: 0.9rem;
+    color: $text-dim;
+    font-style: italic;
+    text-align: center;
+    padding: 12px 0;
 }
 
 .drawn-label,
