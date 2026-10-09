@@ -7,6 +7,23 @@ const COLOR_NAMES = {
   he: { yellow: 'צהוב', blue: 'כחול', red: 'אדום', green: 'ירוק', white: 'לבן' },
 }
 
+const CARD_ABILITY_TEXT = {
+  en: {
+    yellow: 'Trash your fewest other color',
+    blue: 'Draw 1, return 1',
+    red: 'Trash 1 other color',
+    green: 'Take 1 from any group',
+    white: '2 → 1 wildcard, any color',
+  },
+  he: {
+    yellow: 'השמד את הצבע שיש לך ממנו הכי מעט',
+    blue: 'שלוף 1, החזר 1',
+    red: 'השמד 1 מצבע אחר',
+    green: 'קח 1 מכל קבוצה',
+    white: '2 ⟵ 1 ג׳וקר לבחירה',
+  },
+}
+
 const strings = {
   en: {
     subtitle: 'A potion I cut, you choose card game',
@@ -26,6 +43,7 @@ const strings = {
     orderBadge: (n) => `#${n}`,
 
     colorName: (c) => COLOR_NAMES.en[c] ?? c,
+    cardAbilityText: (c) => CARD_ABILITY_TEXT.en[c] ?? '',
 
     dealingTitle: (name) => `${name} is dealing`,
     dealingHint:
@@ -129,6 +147,7 @@ const strings = {
     orderBadge: (n) => `#${n}`,
 
     colorName: (c) => COLOR_NAMES.he[c] ?? c,
+    cardAbilityText: (c) => CARD_ABILITY_TEXT.he[c] ?? '',
 
     dealingTitle: (name) => `${name} מחלק קלפים`,
     dealingHint:

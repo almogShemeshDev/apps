@@ -160,7 +160,7 @@ function onGreenPick(groupId, cardId) {
 
 .groups {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
     gap: 12px;
 }
 
@@ -180,7 +180,7 @@ function onGreenPick(groupId, cardId) {
     gap: 8px;
     flex-wrap: wrap;
     justify-content: center;
-    min-height: 40px;
+    min-height: 122px;
     align-items: center;
 }
 
