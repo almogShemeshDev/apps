@@ -23,6 +23,8 @@ export function useBotAI() {
     endRound,
     canTrashThree,
     trashThree,
+    canTrashFour,
+    trashFour,
     canUseBlueAbility,
     useBlueAbilityDraw,
     blueReturnCandidates,
@@ -35,9 +37,17 @@ export function useBotAI() {
     useYellowAbility,
     canUseGreenAbility,
     useGreenAbility,
-    canUseWhiteAbility,
-    whiteColorOptions,
-    useWhiteAbility,
+    whiteConversionOutcome,
+    whiteConversionOptions,
+    canUseWhiteConversion,
+    useWhiteConversionTrash,
+    useWhiteConversionBlue,
+    whiteConversionYellowTargets,
+    useWhiteConversionYellow,
+    whiteConversionRedTargets,
+    useWhiteConversionRed,
+    canUseWhiteConversionGreen,
+    useWhiteConversionGreen,
     countColor,
   } = useGameState()
 
@@ -162,6 +172,9 @@ export function useBotAI() {
       if (canTrashThree(playerIndex, color)) {
         candidates.push({ net: 3, perform: () => trashThree(playerIndex, color) })
       }
+      if (canTrashFour(playerIndex, color)) {
+        candidates.push({ net: 4, perform: () => trashFour(playerIndex, color) })
+      }
     }
 
     if (canUseBlueAbility(playerIndex)) {
@@ -191,20 +204,104 @@ export function useBotAI() {
       candidates.push({ net: 3, perform: () => performGreenAbility(playerIndex) })
     }
 
-    if (canUseWhiteAbility(playerIndex)) {
-      const options = whiteColorOptions(playerIndex)
-      if (options.length) {
-        const color = options.reduce(
+    if (canUseWhiteConversion(playerIndex)) {
+      for (const color of whiteConversionOptions(playerIndex)) {
+        const candidate = evaluateWhiteConversion(playerIndex, color)
+        if (candidate) candidates.push(candidate)
+      }
+    }
+
+    // Flip variants (2 of a color instead of 4) are only worth considering when the
+    // bot can't afford the full ability — paying with a flip is VP-neutral (the 2
+    // cards leave the hand but cost 2 VP at game end), so only the ability's own
+    // effect matters here, not the activation cost.
+    if (!canUseBlueAbility(playerIndex) && canUseBlueAbility(playerIndex, true)) {
+      candidates.push({ net: 1, perform: () => useBlueAbilityDraw(playerIndex, true) })
+    }
+
+    if (!canUseRedAbility(playerIndex) && canUseRedAbility(playerIndex, true)) {
+      const targets = redAbilityTargets(playerIndex, true)
+      if (targets.length) {
+        const color = targets.reduce(
           (best, c) => (countColor(hand, c) > countColor(hand, best) ? c : best),
-          options[0]
+          targets[0]
         )
-        candidates.push({ net: 7, perform: () => useWhiteAbility(playerIndex, color) })
+        candidates.push({ net: 2, perform: () => useRedAbility(playerIndex, color, true) })
+      }
+    }
+
+    if (!canUseYellowAbility(playerIndex) && canUseYellowAbility(playerIndex, true)) {
+      const targets = yellowTargetCandidates(playerIndex, true)
+      if (targets.length) {
+        const color = targets[0]
+        candidates.push({ net: countColor(hand, color), perform: () => useYellowAbility(playerIndex, color, true) })
       }
     }
 
     if (!candidates.length) return null
     candidates.sort((a, b) => b.net - a.net)
     return candidates[0]
+  }
+
+  // White's conversion spends 2 white + the real cards of `color` needed to reach
+  // a merged total of 2/3/4; "base" approximates the resulting VP gain (cards
+  // leaving the hand, net of the flip penalty when the outcome is a flip).
+  function evaluateWhiteConversion(playerIndex, color) {
+    const hand = state.players[playerIndex].hand
+    const outcome = whiteConversionOutcome(playerIndex, color)
+    if (!outcome) return null
+
+    if (outcome === 'trash') {
+      return { net: 4, perform: () => useWhiteConversionTrash(playerIndex, color) }
+    }
+
+    const realNeeded = outcome === 'flip' ? 1 : 3
+    const base = 2 + realNeeded - (outcome === 'flip' ? 2 : 0)
+
+    if (color === 'blue') {
+      if (!state.deck.length) return null
+      return { net: base, perform: () => useWhiteConversionBlue(playerIndex) }
+    }
+
+    if (color === 'yellow') {
+      const targets = whiteConversionYellowTargets(playerIndex)
+      if (!targets.length) return null
+      const pick = targets[0]
+      return { net: base + countColor(hand, pick), perform: () => useWhiteConversionYellow(playerIndex, pick) }
+    }
+
+    if (color === 'red') {
+      const targets = whiteConversionRedTargets(playerIndex)
+      if (!targets.length) return null
+      const pick = targets.reduce(
+        (best, c) => (countColor(hand, c) > countColor(hand, best) ? c : best),
+        targets[0]
+      )
+      return { net: base + 1, perform: () => useWhiteConversionRed(playerIndex, pick) }
+    }
+
+    if (color === 'green') {
+      // The flip-outcome steals a card into the hand for a net-zero/negative
+      // immediate swing (same caveat as a plain green flip) — skip it, but the
+      // 4-total outcome is still a clear net win.
+      if (outcome === 'flip' || !canUseWhiteConversionGreen(playerIndex)) return null
+      let best = null
+      let bestScore = -Infinity
+      for (const group of state.groups) {
+        for (const card of group.cards) {
+          const n = countColor(hand, card.color) + 1
+          const score = n === 3 ? 3 : n === 4 ? 6 : 1
+          if (score > bestScore) {
+            bestScore = score
+            best = { groupId: group.id, cardId: card.id }
+          }
+        }
+      }
+      if (!best) return null
+      return { net: base - 1, perform: () => useWhiteConversionGreen(playerIndex, best.groupId, best.cardId) }
+    }
+
+    return null
   }
 
   function performGreenAbility(playerIndex) {

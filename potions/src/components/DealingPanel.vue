@@ -165,7 +165,7 @@ function onDropToPool() {
     gap: 8px;
     flex-wrap: wrap;
     align-items: center;
-    min-height: 46px;
+    min-height: 136px;
     background: rgba(255, 255, 255, 0.03);
     border: 1px dashed $border;
     border-radius: 10px;
@@ -179,7 +179,7 @@ function onDropToPool() {
 
 .groups {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
     gap: 12px;
 }
 

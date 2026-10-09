@@ -24,6 +24,11 @@
                 <span v-if="!p.hand.length" class="none">—</span>
             </div>
             <div class="hand-total">{{ t('cardsLeftLabel', p.hand.length) }}</div>
+            <div class="score-row">
+                <span class="score-label">{{ t('scoreLabel') }}</span>
+                <span class="score-value" dir="ltr">{{ playerScore(p) }}</span>
+                <span v-if="p.flipPenalty" class="flip-chip">{{ t('flippedCountLabel', p.flipPenalty) }}</span>
+            </div>
         </div>
     </div>
 </template>
@@ -38,6 +43,10 @@ const { t } = useLang()
 
 function orderOf(playerIndex) {
     return turnOrder.value.indexOf(playerIndex) + 1
+}
+
+function playerScore(p) {
+    return -p.hand.length - (p.flipPenalty || 0)
 }
 </script>
 
@@ -133,5 +142,32 @@ function orderOf(playerIndex) {
 .hand-total {
     font-size: 0.72rem;
     color: $text-dim;
+}
+
+.score-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.score-label {
+    font-size: 0.72rem;
+    color: $text-dim;
+}
+
+.score-value {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: $gold;
+}
+
+.flip-chip {
+    font-size: 0.68rem;
+    color: $pink;
+    background: rgba(236, 72, 153, 0.12);
+    border: 1px solid rgba(236, 72, 153, 0.4);
+    border-radius: 999px;
+    padding: 1px 7px;
 }
 </style>

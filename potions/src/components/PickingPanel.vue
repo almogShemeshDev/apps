@@ -50,7 +50,7 @@
                 v-else
                 :key="'picker-' + turnPlayerIndex + '-' + state.round + '-' + state.pickPointer"
                 :player-index="turnPlayerIndex"
-                @green-start="greenPicking = true"
+                @green-start="onGreenStart"
             />
 
             <button
@@ -87,17 +87,29 @@ const {
     canEndRound,
     endRound,
     useGreenAbility,
+    useWhiteConversionGreen,
 } = useGameState()
 const { t } = useLang()
 
 const greenPicking = ref(false)
+// 'normal' | 'flip' | 'white'
+const greenMode = ref('normal')
 
 function letterFor(i) {
     return String.fromCharCode(65 + i)
 }
 
+function onGreenStart(mode) {
+    greenPicking.value = true
+    greenMode.value = mode
+}
+
 function onGreenPick(groupId, cardId) {
-    useGreenAbility(turnPlayerIndex.value, groupId, cardId)
+    if (greenMode.value === 'white') {
+        useWhiteConversionGreen(turnPlayerIndex.value, groupId, cardId)
+    } else {
+        useGreenAbility(turnPlayerIndex.value, groupId, cardId, greenMode.value === 'flip')
+    }
     greenPicking.value = false
 }
 </script>
@@ -148,7 +160,7 @@ function onGreenPick(groupId, cardId) {
 
 .groups {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
     gap: 12px;
 }
 
@@ -168,7 +180,7 @@ function onGreenPick(groupId, cardId) {
     gap: 8px;
     flex-wrap: wrap;
     justify-content: center;
-    min-height: 40px;
+    min-height: 122px;
     align-items: center;
 }
 
