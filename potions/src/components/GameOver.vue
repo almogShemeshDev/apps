@@ -6,7 +6,10 @@
             <p class="standings-label">{{ t('finalStandings') }}</p>
             <div v-for="p in ranked" :key="p.name" class="row" :class="{ winner: p.vp === topVp }">
                 <span class="name">{{ p.name }}</span>
-                <span class="cards">{{ t('cardsLeftLabel', p.cardCount) }}</span>
+                <span class="cards">
+                    {{ t('cardsLeftLabel', p.cardCount) }}
+                    <template v-if="p.flipPenalty">· <span dir="ltr">-{{ p.flipPenalty }}</span> {{ t('flipPenaltyLabel') }}</template>
+                </span>
                 <span class="vp">🏆 <span dir="ltr">{{ p.vp }}</span></span>
             </div>
             <p class="winner-line">
@@ -31,7 +34,12 @@ const { t } = useLang()
 
 const ranked = computed(() =>
     [...props.players]
-        .map((p) => ({ name: p.name, cardCount: p.hand.length, vp: -p.hand.length }))
+        .map((p) => ({
+            name: p.name,
+            cardCount: p.hand.length,
+            flipPenalty: p.flipPenalty || 0,
+            vp: -p.hand.length - (p.flipPenalty || 0),
+        }))
         .sort((a, b) => b.vp - a.vp)
 )
 const topVp = computed(() => ranked.value[0]?.vp ?? 0)

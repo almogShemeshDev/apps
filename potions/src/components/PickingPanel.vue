@@ -50,7 +50,7 @@
                 v-else
                 :key="'picker-' + turnPlayerIndex + '-' + state.round + '-' + state.pickPointer"
                 :player-index="turnPlayerIndex"
-                @green-start="greenPicking = true"
+                @green-start="onGreenStart"
             />
 
             <button
@@ -87,17 +87,29 @@ const {
     canEndRound,
     endRound,
     useGreenAbility,
+    useWhiteConversionGreen,
 } = useGameState()
 const { t } = useLang()
 
 const greenPicking = ref(false)
+// 'normal' | 'flip' | 'white'
+const greenMode = ref('normal')
 
 function letterFor(i) {
     return String.fromCharCode(65 + i)
 }
 
+function onGreenStart(mode) {
+    greenPicking.value = true
+    greenMode.value = mode
+}
+
 function onGreenPick(groupId, cardId) {
-    useGreenAbility(turnPlayerIndex.value, groupId, cardId)
+    if (greenMode.value === 'white') {
+        useWhiteConversionGreen(turnPlayerIndex.value, groupId, cardId)
+    } else {
+        useGreenAbility(turnPlayerIndex.value, groupId, cardId, greenMode.value === 'flip')
+    }
     greenPicking.value = false
 }
 </script>

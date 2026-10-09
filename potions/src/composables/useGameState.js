@@ -68,7 +68,23 @@ function removeFromHand(hand, color, n) {
 function createPlayer(input) {
   const name = typeof input === 'string' ? input : input.name
   const isBot = typeof input === 'string' ? false : !!input.isBot
-  return { name, isBot, hand: [] }
+  return { name, isBot, hand: [], flipPenalty: 0 }
+}
+
+// Pays the cards that trigger an ability. A normal activation (4 of a color)
+// trashes them into the shared discard pile with no further cost. A "flip"
+// activation (2 of a color) sets them aside face-down instead — they no
+// longer count in the player's hand, but they cost 2 VP together at the end
+// of the game (tracked on the player, not the shared discard pile).
+function payAbilityCost(playerIndex, color, flip) {
+  const player = state.players[playerIndex]
+  const cost = flip ? 2 : 4
+  removeFromHand(player.hand, color, cost)
+  if (flip) {
+    player.flipPenalty += 2
+  } else {
+    state.discardByColor[color] += cost
+  }
 }
 
 // The dealer cannot use abilities while splitting the dealt cards into groups —
@@ -253,20 +269,58 @@ function trashThree(playerIndex, color) {
   pushLog('trash-three', { playerName: player.name, color })
 }
 
-function canUseBlueAbility(playerIndex) {
-  if (!isActionWindow(playerIndex) || state.pendingBlueReturn) return false
-  return countColor(state.players[playerIndex].hand, 'blue') >= 4 && state.deck.length > 0
+// A player holding 4+ of a color is normally expected to spend them on that
+// color's ability, but if the ability has no valid target right now (e.g. no
+// other color in hand for Red, an empty deck for Blue, nothing in any group
+// for Green, or no valid merge color for White), they shouldn't be stuck —
+// they can trash all 4 for no effect instead. There's no equivalent fallback
+// for the 2-card flip: flipping without using the ability would just be a
+// pure -2 VP penalty for nothing, so no one would ever want it.
+function canUseColorAbilityNormal(playerIndex, color) {
+  switch (color) {
+    case 'blue':
+      return canUseBlueAbility(playerIndex, false)
+    case 'red':
+      return canUseRedAbility(playerIndex, false)
+    case 'yellow':
+      return canUseYellowAbility(playerIndex, false)
+    case 'green':
+      return canUseGreenAbility(playerIndex, false)
+    case 'white':
+      return canUseWhiteConversion(playerIndex)
+    default:
+      return false
+  }
 }
 
-function useBlueAbilityDraw(playerIndex) {
-  if (!canUseBlueAbility(playerIndex)) return
+function canTrashFour(playerIndex, color) {
+  if (!isActionWindow(playerIndex)) return false
+  if (countColor(state.players[playerIndex].hand, color) < 4) return false
+  return !canUseColorAbilityNormal(playerIndex, color)
+}
+
+function trashFour(playerIndex, color) {
+  if (!canTrashFour(playerIndex, color)) return
   const player = state.players[playerIndex]
-  removeFromHand(player.hand, 'blue', 4)
-  state.discardByColor.blue += 4
+  removeFromHand(player.hand, color, 4)
+  state.discardByColor[color] += 4
+  pushLog('trash-four', { playerName: player.name, color })
+}
+
+function canUseBlueAbility(playerIndex, flip = false) {
+  if (!isActionWindow(playerIndex) || state.pendingBlueReturn) return false
+  const need = flip ? 2 : 4
+  return countColor(state.players[playerIndex].hand, 'blue') >= need && state.deck.length > 0
+}
+
+function useBlueAbilityDraw(playerIndex, flip = false) {
+  if (!canUseBlueAbility(playerIndex, flip)) return
+  const player = state.players[playerIndex]
+  payAbilityCost(playerIndex, 'blue', flip)
   const drawn = state.deck.shift()
   player.hand.push(drawn)
   state.pendingBlueReturn = { playerIndex }
-  pushLog('blue-draw', { playerName: player.name, color: drawn })
+  pushLog(flip ? 'blue-draw-flip' : 'blue-draw', { playerName: player.name, color: drawn })
 }
 
 function blueReturnCandidates(playerIndex) {
@@ -284,37 +338,38 @@ function resolveBlueReturn(playerIndex, color) {
   pushLog('blue-return', { playerName: player.name, color })
 }
 
-function canUseRedAbility(playerIndex) {
+function canUseRedAbility(playerIndex, flip = false) {
   if (!isActionWindow(playerIndex) || state.pendingBlueReturn) return false
-  return redAbilityTargets(playerIndex).length > 0
+  return redAbilityTargets(playerIndex, flip).length > 0
 }
 
-function redAbilityTargets(playerIndex) {
+function redAbilityTargets(playerIndex, flip = false) {
   const hand = [...state.players[playerIndex].hand]
-  if (countColor(hand, 'red') < 4) return []
-  removeFromHand(hand, 'red', 4)
+  const need = flip ? 2 : 4
+  if (countColor(hand, 'red') < need) return []
+  removeFromHand(hand, 'red', need)
   return [...new Set(hand)]
 }
 
-function useRedAbility(playerIndex, trashColor) {
-  if (!redAbilityTargets(playerIndex).includes(trashColor)) return
+function useRedAbility(playerIndex, trashColor, flip = false) {
+  if (!redAbilityTargets(playerIndex, flip).includes(trashColor)) return
   const player = state.players[playerIndex]
-  removeFromHand(player.hand, 'red', 4)
-  state.discardByColor.red += 4
+  payAbilityCost(playerIndex, 'red', flip)
   removeFromHand(player.hand, trashColor, 1)
   state.discardByColor[trashColor] += 1
-  pushLog('red', { playerName: player.name, color: trashColor })
+  pushLog(flip ? 'red-flip' : 'red', { playerName: player.name, color: trashColor })
 }
 
-function canUseYellowAbility(playerIndex) {
+function canUseYellowAbility(playerIndex, flip = false) {
   if (!isActionWindow(playerIndex) || state.pendingBlueReturn) return false
-  return yellowTargetCandidates(playerIndex).length > 0
+  return yellowTargetCandidates(playerIndex, flip).length > 0
 }
 
-function yellowTargetCandidates(playerIndex) {
+function yellowTargetCandidates(playerIndex, flip = false) {
   const hand = [...state.players[playerIndex].hand]
-  if (countColor(hand, 'yellow') < 4) return []
-  removeFromHand(hand, 'yellow', 4)
+  const need = flip ? 2 : 4
+  if (countColor(hand, 'yellow') < need) return []
+  removeFromHand(hand, 'yellow', need)
   const others = COLORS.filter((c) => c !== 'yellow')
   const counts = others.map((c) => ({ color: c, count: countColor(hand, c) })).filter((x) => x.count > 0)
   if (counts.length === 0) return []
@@ -322,59 +377,200 @@ function yellowTargetCandidates(playerIndex) {
   return counts.filter((x) => x.count === min).map((x) => x.color)
 }
 
-function useYellowAbility(playerIndex, chosenColor) {
-  if (!yellowTargetCandidates(playerIndex).includes(chosenColor)) return
+function useYellowAbility(playerIndex, chosenColor, flip = false) {
+  if (!yellowTargetCandidates(playerIndex, flip).includes(chosenColor)) return
   const player = state.players[playerIndex]
-  removeFromHand(player.hand, 'yellow', 4)
-  state.discardByColor.yellow += 4
+  payAbilityCost(playerIndex, 'yellow', flip)
   const n = countColor(player.hand, chosenColor)
   removeFromHand(player.hand, chosenColor, n)
   state.discardByColor[chosenColor] += n
-  pushLog('yellow', { playerName: player.name, color: chosenColor, count: n })
+  pushLog(flip ? 'yellow-flip' : 'yellow', { playerName: player.name, color: chosenColor, count: n })
 }
 
-function canUseGreenAbility(playerIndex) {
+function canUseGreenAbility(playerIndex, flip = false) {
   if (!isActionWindow(playerIndex) || state.pendingBlueReturn) return false
   if (state.phase !== 'picking' && state.phase !== 'dealer-final') return false
-  if (countColor(state.players[playerIndex].hand, 'green') < 4) return false
+  const need = flip ? 2 : 4
+  if (countColor(state.players[playerIndex].hand, 'green') < need) return false
   return state.groups.some((g) => g.cards.length > 0)
 }
 
-function useGreenAbility(playerIndex, groupId, cardId) {
-  if (!canUseGreenAbility(playerIndex)) return
+function useGreenAbility(playerIndex, groupId, cardId, flip = false) {
+  if (!canUseGreenAbility(playerIndex, flip)) return
   const group = state.groups.find((g) => g.id === groupId)
   if (!group) return
   const idx = group.cards.findIndex((c) => c.id === cardId)
   if (idx === -1) return
   const player = state.players[playerIndex]
-  removeFromHand(player.hand, 'green', 4)
-  state.discardByColor.green += 4
+  payAbilityCost(playerIndex, 'green', flip)
   const [card] = group.cards.splice(idx, 1)
   player.hand.push(card.color)
-  pushLog('green', { playerName: player.name, color: card.color })
+  pushLog(flip ? 'green-flip' : 'green', { playerName: player.name, color: card.color })
 }
 
-// Activating costs 4 white potions; the action itself then trashes 3 more
-// cards of a color the player chooses (7 physical cards leave the hand total).
-function canUseWhiteAbility(playerIndex) {
-  if (!isActionWindow(playerIndex) || state.pendingBlueReturn) return false
-  return whiteColorOptions(playerIndex).length > 0
+// --- White: convert 2 white potions into 1 wildcard potion of another color ---
+// The wildcard merges with the player's real holdings of that color: 1 real
+// (+1 wildcard = 2) triggers that color's flip-ability (and the usual -2 VP
+// flip penalty), 2 real (+1 = 3) is a plain trash with no effect, 3 real
+// (+1 = 4) triggers that color's trash + ability. Spending the 2 white
+// potions is always a normal discard — it's not a "flip" of white itself, so
+// it never adds to flipPenalty on its own. White has no separate 4-cost tier.
+
+function whiteConversionOutcome(playerIndex, color) {
+  const real = countColor(state.players[playerIndex].hand, color)
+  const total = real + 1
+  if (total === 2) return 'flip'
+  if (total === 3) return 'trash'
+  if (total === 4) return 'ability'
+  return null
 }
 
-function whiteColorOptions(playerIndex) {
+function whiteConversionOptions(playerIndex) {
   const hand = state.players[playerIndex].hand
-  if (countColor(hand, 'white') < 4) return []
-  return COLORS.filter((c) => c !== 'white' && countColor(hand, c) >= 3)
+  if (countColor(hand, 'white') < 2) return []
+  return COLORS.filter((c) => {
+    if (c === 'white') return false
+    const outcome = whiteConversionOutcome(playerIndex, c)
+    if (!outcome) return false
+    if (outcome === 'trash') return true
+    if (c === 'blue') return state.deck.length > 0
+    if (c === 'green') {
+      if (state.phase !== 'picking' && state.phase !== 'dealer-final') return false
+      return state.groups.some((g) => g.cards.length > 0)
+    }
+    return true
+  })
 }
 
-function useWhiteAbility(playerIndex, color) {
-  if (!whiteColorOptions(playerIndex).includes(color)) return
+function canUseWhiteConversion(playerIndex) {
+  if (!isActionWindow(playerIndex) || state.pendingBlueReturn) return false
+  return whiteConversionOptions(playerIndex).length > 0
+}
+
+// Pays the 2 white + the real merge cards of `color` — common to every outcome.
+function payWhiteConversion(playerIndex, color, realNeeded) {
   const player = state.players[playerIndex]
-  removeFromHand(player.hand, 'white', 4)
-  state.discardByColor.white += 4
-  removeFromHand(player.hand, color, 3)
-  state.discardByColor[color] += 3
-  pushLog('white', { playerName: player.name, color })
+  removeFromHand(player.hand, 'white', 2)
+  state.discardByColor.white += 2
+  removeFromHand(player.hand, color, realNeeded)
+}
+
+function realNeededFor(outcome) {
+  return outcome === 'flip' ? 1 : 3
+}
+
+// The 'trash' outcome (merged total of 3) needs no further choice — resolves immediately.
+function useWhiteConversionTrash(playerIndex, color) {
+  if (whiteConversionOutcome(playerIndex, color) !== 'trash') return
+  const player = state.players[playerIndex]
+  payWhiteConversion(playerIndex, color, 2)
+  state.discardByColor[color] += 2
+  pushLog('white-convert-trash', { playerName: player.name, color })
+}
+
+// Blue's effect (draw + pending return) needs no sub-choice beyond the deck check.
+function useWhiteConversionBlue(playerIndex) {
+  const outcome = whiteConversionOutcome(playerIndex, 'blue')
+  if ((outcome !== 'flip' && outcome !== 'ability') || !state.deck.length) return
+  const player = state.players[playerIndex]
+  const realNeeded = realNeededFor(outcome)
+  payWhiteConversion(playerIndex, 'blue', realNeeded)
+  if (outcome === 'flip') player.flipPenalty += 2
+  else state.discardByColor.blue += realNeeded
+  const drawn = state.deck.shift()
+  player.hand.push(drawn)
+  state.pendingBlueReturn = { playerIndex }
+  pushLog(outcome === 'flip' ? 'white-convert-blue-flip' : 'white-convert-blue', {
+    playerName: player.name,
+    color: drawn,
+  })
+}
+
+// Yellow's effect (trash the least-held other color) may still tie between
+// colors, so it needs a candidate list the same way the normal ability does.
+function whiteConversionYellowTargets(playerIndex) {
+  const outcome = whiteConversionOutcome(playerIndex, 'yellow')
+  if (outcome !== 'flip' && outcome !== 'ability') return []
+  const hand = [...state.players[playerIndex].hand]
+  removeFromHand(hand, 'white', 2)
+  removeFromHand(hand, 'yellow', realNeededFor(outcome))
+  const others = COLORS.filter((c) => c !== 'yellow')
+  const counts = others.map((c) => ({ color: c, count: countColor(hand, c) })).filter((x) => x.count > 0)
+  if (!counts.length) return []
+  const min = Math.min(...counts.map((x) => x.count))
+  return counts.filter((x) => x.count === min).map((x) => x.color)
+}
+
+function useWhiteConversionYellow(playerIndex, chosenColor) {
+  if (!whiteConversionYellowTargets(playerIndex).includes(chosenColor)) return
+  const outcome = whiteConversionOutcome(playerIndex, 'yellow')
+  const realNeeded = realNeededFor(outcome)
+  const player = state.players[playerIndex]
+  payWhiteConversion(playerIndex, 'yellow', realNeeded)
+  if (outcome === 'flip') player.flipPenalty += 2
+  else state.discardByColor.yellow += realNeeded
+  const n = countColor(player.hand, chosenColor)
+  removeFromHand(player.hand, chosenColor, n)
+  state.discardByColor[chosenColor] += n
+  pushLog(outcome === 'flip' ? 'white-convert-yellow-flip' : 'white-convert-yellow', {
+    playerName: player.name,
+    color: chosenColor,
+    count: n,
+  })
+}
+
+// Red's effect (trash 1 of another color) needs the player to pick which color.
+function whiteConversionRedTargets(playerIndex) {
+  const outcome = whiteConversionOutcome(playerIndex, 'red')
+  if (outcome !== 'flip' && outcome !== 'ability') return []
+  const hand = [...state.players[playerIndex].hand]
+  removeFromHand(hand, 'white', 2)
+  removeFromHand(hand, 'red', realNeededFor(outcome))
+  return [...new Set(hand)]
+}
+
+function useWhiteConversionRed(playerIndex, trashColor) {
+  if (!whiteConversionRedTargets(playerIndex).includes(trashColor)) return
+  const outcome = whiteConversionOutcome(playerIndex, 'red')
+  const realNeeded = realNeededFor(outcome)
+  const player = state.players[playerIndex]
+  payWhiteConversion(playerIndex, 'red', realNeeded)
+  if (outcome === 'flip') player.flipPenalty += 2
+  else state.discardByColor.red += realNeeded
+  removeFromHand(player.hand, trashColor, 1)
+  state.discardByColor[trashColor] += 1
+  pushLog(outcome === 'flip' ? 'white-convert-red-flip' : 'white-convert-red', {
+    playerName: player.name,
+    color: trashColor,
+  })
+}
+
+// Green's effect (snipe a card from a dealt group) needs a board pick.
+function canUseWhiteConversionGreen(playerIndex) {
+  const outcome = whiteConversionOutcome(playerIndex, 'green')
+  if (outcome !== 'flip' && outcome !== 'ability') return false
+  if (state.phase !== 'picking' && state.phase !== 'dealer-final') return false
+  return state.groups.some((g) => g.cards.length > 0)
+}
+
+function useWhiteConversionGreen(playerIndex, groupId, cardId) {
+  if (!canUseWhiteConversionGreen(playerIndex)) return
+  const group = state.groups.find((g) => g.id === groupId)
+  if (!group) return
+  const idx = group.cards.findIndex((c) => c.id === cardId)
+  if (idx === -1) return
+  const outcome = whiteConversionOutcome(playerIndex, 'green')
+  const realNeeded = realNeededFor(outcome)
+  const player = state.players[playerIndex]
+  payWhiteConversion(playerIndex, 'green', realNeeded)
+  if (outcome === 'flip') player.flipPenalty += 2
+  else state.discardByColor.green += realNeeded
+  const [card] = group.cards.splice(idx, 1)
+  player.hand.push(card.color)
+  pushLog(outcome === 'flip' ? 'white-convert-green-flip' : 'white-convert-green', {
+    playerName: player.name,
+    color: card.color,
+  })
 }
 
 function resetGame() {
@@ -420,6 +616,8 @@ export function useGameState() {
     endRound,
     canTrashThree,
     trashThree,
+    canTrashFour,
+    trashFour,
     canUseBlueAbility,
     useBlueAbilityDraw,
     blueReturnCandidates,
@@ -432,9 +630,17 @@ export function useGameState() {
     useYellowAbility,
     canUseGreenAbility,
     useGreenAbility,
-    canUseWhiteAbility,
-    whiteColorOptions,
-    useWhiteAbility,
+    whiteConversionOutcome,
+    whiteConversionOptions,
+    canUseWhiteConversion,
+    useWhiteConversionTrash,
+    useWhiteConversionBlue,
+    whiteConversionYellowTargets,
+    useWhiteConversionYellow,
+    whiteConversionRedTargets,
+    useWhiteConversionRed,
+    canUseWhiteConversionGreen,
+    useWhiteConversionGreen,
     resetGame,
   }
 }

@@ -55,18 +55,44 @@ function formatEntry(entry) {
             return t('logClaimFinal', entry.playerName, icons(entry.colors))
         case 'trash-three':
             return t('logTrashThree', entry.playerName, icon(entry.color))
+        case 'trash-four':
+            return t('logTrashFour', entry.playerName, icon(entry.color))
         case 'blue-draw':
             return t('logBlueDraw', entry.playerName, icon(entry.color))
+        case 'blue-draw-flip':
+            return t('logBlueDrawFlip', entry.playerName, icon(entry.color))
         case 'blue-return':
             return t('logBlueReturn', entry.playerName, icon(entry.color))
         case 'red':
             return t('logRed', entry.playerName, icon(entry.color))
+        case 'red-flip':
+            return t('logRedFlip', entry.playerName, icon(entry.color))
         case 'yellow':
             return t('logYellow', entry.playerName, entry.count, icon(entry.color))
+        case 'yellow-flip':
+            return t('logYellowFlip', entry.playerName, entry.count, icon(entry.color))
         case 'green':
             return t('logGreen', entry.playerName, icon(entry.color))
-        case 'white':
-            return t('logWhite', entry.playerName, icon(entry.color))
+        case 'green-flip':
+            return t('logGreenFlip', entry.playerName, icon(entry.color))
+        case 'white-convert-trash':
+            return t('logWhiteConvertTrash', entry.playerName, icon(entry.color))
+        case 'white-convert-blue':
+            return t('logWhiteConvertBlue', entry.playerName, icon(entry.color))
+        case 'white-convert-blue-flip':
+            return t('logWhiteConvertBlueFlip', entry.playerName, icon(entry.color))
+        case 'white-convert-yellow':
+            return t('logWhiteConvertYellow', entry.playerName, entry.count, icon(entry.color))
+        case 'white-convert-yellow-flip':
+            return t('logWhiteConvertYellowFlip', entry.playerName, entry.count, icon(entry.color))
+        case 'white-convert-red':
+            return t('logWhiteConvertRed', entry.playerName, icon(entry.color))
+        case 'white-convert-red-flip':
+            return t('logWhiteConvertRedFlip', entry.playerName, icon(entry.color))
+        case 'white-convert-green':
+            return t('logWhiteConvertGreen', entry.playerName, icon(entry.color))
+        case 'white-convert-green-flip':
+            return t('logWhiteConvertGreenFlip', entry.playerName, icon(entry.color))
         case 'game-over':
             return t('logGameOver')
         default:
