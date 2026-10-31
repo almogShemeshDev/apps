@@ -21,13 +21,36 @@
             <div class="status-line" :class="statusClass">{{ statusText }}</div>
         </div>
 
+        <div class="category-strip">
+            <div
+                v-for="cat in CATEGORIES"
+                :key="cat.id"
+                class="cat-chip"
+                :class="[cat.id, { collected: collectedCategories.has(cat.id) }]"
+                :title="categoryName(cat)"
+                :aria-label="categoryName(cat)"
+            >
+                {{ cat.icon }}
+            </div>
+            <div class="score-info">
+                <span>{{ t('distinctCategories', collectedCategories.size) }}</span>
+                <span class="score" :class="{ provisional: windowStatus !== 'within' }">
+                    {{ t('potentialScore', potentialVp) }}
+                </span>
+            </div>
+        </div>
+        <p v-if="state.order.cards.length && windowStatus !== 'within'" class="provisional-note">
+            {{ t('potentialScoreProvisional') }}
+        </p>
+
         <div v-if="state.order.cards.length" class="cards">
             <TransitionGroup name="card-fly">
-                <template v-for="c in state.order.cards" :key="c.instanceId">
+                <template v-for="(c, i) in state.order.cards" :key="c.instanceId">
                     <ProductCard
                         v-if="c.type === 'product'"
                         :def-id="c.defId"
                         :effective-price="effectivePriceOf(c)"
+                        :is-new-category="isNewCategory(i)"
                     />
                     <SpecialCard v-else :def-id="c.defId" />
                 </template>
@@ -43,9 +66,12 @@ import ProductCard from './ProductCard.vue'
 import SpecialCard from './SpecialCard.vue'
 import { useGameState } from '../composables/useGameState.js'
 import { useLang } from '../composables/useLang.js'
+import { CATEGORIES } from '../game/categories.js'
+import { PRODUCTS_BY_ID } from '../game/products.js'
 
-const { state, effectiveTotal, minLimit, maxLimit, windowStatus, effectivePriceOf } = useGameState()
-const { t } = useLang()
+const { state, effectiveTotal, minLimit, maxLimit, windowStatus, effectivePriceOf, collectedCategories, potentialVp } =
+    useGameState()
+const { t, categoryName } = useLang()
 
 const scaleMax = computed(() => Math.max(40, maxLimit.value + 10))
 function pct(value) {
@@ -58,6 +84,19 @@ const statusText = computed(() => {
     if (windowStatus.value === 'above') return t('statusAbove')
     return t('statusWithin')
 })
+
+// True when this card (by its position in the cart) was the first to bring
+// its category into the order — used to briefly highlight new categories.
+function isNewCategory(index) {
+    const card = state.order.cards[index]
+    if (card.type !== 'product') return false
+    const category = PRODUCTS_BY_ID[card.defId].category
+    for (let i = 0; i < index; i++) {
+        const prior = state.order.cards[i]
+        if (prior.type === 'product' && PRODUCTS_BY_ID[prior.defId].category === category) return false
+    }
+    return true
+}
 </script>
 
 <style lang="scss" scoped>
@@ -168,6 +207,82 @@ const statusText = computed(() => {
     &.status-above {
         color: $danger;
     }
+}
+
+.category-strip {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    padding: 8px 10px;
+    background: $surface;
+    border-radius: 10px;
+}
+
+.cat-chip {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
+    background: $bg-panel;
+    border: 2px solid $border;
+    opacity: 0.4;
+    transition:
+        opacity 0.2s,
+        border-color 0.2s,
+        transform 0.2s;
+
+    &.collected {
+        opacity: 1;
+        transform: scale(1.08);
+    }
+
+    &.fashion.collected {
+        border-color: $cat-fashion;
+    }
+    &.home.collected {
+        border-color: $cat-home;
+    }
+    &.tech.collected {
+        border-color: $cat-tech;
+    }
+    &.food.collected {
+        border-color: $cat-food;
+    }
+    &.leisure.collected {
+        border-color: $cat-leisure;
+    }
+}
+
+.score-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin-inline-start: auto;
+    font-size: 0.74rem;
+    color: $text-dim;
+    text-align: end;
+
+    .score {
+        font-weight: 700;
+        color: $gold;
+
+        &.provisional {
+            color: $text-dim;
+            font-style: italic;
+        }
+    }
+}
+
+.provisional-note {
+    font-size: 0.68rem;
+    color: $text-dim;
+    font-style: italic;
+    text-align: center;
+    margin-top: -4px;
 }
 
 .cards {

@@ -51,6 +51,11 @@ const strings = {
     priceLabel: 'Price',
     vpShortLabel: 'VP',
 
+    categoriesLabel: 'Categories',
+    distinctCategories: (n) => `Distinct categories: ${n} / 5`,
+    potentialScore: (vp) => `Potential shipment score: ${vp} VP`,
+    potentialScoreProvisional: 'Provisional — only earned after a successful shipment',
+
     probPanelTitle: 'Probability Panel',
     probToggle: 'Show odds',
     probNextProduct: 'Next card is a product',
@@ -58,14 +63,18 @@ const strings = {
     probOverflow: 'Next draw overflows the max',
     probWithin: 'Next draw stays in window',
     probBelowMin: 'Next draw stays below minimum',
-    probExpectedVp: 'Expected VP of next draw',
+    probNewCategory: 'Next product is a new category',
+    probDuplicateCategory: 'Next product is an already-collected category',
+    probIncreasesVp: 'Next draw increases the shipment score',
+    probExpectedVpGain: 'Expected VP gain from next draw',
 
     logTitle: 'Game Log',
     logEmpty: 'No actions yet',
     logTurnStart: (name) => `${name}'s turn begins`,
     logDraw: (name, cardName, price) => `${name} drew ${cardName} (price ${price})`,
-    logShip: (name, vp, total) => `${name} shipped the order for ${vp} VP (total ${total})`,
-    logFail: (name, total) => `${name}'s shipment failed (total ${total})`,
+    logShip: (name, vp, categoryCount, total) =>
+      `${name} shipped the order for ${vp} VP across ${categoryCount} ${categoryCount === 1 ? 'category' : 'categories'} (total ${total})`,
+    logFail: (name, total, lostVp) => `${name}'s shipment failed (total ${total}, ${lostVp} VP lost)`,
     logCoupon: (name) => `${name} used a Discount Coupon`,
     logFreeReturn: (name, cardName) => `${name} used Free Return on ${cardName}`,
     logTaxInsurance: (name) => `${name} used Tax Insurance`,
@@ -135,6 +144,11 @@ const strings = {
     priceLabel: 'מחיר',
     vpShortLabel: 'נק"ז',
 
+    categoriesLabel: 'קטגוריות',
+    distinctCategories: (n) => `קטגוריות שונות: ${n} / 5`,
+    potentialScore: (vp) => `ניקוד משלוח פוטנציאלי: ${vp} נק"ז`,
+    potentialScoreProvisional: 'זמני — יוענק רק לאחר משלוח מוצלח',
+
     probPanelTitle: 'פאנל סיכויים',
     probToggle: 'הצג סיכויים',
     probNextProduct: 'הקלף הבא הוא מוצר',
@@ -142,14 +156,18 @@ const strings = {
     probOverflow: 'השליפה הבאה חורגת מהמקסימום',
     probWithin: 'השליפה הבאה נשארת בטווח',
     probBelowMin: 'השליפה הבאה נשארת מתחת למינימום',
-    probExpectedVp: 'נק"ז צפוי מהשליפה הבאה',
+    probNewCategory: 'המוצר הבא הוא קטגוריה חדשה',
+    probDuplicateCategory: 'המוצר הבא הוא קטגוריה שכבר נאספה',
+    probIncreasesVp: 'השליפה הבאה מעלה את ניקוד המשלוח',
+    probExpectedVpGain: 'תוספת נק"ז צפויה מהשליפה הבאה',
 
     logTitle: 'יומן משחק',
     logEmpty: 'אין פעולות עדיין',
     logTurnStart: (name) => `התור של ${name} מתחיל`,
     logDraw: (name, cardName, price) => `${name} שלף/ה ${cardName} (מחיר ${price})`,
-    logShip: (name, vp, total) => `${name} שלח/ה הזמנה בשווי ${vp} נק"ז (סכום ${total})`,
-    logFail: (name, total) => `ההזמנה של ${name} נכשלה (סכום ${total})`,
+    logShip: (name, vp, categoryCount, total) =>
+      `${name} שלח/ה הזמנה בשווי ${vp} נק"ז מתוך ${categoryCount} קטגוריות (סכום ${total})`,
+    logFail: (name, total, lostVp) => `ההזמנה של ${name} נכשלה (סכום ${total}, ${lostVp} נק"ז אבדו)`,
     logCoupon: (name) => `${name} השתמש/ה בקופון הנחה`,
     logFreeReturn: (name, cardName) => `${name} השתמש/ה בהחזרה חינם על ${cardName}`,
     logTaxInsurance: (name) => `${name} השתמש/ה בביטוח מכס`,
@@ -190,5 +208,8 @@ export function useLang() {
   function cardDesc(def) {
     return lang.value === 'he' ? def.descriptionHe ?? def.description : def.description
   }
-  return { lang, t, dir, toggleLang, cardName, cardDesc }
+  function categoryName(category) {
+    return lang.value === 'he' ? category.nameHe ?? category.name : category.name
+  }
+  return { lang, t, dir, toggleLang, cardName, cardDesc, categoryName }
 }

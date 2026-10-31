@@ -2,7 +2,8 @@ import { reactive, computed } from 'vue'
 import { buildDeck } from '../game/deck.js'
 import { windowForLevel, advanceLevel, retreatLevel, START_LEVEL } from '../game/windows.js'
 import { SPECIALS_BY_ID } from '../game/specials.js'
-import { instancePrice, instanceVp } from '../game/probability.js'
+import { instancePrice } from '../game/probability.js'
+import { categoriesInCards, scoreForCategoryCount } from '../game/scoring.js'
 
 let nextLogId = 1
 
@@ -47,6 +48,11 @@ const windowStatus = computed(() => {
   if (effectiveTotal.value > maxLimit.value) return 'above'
   return 'within'
 })
+
+// Shipment scoring: VP is earned by distinct product categories in the
+// cart, not by summing individual products (specials never count).
+const collectedCategories = computed(() => categoriesInCards(state.order.cards))
+const potentialVp = computed(() => scoreForCategoryCount(collectedCategories.value.size))
 
 // The most recently drawn product still present in the cart (Free Return's target).
 const freeReturnTarget = computed(() => {
@@ -139,11 +145,11 @@ function canShip() {
 function doShip() {
   if (!canShip()) return
   const player = turnPlayer.value
-  let vpGained = 0
+  const categoryCount = collectedCategories.value.size
+  const vpGained = scoreForCategoryCount(categoryCount)
   for (const card of state.order.cards) {
     if (card.type === 'product') {
       player.productsWon.push(card.defId)
-      vpGained += instanceVp(card)
     } else {
       player.specialInventory.push({ instanceId: card.instanceId, defId: card.defId })
     }
@@ -151,7 +157,7 @@ function doShip() {
   player.vp += vpGained
   const total = effectiveTotal.value
   state.windowLevel = advanceLevel(state.windowLevel)
-  pushLog('ship', { playerName: player.name, vp: vpGained, total })
+  pushLog('ship', { playerName: player.name, vp: vpGained, categoryCount, total })
   pushLog('window-move', { level: state.windowLevel })
   nextTurn()
 }
@@ -163,9 +169,10 @@ function canStopOrFail() {
 function doFail() {
   if (!canStopOrFail()) return
   const total = effectiveTotal.value
+  const lostVp = potentialVp.value
   for (const card of state.order.cards) state.discard.push(card)
   state.windowLevel = retreatLevel(state.windowLevel)
-  pushLog('fail', { playerName: turnPlayer.value.name, total })
+  pushLog('fail', { playerName: turnPlayer.value.name, total, lostVp })
   pushLog('window-move', { level: state.windowLevel })
   nextTurn()
 }
@@ -299,6 +306,8 @@ export function useGameState() {
     effectiveTotal,
     windowStatus,
     effectivePriceOf,
+    collectedCategories,
+    potentialVp,
     freeReturnTarget,
     flashSaleEligibleTargets,
     peekedCard,

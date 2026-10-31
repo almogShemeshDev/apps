@@ -48,9 +48,9 @@ function formatEntry(entry) {
         case 'draw':
             return t('logDraw', entry.playerName, nameFor(entry.defId, entry.cardType), entry.price)
         case 'ship':
-            return t('logShip', entry.playerName, entry.vp, entry.total)
+            return t('logShip', entry.playerName, entry.vp, entry.categoryCount, entry.total)
         case 'fail':
-            return t('logFail', entry.playerName, entry.total)
+            return t('logFail', entry.playerName, entry.total, entry.lostVp)
         case 'window-move':
             return t('logWindowMove', entry.level)
         case 'coupon':

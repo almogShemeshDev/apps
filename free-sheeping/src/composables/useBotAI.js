@@ -1,6 +1,6 @@
 import { ref, watch } from 'vue'
 import { useGameState } from './useGameState.js'
-import { probOverflow, expectedNextVp, instancePrice } from '../game/probability.js'
+import { probOverflow, expectedNextVpGain, instancePrice } from '../game/probability.js'
 
 const DELAY = 650
 const OVERFLOW_RISK_THRESHOLD = 0.45
@@ -34,6 +34,7 @@ export function useBotAI() {
     useSneakPeek,
     resolveSneakPeek,
     peekedCard,
+    collectedCategories,
   } = useGameState()
 
   const botBusy = ref(false)
@@ -125,9 +126,9 @@ export function useBotAI() {
 
   function shouldKeepDrawing(playerIndex) {
     const risk = probOverflow(state.deck, effectiveTotal.value, maxLimit.value)
-    const expVp = expectedNextVp(state.deck)
+    const expVpGain = expectedNextVpGain(state.deck, collectedCategories.value)
     if (risk >= OVERFLOW_RISK_THRESHOLD) return false
-    return expVp > 0.5
+    return expVpGain > 0.5
   }
 
   // Try the specials that can bring an over-the-limit order back into range,
