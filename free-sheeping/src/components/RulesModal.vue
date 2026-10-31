@@ -11,7 +11,8 @@
                     <p>
                         A push-your-luck shopping cart game for 2–5 players. Draw products toward a
                         shared, circular free-shipping window — go too low or too high and your order
-                        fails. Score points by diversifying what you ship, not just how much.
+                        fails. Build the biggest, most diverse product collection by the end of the
+                        game to win.
                     </p>
                 </section>
 
@@ -47,9 +48,11 @@
                 <section>
                     <h3>Shipping or Failing</h3>
                     <p>
-                        <strong>Ship</strong> while within the window to score VP (see Scoring below),
-                        keep every product and special card you drew, and advance the shared window
-                        one level forward (level 5 wraps to level 1).
+                        <strong>Ship</strong> while within the window to keep every product you drew —
+                        they join your permanent collection — plus any special cards, and to advance
+                        the shared window one level forward (level 5 wraps to level 1). Shipping itself
+                        earns no immediate points; all scoring happens at the end of the game (see
+                        Scoring below).
                     </p>
                     <p>
                         <strong>Failing</strong> — whether forced or voluntary — discards your whole
@@ -61,17 +64,22 @@
                 <section>
                     <h3>Scoring</h3>
                     <p>
-                        A shipment's VP comes from how many <strong>distinct product categories</strong>
-                        it contains, not from the products themselves. Extra products from a category
-                        you already shipped add nothing. Special cards never count as a category.
+                        Scoring happens once, at the end of the game, based on your entire collection
+                        of shipped products. Each of the five categories is scored separately by how
+                        many products you collected in it:
                     </p>
                     <ul>
-                        <li>1 category = 1 VP</li>
-                        <li>2 categories = 3 VP</li>
-                        <li>3 categories = 6 VP</li>
-                        <li>4 categories = 10 VP</li>
-                        <li>5 categories = 15 VP</li>
+                        <li>0–1 products = 0 VP</li>
+                        <li>2 products = 2 VP</li>
+                        <li>3 products = 5 VP</li>
+                        <li>4 products = 9 VP</li>
+                        <li>5 or more products = 14 VP</li>
                     </ul>
+                    <p>
+                        On top of that, collecting <strong>at least one product from all five
+                        categories</strong> earns a <strong>5 VP diversity bonus</strong>. Add the five
+                        category scores and the bonus together for your final score.
+                    </p>
                 </section>
 
                 <section>
@@ -119,8 +127,8 @@
                     <h3>סקירה כללית</h3>
                     <p>
                         משחק עגלת קניות ל-2–5 שחקנים. שולפים מוצרים כדי להגיע לטווח המשלוח החינמי
-                        המשותף והמעגלי — אם תרדו נמוך מדי או תעלו גבוה מדי, ההזמנה תיכשל. מנקדים על
-                        ידי גיוון השליחה, לא רק על כמות.
+                        המשותף והמעגלי — אם תרדו נמוך מדי או תעלו גבוה מדי, ההזמנה תיכשל. בנו את
+                        האוסף הגדול והמגוון ביותר עד סוף המשחק כדי לנצח.
                     </p>
                 </section>
 
@@ -154,9 +162,10 @@
                 <section>
                     <h3>שליחה או כישלון</h3>
                     <p>
-                        <strong>שליחה</strong> בזמן שההזמנה בתוך הטווח מזכה בנק"ז (ראו ניקוד למטה),
-                        שומרת את כל המוצרים והקלפים המיוחדים שנשלפו, ומקדמת את חלון המשלוח המשותף
-                        רמה אחת קדימה (רמה 5 חוזרת לרמה 1).
+                        <strong>שליחה</strong> בזמן שההזמנה בתוך הטווח שומרת את כל המוצרים שנשלפו —
+                        הם מצטרפים לאוסף הקבוע שלכם — בנוסף לכל קלף מיוחד, ומקדמת את חלון המשלוח
+                        המשותף רמה אחת קדימה (רמה 5 חוזרת לרמה 1). השליחה עצמה לא מזכה בנק"ז מיידי;
+                        כל הניקוד מתבצע בסוף המשחק (ראו ניקוד למטה).
                     </p>
                     <p>
                         <strong>כישלון</strong> — בין אם נכפה ובין אם מרצון — מבטל את כל ההזמנה ומחזיר
@@ -168,17 +177,21 @@
                 <section>
                     <h3>ניקוד</h3>
                     <p>
-                        נק"ז של משלוח מגיע ממספר <strong>הקטגוריות השונות</strong> שהוא מכיל, ולא
-                        מהמוצרים עצמם. מוצרים נוספים מקטגוריה שכבר נשלחה לא מוסיפים כלום. קלפים
-                        מיוחדים לעולם לא נחשבים כקטגוריה.
+                        הניקוד מתבצע פעם אחת, בסוף המשחק, על בסיס כל אוסף המוצרים ששלחתם. כל אחת
+                        מחמש הקטגוריות מנוקדת בנפרד לפי מספר המוצרים שאספתם בה:
                     </p>
                     <ul>
-                        <li>קטגוריה אחת = 1 נק"ז</li>
-                        <li>2 קטגוריות = 3 נק"ז</li>
-                        <li>3 קטגוריות = 6 נק"ז</li>
-                        <li>4 קטגוריות = 10 נק"ז</li>
-                        <li>5 קטגוריות = 15 נק"ז</li>
+                        <li>0–1 מוצרים = 0 נק"ז</li>
+                        <li>2 מוצרים = 2 נק"ז</li>
+                        <li>3 מוצרים = 5 נק"ז</li>
+                        <li>4 מוצרים = 9 נק"ז</li>
+                        <li>5 מוצרים או יותר = 14 נק"ז</li>
                     </ul>
+                    <p>
+                        בנוסף, איסוף <strong>לפחות מוצר אחד מכל חמש הקטגוריות</strong> מזכה
+                        ב<strong>בונוס גיוון של 5 נק"ז</strong>. סכמו את חמשת ניקודי הקטגוריות
+                        והבונוס יחד לניקוד הסופי שלכם.
+                    </p>
                 </section>
 
                 <section>

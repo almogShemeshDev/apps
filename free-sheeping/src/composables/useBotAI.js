@@ -1,6 +1,6 @@
 import { ref, watch } from 'vue'
 import { useGameState } from './useGameState.js'
-import { probOverflow, expectedNextVpGain, instancePrice } from '../game/probability.js'
+import { probOverflow, instancePrice } from '../game/probability.js'
 
 const DELAY = 650
 const OVERFLOW_RISK_THRESHOLD = 0.45
@@ -34,7 +34,6 @@ export function useBotAI() {
     useSneakPeek,
     resolveSneakPeek,
     peekedCard,
-    collectedCategories,
   } = useGameState()
 
   const botBusy = ref(false)
@@ -124,11 +123,11 @@ export function useBotAI() {
     return nextTotal <= maxLimit.value
   }
 
+  // Every shipped product helps the endgame collection, so the only real
+  // tradeoff is risk: keep drawing while the odds of overflowing stay low.
   function shouldKeepDrawing(playerIndex) {
     const risk = probOverflow(state.deck, effectiveTotal.value, maxLimit.value)
-    const expVpGain = expectedNextVpGain(state.deck, collectedCategories.value)
-    if (risk >= OVERFLOW_RISK_THRESHOLD) return false
-    return expVpGain > 0.5
+    return risk < OVERFLOW_RISK_THRESHOLD
   }
 
   // Try the specials that can bring an over-the-limit order back into range,

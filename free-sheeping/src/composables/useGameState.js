@@ -3,7 +3,6 @@ import { buildDeck } from '../game/deck.js'
 import { windowForLevel, advanceLevel, retreatLevel, START_LEVEL } from '../game/windows.js'
 import { SPECIALS_BY_ID } from '../game/specials.js'
 import { instancePrice } from '../game/probability.js'
-import { categoriesInCards, scoreForCategoryCount } from '../game/scoring.js'
 
 let nextLogId = 1
 
@@ -13,7 +12,8 @@ function freshTurnEffects() {
 
 const state = reactive({
   phase: 'setup', // 'setup' | 'playing' | 'game-over'
-  players: [], // { id, name, isBot, vp, productsWon: [defId,...], specialInventory: [{instanceId, defId}] }
+  players: [], // { name, isBot, productsWon: [defId,...], specialInventory: [{instanceId, defId}] } — score is derived from productsWon (see scoring.js), not stored
+
   deck: [], // array of card instances, index 0 = top of deck
   discard: [],
   windowLevel: START_LEVEL,
@@ -49,11 +49,6 @@ const windowStatus = computed(() => {
   return 'within'
 })
 
-// Shipment scoring: VP is earned by distinct product categories in the
-// cart, not by summing individual products (specials never count).
-const collectedCategories = computed(() => categoriesInCards(state.order.cards))
-const potentialVp = computed(() => scoreForCategoryCount(collectedCategories.value.size))
-
 // The most recently drawn product still present in the cart (Free Return's target).
 const freeReturnTarget = computed(() => {
   for (let i = state.order.cards.length - 1; i >= 0; i--) {
@@ -71,7 +66,7 @@ const peekedCard = computed(() => {
 function createPlayer(input) {
   const name = typeof input === 'string' ? input : input.name
   const isBot = typeof input === 'string' ? false : !!input.isBot
-  return { name, isBot, vp: 0, productsWon: [], specialInventory: [] }
+  return { name, isBot, productsWon: [], specialInventory: [] }
 }
 
 function startGame(playerInputs) {
@@ -142,22 +137,23 @@ function canShip() {
   return state.phase === 'playing' && windowStatus.value === 'within'
 }
 
+// Shipping awards no immediate VP — successful products join the player's
+// permanent collection and are scored only at game end (see scoring.js).
 function doShip() {
   if (!canShip()) return
   const player = turnPlayer.value
-  const categoryCount = collectedCategories.value.size
-  const vpGained = scoreForCategoryCount(categoryCount)
+  let productCount = 0
   for (const card of state.order.cards) {
     if (card.type === 'product') {
       player.productsWon.push(card.defId)
+      productCount++
     } else {
       player.specialInventory.push({ instanceId: card.instanceId, defId: card.defId })
     }
   }
-  player.vp += vpGained
   const total = effectiveTotal.value
   state.windowLevel = advanceLevel(state.windowLevel)
-  pushLog('ship', { playerName: player.name, vp: vpGained, categoryCount, total })
+  pushLog('ship', { playerName: player.name, productCount, total })
   pushLog('window-move', { level: state.windowLevel })
   nextTurn()
 }
@@ -169,10 +165,9 @@ function canStopOrFail() {
 function doFail() {
   if (!canStopOrFail()) return
   const total = effectiveTotal.value
-  const lostVp = potentialVp.value
   for (const card of state.order.cards) state.discard.push(card)
   state.windowLevel = retreatLevel(state.windowLevel)
-  pushLog('fail', { playerName: turnPlayer.value.name, total, lostVp })
+  pushLog('fail', { playerName: turnPlayer.value.name, total })
   pushLog('window-move', { level: state.windowLevel })
   nextTurn()
 }
@@ -306,8 +301,6 @@ export function useGameState() {
     effectiveTotal,
     windowStatus,
     effectivePriceOf,
-    collectedCategories,
-    potentialVp,
     freeReturnTarget,
     flashSaleEligibleTargets,
     peekedCard,

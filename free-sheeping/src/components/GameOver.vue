@@ -4,11 +4,31 @@
 
         <div class="standings">
             <p class="standings-label">{{ t('finalStandings') }}</p>
-            <div v-for="p in ranked" :key="p.name" class="row" :class="{ winner: isWinner(p) }">
-                <span class="name">{{ p.name }}</span>
-                <span class="shipped">{{ t('productsWonLabel', p.shipped) }}</span>
-                <span class="vp">⭐ <span dir="ltr">{{ p.vp }}</span></span>
+
+            <div v-for="p in ranked" :key="p.name" class="player-result" :class="{ winner: isWinner(p) }">
+                <div class="result-header">
+                    <span class="name">{{ p.name }}</span>
+                    <span class="total-score">⭐ <span dir="ltr">{{ p.score }}</span></span>
+                </div>
+
+                <div class="breakdown">
+                    <div v-for="cat in CATEGORIES" :key="cat.id" class="cat-row">
+                        <span class="icon">{{ cat.icon }}</span>
+                        <span class="cat-name">{{ categoryName(cat) }}</span>
+                        <span class="cat-count">{{ p.counts[cat.id] }}</span>
+                        <span class="cat-points" dir="ltr">+{{ scoreForCategoryProductCount(p.counts[cat.id]) }}</span>
+                    </div>
+                    <div v-if="p.bonus" class="bonus-row">
+                        <span>{{ t('diversityBonusLabel') }}</span>
+                        <span dir="ltr">+5</span>
+                    </div>
+                    <div class="total-row">
+                        <span>{{ t('totalScoreLabel') }}</span>
+                        <span dir="ltr">{{ p.score }}</span>
+                    </div>
+                </div>
             </div>
+
             <p class="winner-line">
                 {{ tiedForFirst ? t('tiedLabel') : t('winnerLabel', ranked[0]?.name) }}
             </p>
@@ -21,25 +41,34 @@
 <script setup>
 import { computed } from 'vue'
 import { useLang } from '../composables/useLang.js'
+import { CATEGORIES } from '../game/categories.js'
+import { categoryCounts, hasDiversityBonus, endgameScore, scoreForCategoryProductCount } from '../game/scoring.js'
 
 const props = defineProps({
     players: { type: Array, required: true },
 })
 defineEmits(['play-again'])
 
-const { t } = useLang()
+const { t, categoryName } = useLang()
 
 const ranked = computed(() =>
     [...props.players]
-        .map((p) => ({ name: p.name, vp: p.vp, shipped: p.productsWon.length }))
-        .sort((a, b) => b.vp - a.vp || b.shipped - a.shipped)
+        .map((p) => {
+            const counts = categoryCounts(p.productsWon)
+            return {
+                name: p.name,
+                shipped: p.productsWon.length,
+                counts,
+                bonus: hasDiversityBonus(counts),
+                score: endgameScore(p.productsWon),
+            }
+        })
+        .sort((a, b) => b.score - a.score || b.shipped - a.shipped)
 )
 const top = computed(() => ranked.value[0])
-const tiedForFirst = computed(
-    () => top.value && ranked.value.filter((p) => p.vp === top.value.vp && p.shipped === top.value.shipped).length > 1
-)
+const tiedForFirst = computed(() => top.value && ranked.value.filter((p) => p.score === top.value.score).length > 1)
 function isWinner(p) {
-    return top.value && p.vp === top.value.vp && p.shipped === top.value.shipped
+    return top.value && p.score === top.value.score
 }
 </script>
 
@@ -69,6 +98,8 @@ function isWinner(p) {
     border-radius: 16px;
     padding: 24px 32px;
     min-width: 300px;
+    max-width: 420px;
+    width: 100%;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -83,29 +114,83 @@ function isWinner(p) {
     color: $text-dim;
 }
 
-.row {
-    display: flex;
-    justify-content: space-between;
-    gap: 16px;
+.player-result {
     width: 100%;
-    padding: 6px 12px;
-    border-radius: 8px;
-    font-size: 0.95rem;
-
-    .shipped {
-        color: $text-dim;
-        font-size: 0.85rem;
-    }
+    border: 1px solid $border;
+    border-radius: 12px;
+    padding: 10px 14px;
 
     &.winner {
-        background: rgba(232, 162, 61, 0.15);
-        color: $gold;
-        font-weight: 700;
-
-        .shipped {
-            color: $gold;
-        }
+        border-color: $gold;
+        background: rgba(232, 162, 61, 0.08);
     }
+}
+
+.result-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: $text;
+
+    .total-score {
+        color: $gold;
+    }
+}
+
+.player-result.winner .result-header {
+    color: $gold;
+}
+
+.breakdown {
+    margin-top: 6px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.cat-row {
+    display: grid;
+    grid-template-columns: 1.2em 1fr auto auto;
+    gap: 6px;
+    align-items: center;
+    font-size: 0.78rem;
+    color: $text-dim;
+
+    .cat-name {
+        text-align: start;
+    }
+
+    .cat-count {
+        color: $text;
+    }
+
+    .cat-points {
+        min-width: 2.2em;
+        text-align: end;
+        color: $text-dim;
+    }
+}
+
+.bonus-row,
+.total-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.78rem;
+    padding-top: 4px;
+    margin-top: 2px;
+    border-top: 1px dashed $border;
+}
+
+.bonus-row {
+    color: $teal;
+    font-weight: 700;
+}
+
+.total-row {
+    color: $text;
+    font-weight: 700;
 }
 
 .winner-line {

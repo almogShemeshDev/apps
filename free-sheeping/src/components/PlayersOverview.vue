@@ -12,8 +12,20 @@
                 <span v-if="i === state.turnIndex" class="badge turn-badge">{{ t('turnBadge') }}</span>
             </div>
             <div class="stats-row">
-                <span class="vp">⭐ {{ p.vp }} {{ t('vpLabel') }}</span>
+                <span class="vp">✨ {{ t('estScoreLabel', endgameScore(p.productsWon)) }}</span>
                 <span class="shipped">{{ t('productsWonLabel', p.productsWon.length) }}</span>
+            </div>
+            <div class="collection">
+                <span
+                    v-for="cat in CATEGORIES"
+                    :key="cat.id"
+                    class="cat-count"
+                    :class="[cat.id, { collected: countsFor(p)[cat.id] > 0 }]"
+                    :title="categoryName(cat)"
+                    :aria-label="categoryName(cat)"
+                >
+                    {{ cat.icon }}<span class="count">{{ countsFor(p)[cat.id] }}</span>
+                </span>
             </div>
             <div class="inventory">
                 <span v-if="!p.specialInventory.length" class="none">{{ t('noSpecials') }}</span>
@@ -29,12 +41,17 @@
 import { useGameState } from '../composables/useGameState.js'
 import { useLang } from '../composables/useLang.js'
 import { SPECIALS_BY_ID } from '../game/specials.js'
+import { CATEGORIES } from '../game/categories.js'
+import { categoryCounts, endgameScore } from '../game/scoring.js'
 
 const { state } = useGameState()
-const { t } = useLang()
+const { t, categoryName } = useLang()
 
 function specialIcon(defId) {
     return SPECIALS_BY_ID[defId]?.icon ?? ''
+}
+function countsFor(player) {
+    return categoryCounts(player.productsWon)
 }
 </script>
 
@@ -104,6 +121,52 @@ function specialIcon(defId) {
 
 .shipped {
     color: $text-dim;
+}
+
+.collection {
+    display: flex;
+    gap: 5px;
+    flex-wrap: wrap;
+}
+
+.cat-count {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    padding: 2px 6px;
+    border-radius: 999px;
+    background: $surface;
+    border: 1px solid $border;
+    font-size: 0.72rem;
+    opacity: 0.55;
+    transition:
+        opacity 0.2s,
+        border-color 0.2s;
+
+    &.collected {
+        opacity: 1;
+    }
+
+    &.fashion.collected {
+        border-color: $cat-fashion;
+    }
+    &.home.collected {
+        border-color: $cat-home;
+    }
+    &.tech.collected {
+        border-color: $cat-tech;
+    }
+    &.food.collected {
+        border-color: $cat-food;
+    }
+    &.leisure.collected {
+        border-color: $cat-leisure;
+    }
+
+    .count {
+        font-weight: 700;
+        color: $text;
+    }
 }
 
 .inventory {

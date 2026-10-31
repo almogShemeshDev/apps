@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest'
 import { useGameState } from './useGameState.js'
+import { endgameScore } from '../game/scoring.js'
 
 function product(id) {
   return { instanceId: id, defId: id, type: 'product' }
@@ -20,40 +21,36 @@ beforeEach(() => {
   // startGame begins at window level 3 (min 15, max 25).
 })
 
-describe('shipment scoring (category-based)', () => {
-  it('awards VP based on distinct categories, not individual products', () => {
-    // P05 Fashion (7), P11 Home (8), P21 Technology (10) -> total 25, 3 categories.
+describe('shipping (endgame collection scoring)', () => {
+  it('a successful shipment moves products into the collection and awards no immediate VP', () => {
+    // P05 Fashion (7), P11 Home (8), P21 Technology (10) -> total 25.
     gs.state.order.cards.push(product('P05'), product('P11'), product('P21'))
     expect(gs.canShip()).toBe(true)
     gs.doShip()
-    expect(gs.state.players[0].vp).toBe(6)
+    expect(gs.state.players[0].productsWon).toEqual(['P05', 'P11', 'P21'])
+    expect(gs.state.players[0].vp).toBeUndefined() // no stored VP field — score is derived at game end
   })
 
-  it('failed shipments earn zero points', () => {
+  it('a shipped special card goes to inventory, not the product collection', () => {
+    gs.state.order.cards.push(product('P05'), product('P11'), special('S05', 1)) // 7 + 8 + 2 = 17, within
+    gs.doShip()
+    expect(gs.state.players[0].productsWon).toEqual(['P05', 'P11'])
+    expect(gs.state.players[0].specialInventory).toEqual([{ instanceId: 'S05-1', defId: 'S05' }])
+  })
+
+  it('failed shipments discard everything and add nothing to the collection', () => {
     // Below the level-3 minimum (15) so the shipment cannot succeed.
     gs.state.order.cards.push(product('P08')) // price 2, well below min
     expect(gs.canShip()).toBe(false)
     expect(gs.canStopOrFail()).toBe(true)
     gs.doFail()
-    expect(gs.state.players[0].vp).toBe(0)
     expect(gs.state.players[0].productsWon).toEqual([])
+    expect(gs.state.discard.some((c) => c.defId === 'P08')).toBe(true)
   })
 
-  it('shipment points are awarded exactly once', () => {
-    gs.state.order.cards.push(product('P05'), product('P11'), product('P21')) // 3 categories -> 6 VP
-    gs.doShip()
-    expect(gs.state.players[0].vp).toBe(6)
-    // It is now the next player's turn with a fresh, empty cart.
-    expect(gs.state.order.cards.length).toBe(0)
-    expect(gs.canShip()).toBe(false)
-    gs.doShip() // no-op: canShip() is false
-    expect(gs.state.players[0].vp).toBe(6)
-    expect(gs.state.players[1].vp).toBe(0)
-  })
-
-  it('product prices still affect shipping eligibility regardless of category score', () => {
-    // A single cheap product: 5 distinct-category-worthy items would still fail
-    // eligibility if the total price is below the window minimum.
+  it('product prices still affect shipping eligibility', () => {
+    // A single cheap product keeps the order below the window minimum
+    // regardless of how many distinct categories are represented.
     gs.state.order.cards.push(product('P08')) // Fashion, price 2
     expect(gs.windowStatus.value).toBe('below')
     expect(gs.canShip()).toBe(false)
@@ -67,16 +64,34 @@ describe('shipment scoring (category-based)', () => {
     expect(gs.canShip()).toBe(true)
   })
 
-  it('special card discounts change price but never product categories', () => {
-    gs.state.order.cards.push(product('P05'), product('P11')) // Fashion + Home, 7 + 8 = 15
+  it('special card discounts change price but never a product category', () => {
+    gs.state.order.cards.push(product('P05'), product('P11'), product('P24')) // Fashion 7 + Home 8 + Tech 4 = 19
     const player = gs.state.players[0]
     player.specialInventory.push({ instanceId: 'TEST-S04', defId: 'S04' })
-    const before = gs.collectedCategories.value.size
     expect(gs.canUseFlashSale(0, 'TEST-S04')).toBe(true)
     gs.useFlashSale(0, 'TEST-S04', ['P05'])
     expect(gs.effectivePriceOf(gs.state.order.cards[0])).toBe(5) // 7 - 2
-    expect(gs.collectedCategories.value.size).toBe(before)
-    expect(gs.potentialVp.value).toBe(3) // still 2 categories -> 3 VP
+    expect(gs.windowStatus.value).toBe('within') // 19 - 2 = 17, still within 15-25
+    gs.doShip()
+    // The discount never touched which products (and categories) were shipped.
+    expect(gs.state.players[0].productsWon).toEqual(['P05', 'P11', 'P24'])
+  })
+
+  it('the endgame score is only computed from the accumulated collection, across turns', () => {
+    // Turn 1 (Alice): ship Fashion + Home.
+    gs.state.order.cards.push(product('P05'), product('P11'))
+    gs.doShip()
+    // Turn 2 (Bob): ship something else entirely.
+    gs.state.order.cards.push(product('P25')) // Food, price 1 -> below min, so fail instead
+    gs.doFail()
+    // Turn 3 (Alice again): ship a third category.
+    gs.state.order.cards.push(product('P05'), product('P21')) // Fashion (dup) + Technology, 7+10=17
+    gs.doShip()
+
+    const alice = gs.state.players[0]
+    expect(alice.productsWon).toEqual(['P05', 'P11', 'P05', 'P21'])
+    expect(endgameScore(alice.productsWon)).toBe(2 /* fashion x2 */ + 0 /* home x1 */ + 0 /* tech x1 */)
+    expect(gs.state.players[1].productsWon).toEqual([]) // Bob's shipment failed
   })
 })
 
@@ -97,15 +112,6 @@ describe('special card prices (count toward the cart like products)', () => {
     expect(gs.windowStatus.value).toBe('within')
     gs.state.order.cards.push(special('S01', 1)) // Discount Coupon, +3 => 27, now above max
     expect(gs.windowStatus.value).toBe('above')
-  })
-
-  it('a shipped special card still contributes 0 VP and no category, only its price', () => {
-    gs.state.order.cards.push(product('P05'), product('P11'), special('S05', 1)) // 7 + 8 + 2 = 17, within
-    expect(gs.collectedCategories.value.size).toBe(2) // the special isn't a category
-    expect(gs.potentialVp.value).toBe(3)
-    gs.doShip()
-    expect(gs.state.players[0].vp).toBe(3) // unaffected by the special's price
-    expect(gs.state.players[0].specialInventory).toEqual([{ instanceId: 'S05-1', defId: 'S05' }])
   })
 })
 

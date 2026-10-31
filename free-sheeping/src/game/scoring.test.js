@@ -1,78 +1,64 @@
 import { describe, it, expect } from 'vitest'
-import { scoreForCategoryCount, categoriesInCards, potentialVp } from './scoring.js'
+import { scoreForCategoryProductCount, categoryCounts, hasDiversityBonus, endgameScore } from './scoring.js'
 
-function product(id) {
-  return { instanceId: id, defId: id, type: 'product' }
-}
-function special(id, i = 1) {
-  return { instanceId: `${id}-${i}`, defId: id, type: 'special' }
-}
-
-describe('scoreForCategoryCount', () => {
-  it('matches the scoring table for 0-5 categories', () => {
-    expect(scoreForCategoryCount(0)).toBe(0)
-    expect(scoreForCategoryCount(1)).toBe(1)
-    expect(scoreForCategoryCount(2)).toBe(3)
-    expect(scoreForCategoryCount(3)).toBe(6)
-    expect(scoreForCategoryCount(4)).toBe(10)
-    expect(scoreForCategoryCount(5)).toBe(15)
+describe('scoreForCategoryProductCount', () => {
+  it('matches the endgame scoring table', () => {
+    expect(scoreForCategoryProductCount(0)).toBe(0)
+    expect(scoreForCategoryProductCount(1)).toBe(0)
+    expect(scoreForCategoryProductCount(2)).toBe(2)
+    expect(scoreForCategoryProductCount(3)).toBe(5)
+    expect(scoreForCategoryProductCount(4)).toBe(9)
+    expect(scoreForCategoryProductCount(5)).toBe(14)
   })
 
-  it('clamps above 5 distinct categories (table has no higher entry)', () => {
-    expect(scoreForCategoryCount(6)).toBe(15)
+  it('caps at the 5-or-more tier', () => {
+    expect(scoreForCategoryProductCount(6)).toBe(14)
+    expect(scoreForCategoryProductCount(9)).toBe(14)
   })
 })
 
-describe('categoriesInCards / potentialVp', () => {
-  it('one category earns 1 VP regardless of duplicate products', () => {
-    // P01, P02, P03 are all Fashion & Beauty.
-    const cards = [product('P01'), product('P02'), product('P03')]
-    expect(categoriesInCards(cards).size).toBe(1)
-    expect(potentialVp(cards)).toBe(1)
+describe('categoryCounts', () => {
+  it('counts products per category and reports all five categories', () => {
+    // P01, P02 Fashion; P09 Home.
+    const counts = categoryCounts(['P01', 'P02', 'P09'])
+    expect(counts).toEqual({ fashion: 2, home: 1, tech: 0, food: 0, leisure: 0 })
   })
 
-  it('two distinct categories earn 3 VP', () => {
-    // P05 Fashion, P15 Home & Living.
-    const cards = [product('P05'), product('P15')]
-    expect(categoriesInCards(cards).size).toBe(2)
-    expect(potentialVp(cards)).toBe(3)
+  it('an empty collection scores all zeros', () => {
+    expect(categoryCounts([])).toEqual({ fashion: 0, home: 0, tech: 0, food: 0, leisure: 0 })
+  })
+})
+
+describe('hasDiversityBonus', () => {
+  it('is false unless every category has at least one product', () => {
+    expect(hasDiversityBonus({ fashion: 3, home: 1, tech: 0, food: 2, leisure: 1 })).toBe(false)
   })
 
-  it('three distinct categories earn 6 VP', () => {
-    // P05 Fashion, P11 Home, P21 Technology.
-    const cards = [product('P05'), product('P11'), product('P21')]
-    expect(categoriesInCards(cards).size).toBe(3)
-    expect(potentialVp(cards)).toBe(6)
+  it('is true once all five categories have at least one product', () => {
+    expect(hasDiversityBonus({ fashion: 1, home: 1, tech: 1, food: 1, leisure: 1 })).toBe(true)
+  })
+})
+
+describe('endgameScore', () => {
+  it('sums the five category scores with no diversity bonus', () => {
+    // Fashion: P01, P02 (2 -> 2 VP). Home: P09, P10, P11 (3 -> 5 VP). Nothing else.
+    const score = endgameScore(['P01', 'P02', 'P09', 'P10', 'P11'])
+    expect(score).toBe(2 + 5)
   })
 
-  it('four distinct categories earn 10 VP', () => {
-    // Fashion, Home, Technology, Food & Kitchen + a duplicate Fashion product.
-    const cards = [product('P08'), product('P16'), product('P24'), product('P25'), product('P06')]
-    expect(categoriesInCards(cards).size).toBe(4)
-    expect(potentialVp(cards)).toBe(10)
+  it('adds the 5 VP diversity bonus once every category has a product', () => {
+    // One product from each of the five categories (1 each -> 0 VP per category).
+    const score = endgameScore(['P01', 'P09', 'P17', 'P25', 'P32'])
+    expect(score).toBe(0 + 5) // all singles score 0, plus the diversity bonus
   })
 
-  it('five distinct categories earn 15 VP', () => {
-    // One product from each of the five categories.
-    const cards = [product('P08'), product('P16'), product('P24'), product('P25'), product('P41')]
-    expect(categoriesInCards(cards).size).toBe(5)
-    expect(potentialVp(cards)).toBe(15)
+  it('a full 5-or-more category plus full diversity scores the maximum tier everywhere', () => {
+    // 5 Fashion products + one product from each other category.
+    const score = endgameScore(['P01', 'P02', 'P03', 'P04', 'P05', 'P09', 'P17', 'P25', 'P32'])
+    expect(score).toBe(14 + 0 + 0 + 0 + 0 + 5) // fashion maxed, others at 1 (0 VP), plus bonus
   })
 
-  it('special cards never count as categories', () => {
-    const cards = [product('P01'), special('S01'), special('S02'), special('S03')]
-    expect(categoriesInCards(cards).size).toBe(1)
-    expect(potentialVp(cards)).toBe(1)
-  })
-
-  it('an empty or all-special cart scores 0', () => {
-    expect(potentialVp([])).toBe(0)
-    expect(potentialVp([special('S01'), special('S02')])).toBe(0)
-  })
-
-  it('duplicate category products do not increase the distinct count', () => {
-    const base = [product('P01')]
-    const withDuplicate = [product('P01'), product('P02')]
-    expect(categoriesInCards(base).size).toBe(categoriesInCards(withDuplicate).size)
+  it('an empty collection scores 0', () => {
+    expect(endgameScore([])).toBe(0)
   })
 })

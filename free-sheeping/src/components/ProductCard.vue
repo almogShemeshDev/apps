@@ -1,5 +1,5 @@
 <template>
-    <div class="product-card" :class="[category.id, { discounted, 'new-category': isNewCategory }]">
+    <div class="product-card" :class="[category.id, { discounted }]">
         <div
             class="category-badge"
             :title="categoryName(category)"
@@ -26,7 +26,6 @@ import { useLang } from '../composables/useLang.js'
 const props = defineProps({
     defId: { type: String, required: true },
     effectivePrice: { type: Number, default: null },
-    isNewCategory: { type: Boolean, default: false },
 })
 
 const { cardName, categoryName } = useLang()
@@ -52,18 +51,6 @@ const discounted = computed(() => props.effectivePrice !== null && props.effecti
     }
 }
 
-@keyframes category-glow {
-    0% {
-        box-shadow: 0 0 0 0 rgba(232, 162, 61, 0);
-    }
-    35% {
-        box-shadow: 0 0 0 6px var(--cat-glow, rgba(232, 162, 61, 0.35));
-    }
-    100% {
-        box-shadow: 0 3px 8px rgba(74, 63, 47, 0.1);
-    }
-}
-
 .product-card {
     width: 118px;
     display: flex;
@@ -85,29 +72,18 @@ const discounted = computed(() => props.effectivePrice !== null && props.effecti
 
     &.fashion {
         --cat-color: #{$cat-fashion};
-        --cat-glow: #{rgba($cat-fashion, 0.35)};
     }
     &.home {
         --cat-color: #{$cat-home};
-        --cat-glow: #{rgba($cat-home, 0.35)};
     }
     &.tech {
         --cat-color: #{$cat-tech};
-        --cat-glow: #{rgba($cat-tech, 0.35)};
     }
     &.food {
         --cat-color: #{$cat-food};
-        --cat-glow: #{rgba($cat-food, 0.35)};
     }
     &.leisure {
         --cat-color: #{$cat-leisure};
-        --cat-glow: #{rgba($cat-leisure, 0.35)};
-    }
-
-    &.new-category {
-        animation:
-            card-pop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1),
-            category-glow 0.9s ease-out 0.1s;
     }
 }
 

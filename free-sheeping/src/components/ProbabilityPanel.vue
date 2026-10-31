@@ -4,13 +4,9 @@
         <div v-if="open" class="body">
             <div class="row"><span>{{ t('probNextProduct') }}</span><strong>{{ pct(probNextIsProduct(state.deck)) }}</strong></div>
             <div class="row"><span>{{ t('probNextSpecial') }}</span><strong>{{ pct(probNextIsSpecial(state.deck)) }}</strong></div>
-            <div class="row"><span>{{ t('probNewCategory') }}</span><strong>{{ pct(newCategory) }}</strong></div>
-            <div class="row"><span>{{ t('probDuplicateCategory') }}</span><strong>{{ pct(duplicateCategory) }}</strong></div>
             <div class="row"><span>{{ t('probOverflow') }}</span><strong>{{ pct(overflow) }}</strong></div>
             <div class="row"><span>{{ t('probWithin') }}</span><strong>{{ pct(within) }}</strong></div>
             <div class="row"><span>{{ t('probBelowMin') }}</span><strong>{{ pct(belowMin) }}</strong></div>
-            <div class="row"><span>{{ t('probIncreasesVp') }}</span><strong>{{ pct(increasesVp) }}</strong></div>
-            <div class="row"><span>{{ t('probExpectedVpGain') }}</span><strong>{{ expectedGain.toFixed(2) }}</strong></div>
         </div>
     </div>
 </template>
@@ -19,19 +15,9 @@
 import { ref, computed } from 'vue'
 import { useGameState } from '../composables/useGameState.js'
 import { useLang } from '../composables/useLang.js'
-import {
-    probNextIsProduct,
-    probNextIsSpecial,
-    probOverflow,
-    probWithinWindow,
-    probBelowMin,
-    probNewCategory,
-    probDuplicateCategory,
-    probNextIncreasesVp,
-    expectedNextVpGain,
-} from '../game/probability.js'
+import { probNextIsProduct, probNextIsSpecial, probOverflow, probWithinWindow, probBelowMin } from '../game/probability.js'
 
-const { state, effectiveTotal, minLimit, maxLimit, collectedCategories } = useGameState()
+const { state, effectiveTotal, minLimit, maxLimit } = useGameState()
 const { t } = useLang()
 
 const open = ref(false)
@@ -39,10 +25,6 @@ const open = ref(false)
 const overflow = computed(() => probOverflow(state.deck, effectiveTotal.value, maxLimit.value))
 const within = computed(() => probWithinWindow(state.deck, effectiveTotal.value, minLimit.value, maxLimit.value))
 const belowMin = computed(() => probBelowMin(state.deck, effectiveTotal.value, minLimit.value))
-const newCategory = computed(() => probNewCategory(state.deck, collectedCategories.value))
-const duplicateCategory = computed(() => probDuplicateCategory(state.deck, collectedCategories.value))
-const increasesVp = computed(() => probNextIncreasesVp(state.deck, collectedCategories.value))
-const expectedGain = computed(() => expectedNextVpGain(state.deck, collectedCategories.value))
 
 function pct(v) {
     return `${Math.round(v * 100)}%`
