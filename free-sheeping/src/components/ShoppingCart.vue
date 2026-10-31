@@ -6,13 +6,13 @@
         </div>
 
         <div class="bar">
-            <div class="bar-track">
+            <div class="bar-track" dir="ltr">
                 <div class="region below" :style="{ width: pct(minLimit) + '%' }"></div>
                 <div class="region within" :style="{ width: pct(maxLimit) - pct(minLimit) + '%' }"></div>
                 <div class="region above" :style="{ width: 100 - pct(maxLimit) + '%' }"></div>
                 <div class="marker" :style="{ left: pct(effectiveTotal) + '%' }">{{ effectiveTotal }}</div>
             </div>
-            <div class="bar-labels">
+            <div class="bar-labels" dir="ltr">
                 <span>0</span>
                 <span>{{ minLimit }}</span>
                 <span>{{ maxLimit }}</span>
