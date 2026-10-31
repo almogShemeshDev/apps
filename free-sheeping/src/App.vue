@@ -1,6 +1,7 @@
 <template>
     <div id="app" :dir="dir">
         <header class="top-bar">
+            <button class="btn-ctrl" @click="showRules = true">{{ t('rulesBtn') }}</button>
             <button class="btn-ctrl btn-lang" @click="toggleLang">
                 {{ lang === 'en' ? 'עב' : 'EN' }}
             </button>
@@ -22,15 +23,17 @@
 
         <GameOver v-else :players="state.players" @play-again="resetGame" />
 
+        <RulesModal v-if="showRules" @close="showRules = false" />
         <CreditsFooter />
     </div>
 </template>
 
 <script setup>
-import { watch } from 'vue'
+import { ref, watch } from 'vue'
 import GameSetup from './components/GameSetup.vue'
 import GameBoard from './components/GameBoard.vue'
 import GameOver from './components/GameOver.vue'
+import RulesModal from './components/RulesModal.vue'
 import CreditsFooter from './components/CreditsFooter.vue'
 import { useGameState } from './composables/useGameState.js'
 import { useBotAI } from './composables/useBotAI.js'
@@ -39,6 +42,7 @@ import { useLang } from './composables/useLang.js'
 const { state, startGame, resetGame } = useGameState()
 useBotAI()
 const { lang, t, dir, toggleLang } = useLang()
+const showRules = ref(false)
 
 watch(
     lang,
