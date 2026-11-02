@@ -29,6 +29,9 @@ const strings = {
     problemPointsLabel: (n) => `Problem points: ${n}/3`,
     problemPointsWarning: 'One more problem point cancels the order!',
     keepPreviewLabel: (count, keep) => `${count} product${count === 1 ? '' : 's'} in cart — you'll keep ${keep}`,
+    keepTiersLabel: 'Keep:',
+    keepTierRange: (min, max) => (max === null ? `${min}+` : min === max ? `${min}` : `${min}–${max}`),
+    nextTierNudge: (nextKeep) => `Almost there! One more product and you can keep ${nextKeep}!`,
 
     drawBtn: 'Draw Card',
     stopBtn: 'Stop & Keep Order',
@@ -131,6 +134,9 @@ const strings = {
     problemPointsLabel: (n) => `נקודות תקלה: ${n}/3`,
     problemPointsWarning: 'עוד נקודת תקלה אחת מבטלת את ההזמנה!',
     keepPreviewLabel: (count, keep) => `${count} מוצרים בעגלה — תשמרו ${keep}`,
+    keepTiersLabel: 'שמירה:',
+    keepTierRange: (min, max) => (max === null ? `${min}+` : min === max ? `${min}` : `${min}–${max}`),
+    nextTierNudge: (nextKeep) => `קדימה! עוד מוצר אחד ותוכלו לבחור ${nextKeep} מוצרים`,
 
     drawBtn: 'שלוף קלף',
     stopBtn: 'עצור ושמור הזמנה',

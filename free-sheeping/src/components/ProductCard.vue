@@ -93,16 +93,17 @@ const category = computed(() => CATEGORIES_BY_ID[def.value.category])
 
 .category-badge {
     position: absolute;
-    top: -8px;
-    right: -8px;
-    width: 22px;
-    height: 22px;
+    top: -10px;
+    right: -10px;
+    width: 30px;
+    height: 30px;
     border-radius: 50%;
-    background: var(--cat-color, $border);
+    background: $bg-panel;
+    border: 2px solid var(--cat-color, $border);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 0.72rem;
+    font-size: 1rem;
     box-shadow: 0 1px 4px rgba(74, 63, 47, 0.25);
 }
 

@@ -3,6 +3,7 @@ import { buildDeck } from '../game/deck.js'
 import { shippingPenaltyFor, SHIPPING_WINDOW } from '../game/windows.js'
 import { SPECIALS_BY_ID } from '../game/specials.js'
 import { instancePrice, instancePoints } from '../game/probability.js'
+import { baseKeepTier } from '../game/keepTiers.js'
 
 let nextLogId = 1
 
@@ -50,15 +51,7 @@ const effectiveProblemPoints = computed(() =>
 
 const productCardsInOrder = computed(() => state.order.cards.filter((c) => c.type === 'product'))
 
-// 1-3 products -> keep 1, 4-5 -> keep 2, 6-7 -> keep 3, 8+ -> keep 4, plus any Extra Pick bonuses used this turn.
-function baseKeepTier(productCount) {
-  if (productCount <= 0) return 0
-  if (productCount <= 3) return 1
-  if (productCount <= 5) return 2
-  if (productCount <= 7) return 3
-  return 4
-}
-
+// baseKeepTier (see keepTiers.js) plus any Extra Pick bonuses used this turn.
 const stopKeepCount = computed(() => baseKeepTier(productCardsInOrder.value.length) + state.turnEffects.extraPickCount)
 
 const needsKeepSelection = computed(() => productCardsInOrder.value.length > stopKeepCount.value)
