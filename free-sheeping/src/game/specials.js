@@ -1,5 +1,7 @@
-// 5 special-card definitions. Each has 3 copies in the deck (see deck.js).
-// `kind` tags which branch useGameState.doUseSpecial dispatches to.
+// 5 bonus-card definitions. Each has 3 copies in the deck (see deck.js).
+// `kind` tags which branch useGameState.js dispatches to. A bonus card is
+// only usable once it has joined a player's inventory via a later successful
+// stop — never the turn it was drawn.
 export const SPECIALS = [
   {
     id: 'S01',
@@ -8,8 +10,8 @@ export const SPECIALS = [
     name: 'Discount Coupon',
     nameHe: 'קופון הנחה',
     price: 3,
-    description: 'Reduce the current order total by 3.',
-    descriptionHe: 'מפחית את סכום ההזמנה הנוכחית ב-3.',
+    description: 'Reduce the order total by 5.',
+    descriptionHe: 'מפחית את סכום ההזמנה ב-5.',
   },
   {
     id: 'S02',
@@ -18,28 +20,28 @@ export const SPECIALS = [
     name: 'Free Return',
     nameHe: 'החזרה חינם',
     price: 4,
-    description: 'Remove the most recently drawn product from the current order.',
-    descriptionHe: 'מסיר את המוצר האחרון שנשלף מההזמנה הנוכחית.',
+    description: 'Remove one product from the cart.',
+    descriptionHe: 'מסיר מוצר אחד מהעגלה.',
   },
   {
     id: 'S03',
-    kind: 'taxInsurance',
+    kind: 'shippingInsurance',
     icon: '🛡️',
-    name: 'Tax Insurance',
-    nameHe: 'ביטוח מכס',
+    name: 'Shipping Insurance',
+    nameHe: 'ביטוח משלוח',
     price: 5,
-    description: 'Increase the maximum shipping limit by 5 for the current turn.',
-    descriptionHe: 'מעלה את תקרת המשלוח ב-5 עבור התור הנוכחי.',
+    description: 'Cancel up to 2 accumulated problem points.',
+    descriptionHe: 'מבטל עד 2 נקודות תקלה שנצברו.',
   },
   {
     id: 'S04',
-    kind: 'flashSale',
-    icon: '⚡',
-    name: 'Flash Sale',
-    nameHe: 'מכירת פלאש',
+    kind: 'extraPick',
+    icon: '➕',
+    name: 'Extra Pick',
+    nameHe: 'בחירה נוספת',
     price: 4,
-    description: 'Reduce the price of up to two products in the current order by 2 each.',
-    descriptionHe: 'מפחית את מחירם של עד שני מוצרים בהזמנה הנוכחית ב-2 כל אחד.',
+    description: 'Keep one additional product from the cart.',
+    descriptionHe: 'שומר מוצר נוסף אחד מהעגלה.',
   },
   {
     id: 'S05',
@@ -48,8 +50,8 @@ export const SPECIALS = [
     name: 'Sneak Peek',
     nameHe: 'הצצה חטופה',
     price: 2,
-    description: 'Reveal the next deck card and choose whether to draw it.',
-    descriptionHe: 'חושף את הקלף הבא בחבילה ומאפשר לבחור אם לשלוף אותו.',
+    description: 'Look at the next 2 deck cards and return them in either order.',
+    descriptionHe: 'חושפת את 2 הקלפים הבאים בחבילה ומאפשרת להחזיר אותם בכל סדר.',
   },
 ]
 

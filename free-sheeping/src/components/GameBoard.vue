@@ -2,12 +2,14 @@
     <div class="game-board">
         <div class="header">
             <div class="turn-info">{{ t('turnLabel', state.turnNumber) }} — {{ turnPlayer?.name }}</div>
-            <div class="deck-info">{{ t('deckLabel', state.deck.length) }}</div>
+            <div class="header-right">
+                <div class="window-info">{{ t('windowFixedLabel', minLimit, maxLimit) }}</div>
+                <div class="deck-info">{{ t('deckLabel', state.deck.length) }}</div>
+            </div>
         </div>
 
         <div class="layout">
             <div class="main-column">
-                <ShippingWindowTrack />
                 <PlayersOverview />
                 <ShoppingCart />
 
@@ -23,7 +25,6 @@
 </template>
 
 <script setup>
-import ShippingWindowTrack from './ShippingWindowTrack.vue'
 import PlayersOverview from './PlayersOverview.vue'
 import ShoppingCart from './ShoppingCart.vue'
 import ActionBar from './ActionBar.vue'
@@ -32,7 +33,7 @@ import GameLog from './GameLog.vue'
 import { useGameState } from '../composables/useGameState.js'
 import { useLang } from '../composables/useLang.js'
 
-const { state, turnPlayer } = useGameState()
+const { state, turnPlayer, minLimit, maxLimit } = useGameState()
 const { t } = useLang()
 </script>
 
@@ -63,6 +64,16 @@ const { t } = useLang()
     font-weight: 700;
     color: $gold;
     font-size: 1rem;
+}
+
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.window-info {
+    font-weight: 600;
 }
 
 .layout {

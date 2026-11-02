@@ -1,5 +1,6 @@
 import { PRODUCTS } from './products.js'
 import { SPECIALS, COPIES_PER_SPECIAL } from './specials.js'
+import { PROBLEMS } from './problems.js'
 
 export function shuffle(arr) {
   const a = [...arr]
@@ -10,7 +11,8 @@ export function shuffle(arr) {
   return a
 }
 
-// 45 products (1 copy each) + 15 specials (3 copies each) = 60 cards.
+// 45 products (1 copy each) + 15 bonus cards (3 copies each of 5 types) +
+// 10 problem cards (1 copy each) = 70 cards.
 // Deck is an array of instances; index 0 is the top of the deck.
 export function buildDeck() {
   const instances = []
@@ -21,6 +23,9 @@ export function buildDeck() {
     for (let i = 1; i <= COPIES_PER_SPECIAL; i++) {
       instances.push({ instanceId: `${s.id}-${i}`, defId: s.id, type: 'special' })
     }
+  }
+  for (const p of PROBLEMS) {
+    instances.push({ instanceId: p.id, defId: p.id, type: 'problem' })
   }
   return shuffle(instances)
 }

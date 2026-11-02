@@ -4,6 +4,8 @@
         <div v-if="open" class="body">
             <div class="row"><span>{{ t('probNextProduct') }}</span><strong>{{ pct(probNextIsProduct(state.deck)) }}</strong></div>
             <div class="row"><span>{{ t('probNextSpecial') }}</span><strong>{{ pct(probNextIsSpecial(state.deck)) }}</strong></div>
+            <div class="row"><span>{{ t('probNextProblem') }}</span><strong>{{ pct(probNextIsProblem(state.deck)) }}</strong></div>
+            <div class="row bust"><span>{{ t('probBust') }}</span><strong>{{ pct(bust) }}</strong></div>
             <div class="row"><span>{{ t('probOverflow') }}</span><strong>{{ pct(overflow) }}</strong></div>
             <div class="row"><span>{{ t('probWithin') }}</span><strong>{{ pct(within) }}</strong></div>
             <div class="row"><span>{{ t('probBelowMin') }}</span><strong>{{ pct(belowMin) }}</strong></div>
@@ -15,13 +17,22 @@
 import { ref, computed } from 'vue'
 import { useGameState } from '../composables/useGameState.js'
 import { useLang } from '../composables/useLang.js'
-import { probNextIsProduct, probNextIsSpecial, probOverflow, probWithinWindow, probBelowMin } from '../game/probability.js'
+import {
+    probNextIsProduct,
+    probNextIsSpecial,
+    probNextIsProblem,
+    probBust,
+    probOverflow,
+    probWithinWindow,
+    probBelowMin,
+} from '../game/probability.js'
 
-const { state, effectiveTotal, minLimit, maxLimit } = useGameState()
+const { state, effectiveTotal, minLimit, maxLimit, effectiveProblemPoints } = useGameState()
 const { t } = useLang()
 
 const open = ref(false)
 
+const bust = computed(() => probBust(state.deck, effectiveProblemPoints.value))
 const overflow = computed(() => probOverflow(state.deck, effectiveTotal.value, maxLimit.value))
 const within = computed(() => probWithinWindow(state.deck, effectiveTotal.value, minLimit.value, maxLimit.value))
 const belowMin = computed(() => probBelowMin(state.deck, effectiveTotal.value, minLimit.value))
@@ -69,6 +80,10 @@ function pct(v) {
 
     strong {
         color: $gold;
+    }
+
+    &.bust strong {
+        color: $danger;
     }
 }
 </style>

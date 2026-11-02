@@ -12,9 +12,10 @@
                 <span v-if="i === state.turnIndex" class="badge turn-badge">{{ t('turnBadge') }}</span>
             </div>
             <div class="stats-row">
-                <span class="vp">✨ {{ t('estScoreLabel', endgameScore(p.productsWon)) }}</span>
+                <span class="vp">✨ {{ t('estScoreLabel', endgameScore(p.productsWon) - p.shippingPenalty) }}</span>
                 <span class="shipped">{{ t('productsWonLabel', p.productsWon.length) }}</span>
             </div>
+            <div v-if="p.shippingPenalty" class="penalty-row">{{ t('shippingPenaltyLabel', p.shippingPenalty) }}</div>
             <div class="collection">
                 <span
                     v-for="cat in CATEGORIES"
@@ -121,6 +122,11 @@ function countsFor(player) {
 
 .shipped {
     color: $text-dim;
+}
+
+.penalty-row {
+    font-size: 0.72rem;
+    color: $danger;
 }
 
 .collection {

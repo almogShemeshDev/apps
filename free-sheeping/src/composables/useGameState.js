@@ -1,22 +1,21 @@
 import { reactive, computed } from 'vue'
 import { buildDeck } from '../game/deck.js'
-import { windowForLevel, advanceLevel, retreatLevel, START_LEVEL } from '../game/windows.js'
+import { shippingPenaltyFor, SHIPPING_WINDOW } from '../game/windows.js'
 import { SPECIALS_BY_ID } from '../game/specials.js'
-import { instancePrice } from '../game/probability.js'
+import { instancePrice, instancePoints } from '../game/probability.js'
 
 let nextLogId = 1
 
 function freshTurnEffects() {
-  return { couponCount: 0, taxInsuranceCount: 0, flashSaleDiscounts: {}, sneakPeekInstanceId: null }
+  return { couponCount: 0, insuranceCancelCount: 0, extraPickCount: 0, sneakPeekCards: null }
 }
 
 const state = reactive({
   phase: 'setup', // 'setup' | 'playing' | 'game-over'
-  players: [], // { name, isBot, productsWon: [defId,...], specialInventory: [{instanceId, defId}] } — score is derived from productsWon (see scoring.js), not stored
+  players: [], // { name, isBot, productsWon: [defId,...], specialInventory: [{instanceId, defId}], shippingPenalty } — score is derived from productsWon (see scoring.js) minus shippingPenalty
 
   deck: [], // array of card instances, index 0 = top of deck
   discard: [],
-  windowLevel: START_LEVEL,
   turnIndex: 0,
   turnNumber: 1,
   roundStartIndex: 0,
@@ -31,49 +30,51 @@ function pushLog(type, data) {
 }
 
 const turnPlayer = computed(() => state.players[state.turnIndex])
-const currentWindow = computed(() => windowForLevel(state.windowLevel))
 
-// Per-card effective price after any Flash Sale discounts, floored at 0.
-function effectivePriceOf(instance) {
-  const discount = state.turnEffects.flashSaleDiscounts[instance.instanceId] ?? 0
-  return Math.max(0, instancePrice(instance) - discount)
-}
-
-const rawTotal = computed(() => state.order.cards.reduce((sum, c) => sum + effectivePriceOf(c), 0))
-const effectiveTotal = computed(() => Math.max(0, rawTotal.value - state.turnEffects.couponCount * 3))
-const minLimit = computed(() => currentWindow.value.min)
-const maxLimit = computed(() => currentWindow.value.max + state.turnEffects.taxInsuranceCount * 5)
+const rawTotal = computed(() => state.order.cards.reduce((sum, c) => sum + instancePrice(c), 0))
+const effectiveTotal = computed(() => Math.max(0, rawTotal.value - state.turnEffects.couponCount * 5))
+const minLimit = computed(() => SHIPPING_WINDOW.min)
+const maxLimit = computed(() => SHIPPING_WINDOW.max)
 const windowStatus = computed(() => {
   if (effectiveTotal.value < minLimit.value) return 'below'
   if (effectiveTotal.value > maxLimit.value) return 'above'
   return 'within'
 })
 
-// The most recently drawn product still present in the cart (Free Return's target).
-const freeReturnTarget = computed(() => {
-  for (let i = state.order.cards.length - 1; i >= 0; i--) {
-    if (state.order.cards[i].type === 'product') return state.order.cards[i]
-  }
-  return null
-})
+const rawProblemPoints = computed(() =>
+  state.order.cards.filter((c) => c.type === 'problem').reduce((sum, c) => sum + instancePoints(c), 0)
+)
+const effectiveProblemPoints = computed(() =>
+  Math.max(0, rawProblemPoints.value - state.turnEffects.insuranceCancelCount * 2)
+)
 
-const peekedCard = computed(() => {
-  const id = state.turnEffects.sneakPeekInstanceId
-  if (!id) return null
-  return state.deck.find((c) => c.instanceId === id) ?? null
-})
+const productCardsInOrder = computed(() => state.order.cards.filter((c) => c.type === 'product'))
+
+// 1-3 products -> keep 1, 4-5 -> keep 2, 6-7 -> keep 3, 8+ -> keep 4, plus any Extra Pick bonuses used this turn.
+function baseKeepTier(productCount) {
+  if (productCount <= 0) return 0
+  if (productCount <= 3) return 1
+  if (productCount <= 5) return 2
+  if (productCount <= 7) return 3
+  return 4
+}
+
+const stopKeepCount = computed(() => baseKeepTier(productCardsInOrder.value.length) + state.turnEffects.extraPickCount)
+
+const needsKeepSelection = computed(() => productCardsInOrder.value.length > stopKeepCount.value)
+
+const peekedCards = computed(() => state.turnEffects.sneakPeekCards)
 
 function createPlayer(input) {
   const name = typeof input === 'string' ? input : input.name
   const isBot = typeof input === 'string' ? false : !!input.isBot
-  return { name, isBot, productsWon: [], specialInventory: [] }
+  return { name, isBot, productsWon: [], specialInventory: [], shippingPenalty: 0 }
 }
 
 function startGame(playerInputs) {
   state.players = playerInputs.map(createPlayer)
   state.deck = buildDeck()
   state.discard = []
-  state.windowLevel = START_LEVEL
   state.turnIndex = 0
   state.turnNumber = 1
   state.roundStartIndex = 0
@@ -90,7 +91,6 @@ function resetGame() {
   state.players = []
   state.deck = []
   state.discard = []
-  state.windowLevel = START_LEVEL
   state.turnIndex = 0
   state.turnNumber = 1
   state.roundStartIndex = 0
@@ -114,10 +114,10 @@ function nextTurn() {
   }
 }
 
-// --- Draw / Ship / Fail ---
+// --- Draw / Stop / Bust ---
 
 function canDraw() {
-  return state.phase === 'playing' && windowStatus.value !== 'above' && state.deck.length > 0
+  return state.phase === 'playing' && !state.turnEffects.sneakPeekCards && state.deck.length > 0
 }
 
 function doDraw() {
@@ -131,50 +131,63 @@ function doDraw() {
     cardType: card.type,
     price: instancePrice(card),
   })
-}
-
-function canShip() {
-  return state.phase === 'playing' && windowStatus.value === 'within'
-}
-
-// Shipping awards no immediate VP — successful products join the player's
-// permanent collection and are scored only at game end (see scoring.js).
-function doShip() {
-  if (!canShip()) return
-  const player = turnPlayer.value
-  let productCount = 0
-  for (const card of state.order.cards) {
-    if (card.type === 'product') {
-      player.productsWon.push(card.defId)
-      productCount++
-    } else {
-      player.specialInventory.push({ instanceId: card.instanceId, defId: card.defId })
-    }
+  if (card.type === 'problem' && effectiveProblemPoints.value >= 3) {
+    doBust()
   }
-  const total = effectiveTotal.value
-  state.windowLevel = advanceLevel(state.windowLevel)
-  pushLog('ship', { playerName: player.name, productCount, total })
-  pushLog('window-move', { level: state.windowLevel })
+}
+
+function doBust() {
+  const player = turnPlayer.value
+  const points = rawProblemPoints.value
+  for (const card of state.order.cards) state.discard.push(card)
+  pushLog('bust', { playerName: player.name, points })
   nextTurn()
 }
 
-function canStopOrFail() {
-  return state.phase === 'playing' && windowStatus.value !== 'within'
+function canStop() {
+  return state.phase === 'playing' && !state.turnEffects.sneakPeekCards && state.order.cards.length > 0
 }
 
-function doFail() {
-  if (!canStopOrFail()) return
+// If productCardsInOrder exceeds the keep allowance, the caller (UI or bot)
+// must pass the instanceIds of the products to keep; otherwise all are kept.
+function doStop(selectedInstanceIds) {
+  if (!canStop()) return
+  const player = turnPlayer.value
   const total = effectiveTotal.value
-  for (const card of state.order.cards) state.discard.push(card)
-  state.windowLevel = retreatLevel(state.windowLevel)
-  pushLog('fail', { playerName: turnPlayer.value.name, total })
-  pushLog('window-move', { level: state.windowLevel })
+  const keepCount = stopKeepCount.value
+  const products = productCardsInOrder.value
+
+  let keepIds
+  if (products.length <= keepCount) {
+    keepIds = new Set(products.map((c) => c.instanceId))
+  } else {
+    keepIds = new Set(selectedInstanceIds ?? [])
+  }
+
+  let keptCount = 0
+  for (const card of state.order.cards) {
+    if (card.type === 'product') {
+      if (keepIds.has(card.instanceId) && keptCount < keepCount) {
+        player.productsWon.push(card.defId)
+        keptCount++
+      } else {
+        state.discard.push(card)
+      }
+    } else if (card.type === 'special') {
+      player.specialInventory.push({ instanceId: card.instanceId, defId: card.defId })
+    } else {
+      state.discard.push(card) // problem cards
+    }
+  }
+
+  const penalty = shippingPenaltyFor(total)
+  player.shippingPenalty += penalty
+  pushLog('stop', { playerName: player.name, productCount: keptCount, total, penalty })
   nextTurn()
 }
 
 // A player stuck with an empty cart once the deck is exhausted simply passes —
-// no shipment was attempted, so the shared window does not move. (Documented
-// assumption: simplest consistent reading of spec section 9.)
+// no order was attempted.
 function canPassEmptyTurn() {
   return state.phase === 'playing' && state.deck.length === 0 && state.order.cards.length === 0
 }
@@ -185,7 +198,7 @@ function passEmptyTurn() {
   nextTurn()
 }
 
-// --- Special cards ---
+// --- Bonus cards ---
 
 function heldInstance(playerIndex, instanceId) {
   return state.players[playerIndex]?.specialInventory.find((s) => s.instanceId === instanceId)
@@ -201,7 +214,7 @@ function consumeSpecial(playerIndex, instanceId) {
 }
 
 function isActivePlayer(playerIndex) {
-  return state.phase === 'playing' && playerIndex === state.turnIndex
+  return state.phase === 'playing' && playerIndex === state.turnIndex && !state.turnEffects.sneakPeekCards
 }
 
 function canUseCoupon(playerIndex, instanceId) {
@@ -216,57 +229,46 @@ function useCoupon(playerIndex, instanceId) {
 }
 
 function canUseFreeReturn(playerIndex, instanceId) {
-  return isActivePlayer(playerIndex) && !!heldInstance(playerIndex, instanceId) && !!freeReturnTarget.value
+  return isActivePlayer(playerIndex) && !!heldInstance(playerIndex, instanceId) && productCardsInOrder.value.length > 0
 }
 
-function useFreeReturn(playerIndex, instanceId) {
+function useFreeReturn(playerIndex, instanceId, targetInstanceId) {
   if (!canUseFreeReturn(playerIndex, instanceId)) return
-  const target = freeReturnTarget.value
+  const idx = state.order.cards.findIndex((c) => c.instanceId === targetInstanceId && c.type === 'product')
+  if (idx === -1) return
   consumeSpecial(playerIndex, instanceId)
-  const idx = state.order.cards.findIndex((c) => c.instanceId === target.instanceId)
-  if (idx !== -1) {
-    const [removed] = state.order.cards.splice(idx, 1)
-    state.discard.push(removed)
-  }
-  pushLog('free-return', { playerName: state.players[playerIndex].name, defId: target.defId })
+  const [removed] = state.order.cards.splice(idx, 1)
+  state.discard.push(removed)
+  pushLog('free-return', { playerName: state.players[playerIndex].name, defId: removed.defId })
 }
 
-function canUseTaxInsurance(playerIndex, instanceId) {
+function canUseShippingInsurance(playerIndex, instanceId) {
   return isActivePlayer(playerIndex) && !!heldInstance(playerIndex, instanceId)
 }
 
-function useTaxInsurance(playerIndex, instanceId) {
-  if (!canUseTaxInsurance(playerIndex, instanceId)) return
+function useShippingInsurance(playerIndex, instanceId) {
+  if (!canUseShippingInsurance(playerIndex, instanceId)) return
   consumeSpecial(playerIndex, instanceId)
-  state.turnEffects.taxInsuranceCount++
-  pushLog('tax-insurance', { playerName: state.players[playerIndex].name })
+  state.turnEffects.insuranceCancelCount++
+  pushLog('shipping-insurance', { playerName: state.players[playerIndex].name })
 }
 
-function flashSaleEligibleTargets() {
-  return state.order.cards.filter((c) => c.type === 'product')
-}
-
-function canUseFlashSale(playerIndex, instanceId) {
+function canUseExtraPick(playerIndex, instanceId) {
   return isActivePlayer(playerIndex) && !!heldInstance(playerIndex, instanceId)
 }
 
-function useFlashSale(playerIndex, instanceId, targetInstanceIds) {
-  if (!canUseFlashSale(playerIndex, instanceId)) return
-  const eligible = new Set(flashSaleEligibleTargets().map((c) => c.instanceId))
-  const targets = [...new Set(targetInstanceIds)].filter((id) => eligible.has(id)).slice(0, 2)
+function useExtraPick(playerIndex, instanceId) {
+  if (!canUseExtraPick(playerIndex, instanceId)) return
   consumeSpecial(playerIndex, instanceId)
-  for (const id of targets) {
-    state.turnEffects.flashSaleDiscounts[id] = (state.turnEffects.flashSaleDiscounts[id] ?? 0) + 2
-  }
-  pushLog('flash-sale', { playerName: state.players[playerIndex].name, count: targets.length })
+  state.turnEffects.extraPickCount++
+  pushLog('extra-pick', { playerName: state.players[playerIndex].name })
 }
 
 function canUseSneakPeek(playerIndex, instanceId) {
   return (
     isActivePlayer(playerIndex) &&
     !!heldInstance(playerIndex, instanceId) &&
-    !state.turnEffects.sneakPeekInstanceId &&
-    windowStatus.value !== 'above' &&
+    !state.turnEffects.sneakPeekCards &&
     state.deck.length > 0
   )
 }
@@ -274,54 +276,52 @@ function canUseSneakPeek(playerIndex, instanceId) {
 function useSneakPeek(playerIndex, instanceId) {
   if (!canUseSneakPeek(playerIndex, instanceId)) return
   consumeSpecial(playerIndex, instanceId)
-  state.turnEffects.sneakPeekInstanceId = state.deck[0].instanceId
+  state.turnEffects.sneakPeekCards = state.deck.slice(0, 2).map((c) => c.instanceId)
   pushLog('sneak-peek', { playerName: state.players[playerIndex].name })
 }
 
-function resolveSneakPeek(playerIndex, accept) {
-  if (!isActivePlayer(playerIndex) || !state.turnEffects.sneakPeekInstanceId) return
+// swap=true puts the deck's 2nd-from-top card on top instead.
+function resolveSneakPeek(playerIndex, swap) {
+  if (!state.turnEffects.sneakPeekCards) return
+  if (!(state.phase === 'playing' && playerIndex === state.turnIndex)) return
   const player = state.players[playerIndex]
-  if (accept) {
-    state.turnEffects.sneakPeekInstanceId = null
-    pushLog('sneak-peek-draw', { playerName: player.name })
-    doDraw()
-  } else {
-    state.turnEffects.sneakPeekInstanceId = null
-    pushLog('sneak-peek-decline', { playerName: player.name })
+  if (swap && state.deck.length >= 2) {
+    ;[state.deck[0], state.deck[1]] = [state.deck[1], state.deck[0]]
   }
+  state.turnEffects.sneakPeekCards = null
+  pushLog(swap ? 'sneak-peek-swap' : 'sneak-peek-keep', { playerName: player.name })
 }
 
 export function useGameState() {
   return {
     state,
     turnPlayer,
-    currentWindow,
     minLimit,
     maxLimit,
     effectiveTotal,
     windowStatus,
-    effectivePriceOf,
-    freeReturnTarget,
-    flashSaleEligibleTargets,
-    peekedCard,
+    rawProblemPoints,
+    effectiveProblemPoints,
+    productCardsInOrder,
+    stopKeepCount,
+    needsKeepSelection,
+    peekedCards,
     startGame,
     resetGame,
     canDraw,
     doDraw,
-    canShip,
-    doShip,
-    canStopOrFail,
-    doFail,
+    canStop,
+    doStop,
     canPassEmptyTurn,
     passEmptyTurn,
     canUseCoupon,
     useCoupon,
     canUseFreeReturn,
     useFreeReturn,
-    canUseTaxInsurance,
-    useTaxInsurance,
-    canUseFlashSale,
-    useFlashSale,
+    canUseShippingInsurance,
+    useShippingInsurance,
+    canUseExtraPick,
+    useExtraPick,
     canUseSneakPeek,
     useSneakPeek,
     resolveSneakPeek,

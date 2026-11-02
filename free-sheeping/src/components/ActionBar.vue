@@ -1,51 +1,74 @@
 <template>
     <div class="action-bar">
-        <div v-if="peekedCard" class="flow-box">
+        <div v-if="peekedCardObjs.length" class="flow-box">
             <p class="flow-prompt">{{ t('sneakPeekPrompt') }}</p>
             <div class="peek-row">
-                <ProductCard v-if="peekedCard.type === 'product'" :def-id="peekedCard.defId" />
-                <SpecialCard v-else :def-id="peekedCard.defId" />
+                <template v-for="c in peekedCardObjs" :key="c.instanceId">
+                    <ProductCard v-if="c.type === 'product'" :def-id="c.defId" />
+                    <ProblemCard v-else-if="c.type === 'problem'" :def-id="c.defId" />
+                    <SpecialCard v-else :def-id="c.defId" />
+                </template>
             </div>
             <div class="flow-choices">
-                <button class="btn primary" @click="resolveSneakPeek(playerIndex, true)">
-                    {{ t('drawRevealedBtn') }}
+                <button class="btn primary" @click="resolveSneakPeek(playerIndex, false)">
+                    {{ t('keepOrderBtn') }}
                 </button>
-                <button class="btn" @click="resolveSneakPeek(playerIndex, false)">{{ t('leaveOnTopBtn') }}</button>
+                <button class="btn" @click="resolveSneakPeek(playerIndex, true)">{{ t('swapOrderBtn') }}</button>
             </div>
         </div>
 
-        <template v-else-if="flashSaleChoosing">
+        <template v-else-if="keeping">
             <div class="flow-box">
-                <p class="flow-prompt">{{ t('flashSaleChoosePrompt') }}</p>
-                <div class="pick-row">
-                    <button
-                        v-for="c in flashSaleEligibleTargets()"
+                <p class="flow-prompt">{{ t('keepSelectionPrompt', stopKeepCount) }}</p>
+                <div class="cards-pick-row">
+                    <ProductCard
+                        v-for="c in productCardsInOrder"
                         :key="c.instanceId"
-                        class="pick-chip"
-                        :class="{ selected: flashSaleSelection.includes(c.instanceId) }"
-                        @click="toggleFlashTarget(c.instanceId)"
-                    >
-                        {{ productIcon(c.defId) }} {{ cardName(productDef(c.defId)) }}
-                    </button>
+                        :def-id="c.defId"
+                        clickable
+                        :class="{ selected: keepSelection.includes(c.instanceId) }"
+                        @click="toggleKeep(c.instanceId)"
+                    />
                 </div>
                 <div class="flow-choices">
-                    <button class="btn primary" @click="confirmFlashSale">{{ t('flashSaleConfirmBtn') }}</button>
-                    <button class="btn" @click="cancelFlashSale">{{ t('cancel') }}</button>
+                    <button
+                        class="btn primary"
+                        :disabled="keepSelection.length !== stopKeepCount"
+                        @click="confirmStop"
+                    >
+                        {{ t('keepSelectionConfirmBtn') }}
+                    </button>
+                    <button class="btn" @click="cancelKeeping">{{ t('cancel') }}</button>
+                </div>
+            </div>
+        </template>
+
+        <template v-else-if="returning">
+            <div class="flow-box">
+                <p class="flow-prompt">{{ t('freeReturnChoosePrompt') }}</p>
+                <div class="cards-pick-row">
+                    <ProductCard
+                        v-for="c in productCardsInOrder"
+                        :key="c.instanceId"
+                        :def-id="c.defId"
+                        clickable
+                        @click="confirmFreeReturn(c.instanceId)"
+                    />
+                </div>
+                <div class="flow-choices">
+                    <button class="btn" @click="cancelReturning">{{ t('cancel') }}</button>
                 </div>
             </div>
         </template>
 
         <template v-else>
             <div v-if="canPassEmptyTurn()" class="main-actions">
-                <button class="btn primary" @click="passEmptyTurn()">{{ t('stopFailBtn') }}</button>
+                <button class="btn primary" @click="passEmptyTurn()">{{ t('passBtn') }}</button>
             </div>
 
             <div v-else class="main-actions">
                 <button class="btn draw" :disabled="!canDraw()" @click="doDraw()">{{ t('drawBtn') }}</button>
-                <button class="btn ship" :disabled="!canShip()" @click="doShip()">{{ t('shipBtn') }}</button>
-                <button class="btn stop" :disabled="!canStopOrFail()" @click="doFail()">
-                    {{ t('stopFailBtn') }}
-                </button>
+                <button class="btn stop" :disabled="!canStop()" @click="onStopClick">{{ t('stopBtn') }}</button>
             </div>
 
             <div v-if="groupedSpecials.length" class="specials-row">
@@ -70,9 +93,9 @@
 import { ref, computed } from 'vue'
 import ProductCard from './ProductCard.vue'
 import SpecialCard from './SpecialCard.vue'
+import ProblemCard from './ProblemCard.vue'
 import { useGameState } from '../composables/useGameState.js'
 import { useLang } from '../composables/useLang.js'
-import { PRODUCTS_BY_ID } from '../game/products.js'
 
 const props = defineProps({
     playerIndex: { type: Number, required: true },
@@ -80,57 +103,60 @@ const props = defineProps({
 
 const {
     state,
-    peekedCard,
+    peekedCards,
+    productCardsInOrder,
+    stopKeepCount,
+    needsKeepSelection,
     canDraw,
     doDraw,
-    canShip,
-    doShip,
-    canStopOrFail,
-    doFail,
+    canStop,
+    doStop,
     canPassEmptyTurn,
     passEmptyTurn,
     canUseCoupon,
     useCoupon,
     canUseFreeReturn,
     useFreeReturn,
-    canUseTaxInsurance,
-    useTaxInsurance,
-    canUseFlashSale,
-    useFlashSale,
-    flashSaleEligibleTargets,
+    canUseShippingInsurance,
+    useShippingInsurance,
+    canUseExtraPick,
+    useExtraPick,
     canUseSneakPeek,
     useSneakPeek,
     resolveSneakPeek,
 } = useGameState()
-const { t, cardName } = useLang()
+const { t } = useLang()
 
 const player = computed(() => state.players[props.playerIndex])
+
+const peekedCardObjs = computed(() =>
+    (peekedCards.value ?? []).map((id) => state.deck.find((c) => c.instanceId === id)).filter(Boolean)
+)
 
 const CAN_USE = {
     coupon: canUseCoupon,
     freeReturn: canUseFreeReturn,
-    taxInsurance: canUseTaxInsurance,
-    flashSale: canUseFlashSale,
+    shippingInsurance: canUseShippingInsurance,
+    extraPick: canUseExtraPick,
     sneakPeek: canUseSneakPeek,
 }
 const DO_USE = {
     coupon: useCoupon,
-    freeReturn: useFreeReturn,
-    taxInsurance: useTaxInsurance,
-    sneakPeek: useSneakPeek,
+    shippingInsurance: useShippingInsurance,
+    extraPick: useExtraPick,
 }
 const KIND_BY_DEF = {
     S01: 'coupon',
     S02: 'freeReturn',
-    S03: 'taxInsurance',
-    S04: 'flashSale',
+    S03: 'shippingInsurance',
+    S04: 'extraPick',
     S05: 'sneakPeek',
 }
 const LABEL_KEY = {
     S01: 'couponBtn',
     S02: 'freeReturnBtn',
-    S03: 'taxInsuranceBtn',
-    S04: 'flashSaleBtn',
+    S03: 'shippingInsuranceBtn',
+    S04: 'extraPickBtn',
     S05: 'sneakPeekBtn',
 }
 
@@ -151,44 +177,64 @@ const groupedSpecials = computed(() => {
     })
 })
 
-function productIcon(defId) {
-    return PRODUCTS_BY_ID[defId]?.icon ?? ''
-}
-function productDef(defId) {
-    return PRODUCTS_BY_ID[defId]
-}
-
-const flashSaleChoosing = ref(false)
-const flashSaleInstanceId = ref(null)
-const flashSaleSelection = ref([])
-
 function activate(group) {
     const kind = KIND_BY_DEF[group.defId]
-    if (kind === 'flashSale') {
-        flashSaleInstanceId.value = group.instanceId
-        flashSaleSelection.value = []
-        flashSaleChoosing.value = true
+    if (kind === 'freeReturn') {
+        freeReturnInstanceId.value = group.instanceId
+        returning.value = true
+        return
+    }
+    if (kind === 'sneakPeek') {
+        useSneakPeek(props.playerIndex, group.instanceId)
         return
     }
     DO_USE[kind](props.playerIndex, group.instanceId)
 }
 
-function toggleFlashTarget(instanceId) {
-    const idx = flashSaleSelection.value.indexOf(instanceId)
-    if (idx !== -1) {
-        flashSaleSelection.value.splice(idx, 1)
-    } else if (flashSaleSelection.value.length < 2) {
-        flashSaleSelection.value.push(instanceId)
+// --- Stop / keep-selection flow ---
+
+const keeping = ref(false)
+const keepSelection = ref([])
+
+function onStopClick() {
+    if (needsKeepSelection.value) {
+        keepSelection.value = []
+        keeping.value = true
+    } else {
+        doStop()
     }
 }
 
-function confirmFlashSale() {
-    useFlashSale(props.playerIndex, flashSaleInstanceId.value, flashSaleSelection.value)
-    flashSaleChoosing.value = false
+function toggleKeep(instanceId) {
+    const idx = keepSelection.value.indexOf(instanceId)
+    if (idx !== -1) {
+        keepSelection.value.splice(idx, 1)
+    } else if (keepSelection.value.length < stopKeepCount.value) {
+        keepSelection.value.push(instanceId)
+    }
 }
 
-function cancelFlashSale() {
-    flashSaleChoosing.value = false
+function confirmStop() {
+    doStop(keepSelection.value)
+    keeping.value = false
+}
+
+function cancelKeeping() {
+    keeping.value = false
+}
+
+// --- Free Return flow ---
+
+const returning = ref(false)
+const freeReturnInstanceId = ref(null)
+
+function confirmFreeReturn(targetInstanceId) {
+    useFreeReturn(props.playerIndex, freeReturnInstanceId.value, targetInstanceId)
+    returning.value = false
+}
+
+function cancelReturning() {
+    returning.value = false
 }
 </script>
 
@@ -238,14 +284,8 @@ function cancelFlashSale() {
     border-color: transparent;
 }
 
-.btn.ship {
-    background: $success;
-    color: #fff;
-    border-color: transparent;
-}
-
 .btn.stop {
-    background: $danger;
+    background: $success;
     color: #fff;
     border-color: transparent;
 }
@@ -307,29 +347,16 @@ function cancelFlashSale() {
     gap: 8px;
 }
 
-.peek-row {
+.peek-row,
+.cards-pick-row {
     display: flex;
     justify-content: center;
-}
-
-.pick-row {
-    display: flex;
-    gap: 8px;
+    gap: 10px;
     flex-wrap: wrap;
 }
 
-.pick-chip {
-    background: $bg-panel;
-    border: 1px solid $border;
-    border-radius: 999px;
-    padding: 6px 12px;
-    font-size: 0.78rem;
-    cursor: pointer;
-
-    &.selected {
-        background: $teal;
-        color: $ink;
-        border-color: transparent;
-    }
+:deep(.product-card.selected) {
+    border-color: $gold;
+    box-shadow: 0 0 0 2px rgba(232, 162, 61, 0.4);
 }
 </style>

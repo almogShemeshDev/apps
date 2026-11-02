@@ -1,5 +1,5 @@
 <template>
-    <div class="product-card" :class="[category.id, { discounted }]">
+    <div class="product-card" :class="[category.id, { clickable }]" @click="clickable && $emit('click')">
         <div
             class="category-badge"
             :title="categoryName(category)"
@@ -10,8 +10,7 @@
         <div class="icon">{{ def.icon }}</div>
         <div class="name">{{ cardName(def) }}</div>
         <div class="stats">
-            <span class="price" :class="{ struck: discounted }">💰 {{ def.price }}</span>
-            <span v-if="discounted" class="price effective">💰 {{ effectivePrice }}</span>
+            <span class="price">💰 {{ def.price }}</span>
         </div>
         <div class="category-name">{{ categoryName(category) }}</div>
     </div>
@@ -25,13 +24,13 @@ import { useLang } from '../composables/useLang.js'
 
 const props = defineProps({
     defId: { type: String, required: true },
-    effectivePrice: { type: Number, default: null },
+    clickable: { type: Boolean, default: false },
 })
+defineEmits(['click'])
 
 const { cardName, categoryName } = useLang()
 const def = computed(() => PRODUCTS_BY_ID[props.defId])
 const category = computed(() => CATEGORIES_BY_ID[def.value.category])
-const discounted = computed(() => props.effectivePrice !== null && props.effectivePrice < def.value.price)
 </script>
 
 <style lang="scss" scoped>
@@ -66,8 +65,13 @@ const discounted = computed(() => props.effectivePrice !== null && props.effecti
     animation: card-pop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
     box-shadow: 0 3px 8px rgba(74, 63, 47, 0.1);
 
-    &.discounted {
-        border-color: $teal;
+    &.clickable {
+        cursor: pointer;
+        transition: transform 0.1s;
+
+        &:hover {
+            transform: translateY(-2px);
+        }
     }
 
     &.fashion {
@@ -133,15 +137,5 @@ const discounted = computed(() => props.effectivePrice !== null && props.effecti
 
 .price {
     color: $danger;
-
-    &.struck {
-        text-decoration: line-through;
-        opacity: 0.6;
-    }
-
-    &.effective {
-        color: $teal;
-        text-decoration: none;
-    }
 }
 </style>

@@ -9,64 +9,73 @@
                 <section>
                     <h3>Overview</h3>
                     <p>
-                        A push-your-luck shopping cart game for 2–5 players. Draw products toward a
-                        shared, circular free-shipping window — go too low or too high and your order
-                        fails. Build the biggest, most diverse product collection by the end of the
-                        game to win.
+                        A push-your-luck shopping cart game for 2–5 players. Draw cards into your
+                        order one at a time, then stop whenever you like to keep some of what you
+                        drew. Draw too many problem cards and the whole order is canceled. Build the
+                        biggest, most diverse product collection by the end of the game to win.
                     </p>
                 </section>
 
                 <section>
                     <h3>The Deck</h3>
                     <p>
-                        A shared 60-card deck: 45 unique products (9 from each of 5 categories) and 15
-                        special cards (3 copies each of 5 types). Every card has a price that adds to
-                        your order total when drawn — specials included.
+                        A shared 70-card deck: 45 unique products (9 from each of 5 categories), 15
+                        bonus cards (3 copies each of 5 types), and 10 problem cards (8 worth 1 point,
+                        2 worth 2 points). Product and bonus cards have a price that adds to your order
+                        total when drawn; problem cards cost nothing but add to your problem points.
                     </p>
                 </section>
 
                 <section>
                     <h3>Your Turn</h3>
                     <p>
-                        Draw cards one at a time into your order. Each draw adds its price to the
-                        order total, which is checked against the shared shipping window's minimum
-                        and maximum:
+                        Draw cards one at a time into your cart, and stop voluntarily after any draw.
+                        There's no limit on how high your order total can climb — but your accumulated
+                        problem points are capped. Reaching <strong>3 or more problem points
+                        immediately cancels the order</strong>: every card in the cart is discarded and
+                        you get nothing from the turn.
                     </p>
-                    <ul>
-                        <li><strong>Within the window</strong> — you may Ship or keep drawing.</li>
-                        <li>
-                            <strong>Below the minimum</strong> — you may keep drawing or voluntarily
-                            stop (a failure).
-                        </li>
-                        <li>
-                            <strong>Above the maximum</strong> — you can no longer draw. Rescue the
-                            order with a special card, or accept failure.
-                        </li>
-                    </ul>
                 </section>
 
                 <section>
-                    <h3>Shipping or Failing</h3>
+                    <h3>Stopping &amp; Keeping</h3>
                     <p>
-                        <strong>Ship</strong> while within the window to keep every product you drew —
-                        they join your permanent collection — plus any special cards, and to advance
-                        the shared window one level forward (level 5 wraps to level 1). Shipping itself
-                        earns no immediate points; all scoring happens at the end of the game (see
-                        Scoring below).
+                        When you stop successfully, how many products you may keep depends on how
+                        many product cards are in your cart:
                     </p>
+                    <ul>
+                        <li>1–3 products → keep 1</li>
+                        <li>4–5 products → keep 2</li>
+                        <li>6–7 products → keep 3</li>
+                        <li>8+ products → keep 4</li>
+                    </ul>
                     <p>
-                        <strong>Failing</strong> — whether forced or voluntary — discards your whole
-                        order and retreats the shared window one level back (level 1 wraps to level
-                        5). You keep nothing from that turn.
+                        Unchosen products are discarded, but their price already counted toward the
+                        order total. All bonus cards in the cart are kept separately, in addition to
+                        your chosen products. Problem cards are always discarded.
                     </p>
+                </section>
+
+                <section>
+                    <h3>Shipping Fees</h3>
+                    <p>
+                        The free-shipping window is fixed at <strong>15–25</strong> for the whole game.
+                        When you stop successfully, your order total is compared against it:
+                    </p>
+                    <ul>
+                        <li>Below 15 → a flat −2 VP shipping fee.</li>
+                        <li>15–25 → free, no fee.</li>
+                        <li>Above 25 → −1 VP for every 5 units over 25, rounded up.</li>
+                    </ul>
+                    <p>These fees accumulate across the game and are subtracted from your final score. A canceled order pays no fee — it simply yields nothing.</p>
                 </section>
 
                 <section>
                     <h3>Scoring</h3>
                     <p>
                         Scoring happens once, at the end of the game, based on your entire collection
-                        of shipped products. Each of the five categories is scored separately by how
-                        many products you collected in it:
+                        of kept products. Each of the five categories is scored separately by how many
+                        products you collected in it:
                     </p>
                     <ul>
                         <li>0–1 products = 0 VP</li>
@@ -78,34 +87,31 @@
                     <p>
                         On top of that, collecting <strong>at least one product from all five
                         categories</strong> earns a <strong>5 VP diversity bonus</strong>. Add the five
-                        category scores and the bonus together for your final score.
+                        category scores and the bonus, then subtract your accumulated shipping fees,
+                        for your final score.
                     </p>
                 </section>
 
                 <section>
-                    <h3>Special Cards</h3>
+                    <h3>Bonus Cards</h3>
                     <p>
-                        Special cards add their price to your order like any product, but you can only
-                        use one after a <em>later</em> successful shipment brings it into your
-                        inventory — never the turn you draw it. Once held, use it on any future turn;
-                        each card is single-use.
+                        Bonus cards add their price to your order like any product, but you can only
+                        use one after a <em>later</em> turn's successful stop brings it into your
+                        inventory — never the turn you draw it. Once held, play it on any future turn
+                        before drawing again or stopping; each card is single-use. A canceled order
+                        cannot be rescued once it has already reached 3 problem points.
                     </p>
                     <ul>
-                        <li><strong>Discount Coupon</strong> (price 3) — reduce the order total by 3.</li>
+                        <li><strong>Discount Coupon</strong> (price 3) — reduce the order total by 5.</li>
+                        <li><strong>Free Return</strong> (price 4) — remove one product from the cart.</li>
                         <li>
-                            <strong>Free Return</strong> (price 4) — remove the most recently drawn
-                            product from the order.
+                            <strong>Shipping Insurance</strong> (price 5) — cancel up to 2 accumulated
+                            problem points.
                         </li>
+                        <li><strong>Extra Pick</strong> (price 4) — keep one additional product.</li>
                         <li>
-                            <strong>Tax Insurance</strong> (price 5) — raise this turn's maximum by 5.
-                        </li>
-                        <li>
-                            <strong>Flash Sale</strong> (price 4) — reduce the price of up to 2
-                            products in the order by 2 each.
-                        </li>
-                        <li>
-                            <strong>Sneak Peek</strong> (price 2) — reveal the next deck card and
-                            choose whether to draw it.
+                            <strong>Sneak Peek</strong> (price 2) — look at the next 2 deck cards and
+                            return them in either order.
                         </li>
                     </ul>
                 </section>
@@ -114,7 +120,7 @@
                     <h3>Game End</h3>
                     <p>
                         Once the deck runs out, play continues until every player has had an equal
-                        number of turns in that final round. The player with the highest total VP
+                        number of turns in that final round. The player with the highest final score
                         wins; a tie is shared.
                     </p>
                 </section>
@@ -126,8 +132,8 @@
                 <section>
                     <h3>סקירה כללית</h3>
                     <p>
-                        משחק עגלת קניות ל-2–5 שחקנים. שולפים מוצרים כדי להגיע לטווח המשלוח החינמי
-                        המשותף והמעגלי — אם תרדו נמוך מדי או תעלו גבוה מדי, ההזמנה תיכשל. בנו את
+                        משחק עגלת קניות ל-2–5 שחקנים. שולפים קלפים אחד אחד להזמנה, ועוצרים מתי שרוצים
+                        כדי לשמור חלק ממה שנשלף. שליפת יותר מדי קלפי תקלה מבטלת את כל ההזמנה. בנו את
                         האוסף הגדול והמגוון ביותר עד סוף המשחק כדי לנצח.
                     </p>
                 </section>
@@ -135,49 +141,59 @@
                 <section>
                     <h3>החבילה</h3>
                     <p>
-                        חבילה משותפת של 60 קלפים: 45 מוצרים ייחודיים (9 מכל אחת מ-5 קטגוריות) ו-15
-                        קלפים מיוחדים (3 עותקים מכל אחד מ-5 סוגים). לכל קלף יש מחיר שמתווסף לסכום
-                        ההזמנה כשהוא נשלף — כולל קלפים מיוחדים.
+                        חבילה משותפת של 70 קלפים: 45 מוצרים ייחודיים (9 מכל אחת מ-5 קטגוריות), 15
+                        קלפי בונוס (3 עותקים מכל אחד מ-5 סוגים), ו-10 קלפי תקלה (8 בשווי נקודה אחת,
+                        2 בשווי שתי נקודות). למוצרים ולקלפי בונוס יש מחיר שמתווסף לסכום ההזמנה כשהם
+                        נשלפים; קלפי תקלה לא עולים כלום אך מוסיפים לנקודות התקלה שלכם.
                     </p>
                 </section>
 
                 <section>
                     <h3>התור שלך</h3>
                     <p>
-                        שולפים קלפים אחד אחד להזמנה. כל שליפה מוסיפה את מחירה לסכום ההזמנה, שנבדק מול
-                        המינימום והמקסימום של חלון המשלוח המשותף:
+                        שולפים קלפים אחד אחד לעגלה, ועוצרים מרצון אחרי כל שליפה. אין הגבלה על כמה
+                        סכום ההזמנה יכול לעלות — אבל נקודות התקלה שנצברו מוגבלות.
+                        <strong>הגעה ל-3 נקודות תקלה או יותר מבטלת את ההזמנה באופן מיידי</strong>:
+                        כל הקלפים בעגלה נגרסים ולא מקבלים כלום מהתור.
                     </p>
-                    <ul>
-                        <li><strong>בתוך הטווח</strong> — אפשר לשלוח את ההזמנה או להמשיך לשלוף.</li>
-                        <li>
-                            <strong>מתחת למינימום</strong> — אפשר להמשיך לשלוף או לעצור מרצון (כישלון).
-                        </li>
-                        <li>
-                            <strong>מעל המקסימום</strong> — אי אפשר לשלוף יותר. אפשר להציל את ההזמנה
-                            עם קלף מיוחד, או לקבל את הכישלון.
-                        </li>
-                    </ul>
                 </section>
 
                 <section>
-                    <h3>שליחה או כישלון</h3>
+                    <h3>עצירה ושמירה</h3>
+                    <p>כשעוצרים בהצלחה, כמה מוצרים אפשר לשמור תלוי במספר קלפי המוצרים בעגלה:</p>
+                    <ul>
+                        <li>1–3 מוצרים ← שמרו 1</li>
+                        <li>4–5 מוצרים ← שמרו 2</li>
+                        <li>6–7 מוצרים ← שמרו 3</li>
+                        <li>8+ מוצרים ← שמרו 4</li>
+                    </ul>
                     <p>
-                        <strong>שליחה</strong> בזמן שההזמנה בתוך הטווח שומרת את כל המוצרים שנשלפו —
-                        הם מצטרפים לאוסף הקבוע שלכם — בנוסף לכל קלף מיוחד, ומקדמת את חלון המשלוח
-                        המשותף רמה אחת קדימה (רמה 5 חוזרת לרמה 1). השליחה עצמה לא מזכה בנק"ז מיידי;
-                        כל הניקוד מתבצע בסוף המשחק (ראו ניקוד למטה).
+                        מוצרים שלא נבחרו נגרסים, אך מחירם כבר נספר לסכום ההזמנה. כל קלפי הבונוס
+                        בעגלה נשמרים בנפרד, בנוסף למוצרים שנבחרו. קלפי תקלה נגרסים תמיד.
                     </p>
+                </section>
+
+                <section>
+                    <h3>עמלות משלוח</h3>
                     <p>
-                        <strong>כישלון</strong> — בין אם נכפה ובין אם מרצון — מבטל את כל ההזמנה ומחזיר
-                        את חלון המשלוח המשותף רמה אחת אחורה (רמה 1 חוזרת לרמה 5). לא נשאר לכם כלום
-                        מהתור הזה.
+                        טווח המשלוח החינמי קבוע ב-<strong>15–25</strong> לכל אורך המשחק. כשעוצרים
+                        בהצלחה, סכום ההזמנה נבדק מולו:
+                    </p>
+                    <ul>
+                        <li>מתחת ל-15 ← עמלת משלוח קבועה של -2 נק"ז.</li>
+                        <li>15–25 ← משלוח חינם, בלי עמלה.</li>
+                        <li>מעל 25 ← -1 נק"ז על כל 5 יחידות מעל 25, מעוגל למעלה.</li>
+                    </ul>
+                    <p>
+                        העמלות נצברות במהלך המשחק ומופחתות מהניקוד הסופי. הזמנה שבוטלה לא משלמת
+                        עמלה — היא פשוט לא מזכה בכלום.
                     </p>
                 </section>
 
                 <section>
                     <h3>ניקוד</h3>
                     <p>
-                        הניקוד מתבצע פעם אחת, בסוף המשחק, על בסיס כל אוסף המוצרים ששלחתם. כל אחת
+                        הניקוד מתבצע פעם אחת, בסוף המשחק, על בסיס כל אוסף המוצרים ששמרתם. כל אחת
                         מחמש הקטגוריות מנוקדת בנפרד לפי מספר המוצרים שאספתם בה:
                     </p>
                     <ul>
@@ -190,32 +206,27 @@
                     <p>
                         בנוסף, איסוף <strong>לפחות מוצר אחד מכל חמש הקטגוריות</strong> מזכה
                         ב<strong>בונוס גיוון של 5 נק"ז</strong>. סכמו את חמשת ניקודי הקטגוריות
-                        והבונוס יחד לניקוד הסופי שלכם.
+                        והבונוס, ואז הפחיתו את עמלות המשלוח שנצברו, לניקוד הסופי שלכם.
                     </p>
                 </section>
 
                 <section>
-                    <h3>קלפים מיוחדים</h3>
+                    <h3>קלפי בונוס</h3>
                     <p>
-                        קלפים מיוחדים מוסיפים את מחירם להזמנה כמו כל מוצר, אך ניתן להשתמש בהם רק לאחר
-                        ששליחה מוצלחת <em>מאוחרת יותר</em> מכניסה אותם למלאי שלכם — לעולם לא באותו
-                        תור שבו נשלפו. לאחר שהם ברשותכם, אפשר להשתמש בהם בכל תור עתידי; כל קלף הוא
-                        חד-פעמי.
+                        קלפי בונוס מוסיפים את מחירם להזמנה כמו כל מוצר, אך ניתן להשתמש בהם רק לאחר
+                        שעצירה מוצלחת <em>בתור מאוחר יותר</em> מכניסה אותם למלאי שלכם — לעולם לא
+                        באותו תור שבו נשלפו. לאחר שהם ברשותכם, אפשר לשחק אותם בכל תור עתידי לפני
+                        שליפה נוספת או עצירה; כל קלף הוא חד-פעמי. הזמנה שהגיעה כבר ל-3 נקודות תקלה
+                        לא ניתנת להצלה.
                     </p>
                     <ul>
-                        <li><strong>קופון הנחה</strong> (מחיר 3) — מפחית את סכום ההזמנה ב-3.</li>
+                        <li><strong>קופון הנחה</strong> (מחיר 3) — מפחית את סכום ההזמנה ב-5.</li>
+                        <li><strong>החזרה חינם</strong> (מחיר 4) — מסיר מוצר אחד מהעגלה.</li>
+                        <li><strong>ביטוח משלוח</strong> (מחיר 5) — מבטל עד 2 נקודות תקלה שנצברו.</li>
+                        <li><strong>בחירה נוספת</strong> (מחיר 4) — שומר מוצר נוסף אחד.</li>
                         <li>
-                            <strong>החזרה חינם</strong> (מחיר 4) — מסיר את המוצר האחרון שנשלף
-                            מההזמנה.
-                        </li>
-                        <li><strong>ביטוח מכס</strong> (מחיר 5) — מעלה את המקסימום של התור ב-5.</li>
-                        <li>
-                            <strong>מכירת פלאש</strong> (מחיר 4) — מפחית את מחירם של עד 2 מוצרים
-                            בהזמנה ב-2 כל אחד.
-                        </li>
-                        <li>
-                            <strong>הצצה חטופה</strong> (מחיר 2) — חושפת את הקלף הבא בחבילה ומאפשרת
-                            לבחור אם לשלוף אותו.
+                            <strong>הצצה חטופה</strong> (מחיר 2) — חושפת את 2 הקלפים הבאים בחבילה
+                            ומאפשרת להחזיר אותם בכל סדר.
                         </li>
                     </ul>
                 </section>
@@ -224,7 +235,7 @@
                     <h3>סוף המשחק</h3>
                     <p>
                         כשהחבילה נגמרת, המשחק ממשיך עד שלכל שחקן היה מספר שווה של תורות בסיבוב
-                        האחרון. השחקן עם סך הנק"ז הגבוה ביותר מנצח; תיקו מתחלק.
+                        האחרון. השחקן עם הניקוד הסופי הגבוה ביותר מנצח; תיקו מתחלק.
                     </p>
                 </section>
             </template>

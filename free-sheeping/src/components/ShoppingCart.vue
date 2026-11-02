@@ -6,10 +6,12 @@
         </div>
 
         <div class="bar">
-            <div class="bar-track" dir="ltr">
-                <div class="region below" :style="{ width: pct(minLimit) + '%' }"></div>
-                <div class="region within" :style="{ width: pct(maxLimit) - pct(minLimit) + '%' }"></div>
-                <div class="region above" :style="{ width: 100 - pct(maxLimit) + '%' }"></div>
+            <div class="bar-track-wrap" dir="ltr">
+                <div class="bar-track">
+                    <div class="region below" :style="{ width: pct(minLimit) + '%' }"></div>
+                    <div class="region within" :style="{ width: pct(maxLimit) - pct(minLimit) + '%' }"></div>
+                    <div class="region above" :style="{ width: 100 - pct(maxLimit) + '%' }"></div>
+                </div>
                 <div class="marker" :style="{ left: pct(effectiveTotal) + '%' }">{{ effectiveTotal }}</div>
             </div>
             <div class="bar-labels" dir="ltr">
@@ -18,17 +20,26 @@
                 <span>{{ maxLimit }}</span>
                 <span>{{ scaleMax }}+</span>
             </div>
-            <div class="status-line" :class="statusClass">{{ statusText }}</div>
+            <div class="status-line" :class="statusClass">
+                {{ statusText }}
+                <span v-if="fee && state.order.cards.length" class="fee-chip">{{ t('feeLabel', fee) }}</span>
+            </div>
+        </div>
+
+        <div class="problem-row" :class="{ danger: effectiveProblemPoints >= 2 }">
+            <span class="problem-label">{{ t('problemPointsLabel', effectiveProblemPoints) }}</span>
+            <span v-if="effectiveProblemPoints === 2" class="problem-warning">{{ t('problemPointsWarning') }}</span>
+        </div>
+
+        <div v-if="productCardsInOrder.length" class="keep-row">
+            {{ t('keepPreviewLabel', productCardsInOrder.length, stopKeepCount) }}
         </div>
 
         <div v-if="state.order.cards.length" class="cards">
             <TransitionGroup name="card-fly">
                 <template v-for="c in state.order.cards" :key="c.instanceId">
-                    <ProductCard
-                        v-if="c.type === 'product'"
-                        :def-id="c.defId"
-                        :effective-price="effectivePriceOf(c)"
-                    />
+                    <ProductCard v-if="c.type === 'product'" :def-id="c.defId" />
+                    <ProblemCard v-else-if="c.type === 'problem'" :def-id="c.defId" />
                     <SpecialCard v-else :def-id="c.defId" />
                 </template>
             </TransitionGroup>
@@ -41,10 +52,13 @@
 import { computed } from 'vue'
 import ProductCard from './ProductCard.vue'
 import SpecialCard from './SpecialCard.vue'
+import ProblemCard from './ProblemCard.vue'
 import { useGameState } from '../composables/useGameState.js'
 import { useLang } from '../composables/useLang.js'
+import { shippingPenaltyFor } from '../game/windows.js'
 
-const { state, effectiveTotal, minLimit, maxLimit, windowStatus, effectivePriceOf } = useGameState()
+const { state, effectiveTotal, minLimit, maxLimit, windowStatus, effectiveProblemPoints, productCardsInOrder, stopKeepCount } =
+    useGameState()
 const { t } = useLang()
 
 const scaleMax = computed(() => Math.max(40, maxLimit.value + 10))
@@ -58,6 +72,7 @@ const statusText = computed(() => {
     if (windowStatus.value === 'above') return t('statusAbove')
     return t('statusWithin')
 })
+const fee = computed(() => shippingPenaltyFor(effectiveTotal.value))
 </script>
 
 <style lang="scss" scoped>
@@ -111,8 +126,12 @@ const statusText = computed(() => {
     gap: 4px;
 }
 
-.bar-track {
+.bar-track-wrap {
     position: relative;
+    padding-top: 6px;
+}
+
+.bar-track {
     display: flex;
     height: 16px;
     border-radius: 999px;
@@ -135,7 +154,7 @@ const statusText = computed(() => {
 
 .marker {
     position: absolute;
-    top: -6px;
+    top: 0;
     transform: translateX(-50%);
     background: $ink;
     color: $cream;
@@ -155,6 +174,10 @@ const statusText = computed(() => {
 }
 
 .status-line {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
     font-size: 0.78rem;
     font-weight: 700;
     text-align: center;
@@ -168,6 +191,39 @@ const statusText = computed(() => {
     &.status-above {
         color: $danger;
     }
+}
+
+.fee-chip {
+    background: rgba(217, 83, 79, 0.12);
+    color: $danger;
+    border-radius: 999px;
+    padding: 1px 8px;
+    font-size: 0.7rem;
+}
+
+.problem-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: $text-dim;
+
+    &.danger {
+        color: $danger;
+    }
+}
+
+.problem-warning {
+    color: $danger;
+}
+
+.keep-row {
+    text-align: center;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: $gold;
 }
 
 .cards {

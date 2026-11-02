@@ -1,14 +1,21 @@
 import { PRODUCTS_BY_ID } from './products.js'
 import { SPECIALS_BY_ID } from './specials.js'
+import { PROBLEMS_BY_ID } from './problems.js'
 
 export function instancePrice(instance) {
-  const def = instance.type === 'product' ? PRODUCTS_BY_ID[instance.defId] : SPECIALS_BY_ID[instance.defId]
-  return def.price
+  if (instance.type === 'product') return PRODUCTS_BY_ID[instance.defId].price
+  if (instance.type === 'problem') return PROBLEMS_BY_ID[instance.defId].price
+  return SPECIALS_BY_ID[instance.defId].price
+}
+
+export function instancePoints(instance) {
+  if (instance.type !== 'problem') return 0
+  return PROBLEMS_BY_ID[instance.defId].points
 }
 
 // All probabilities read the actual remaining deck (sampling without replacement),
 // never a fixed/independent distribution. "Next draw" calculations assume no
-// additional special abilities are activated, per spec.
+// additional bonus abilities are activated, per spec.
 export function remainingByPrice(deck) {
   const counts = {}
   for (const card of deck) {
@@ -26,6 +33,19 @@ export function probNextIsProduct(deck) {
 export function probNextIsSpecial(deck) {
   if (!deck.length) return 0
   return deck.filter((c) => c.type === 'special').length / deck.length
+}
+
+export function probNextIsProblem(deck) {
+  if (!deck.length) return 0
+  return deck.filter((c) => c.type === 'problem').length / deck.length
+}
+
+// Probability that the next draw pushes accumulated problem points (net of
+// any Shipping Insurance already used this turn) to the 3-point bust line.
+export function probBust(deck, effectiveProblemPoints) {
+  if (!deck.length) return 0
+  const n = deck.filter((c) => c.type === 'problem' && effectiveProblemPoints + instancePoints(c) >= 3).length
+  return n / deck.length
 }
 
 export function probOverflow(deck, effectiveTotal, maxLimit) {

@@ -19,6 +19,7 @@
 import { nextTick, ref, watch } from 'vue'
 import { PRODUCTS_BY_ID } from '../game/products.js'
 import { SPECIALS_BY_ID } from '../game/specials.js'
+import { PROBLEMS_BY_ID } from '../game/problems.js'
 import { useGameState } from '../composables/useGameState.js'
 import { useLang } from '../composables/useLang.js'
 
@@ -37,7 +38,7 @@ watch(
 )
 
 function nameFor(defId, cardType) {
-    const def = cardType === 'special' ? SPECIALS_BY_ID[defId] : PRODUCTS_BY_ID[defId]
+    const def = cardType === 'special' ? SPECIALS_BY_ID[defId] : cardType === 'problem' ? PROBLEMS_BY_ID[defId] : PRODUCTS_BY_ID[defId]
     return def ? cardName(def) : defId
 }
 
@@ -47,24 +48,24 @@ function formatEntry(entry) {
             return t('logTurnStart', entry.playerName)
         case 'draw':
             return t('logDraw', entry.playerName, nameFor(entry.defId, entry.cardType), entry.price)
-        case 'ship':
-            return t('logShip', entry.playerName, entry.productCount, entry.total)
-        case 'fail':
-            return t('logFail', entry.playerName, entry.total)
-        case 'window-move':
-            return t('logWindowMove', entry.level)
+        case 'stop':
+            return t('logStop', entry.playerName, entry.productCount, entry.total, entry.penalty)
+        case 'bust':
+            return t('logBust', entry.playerName, entry.points)
         case 'coupon':
             return t('logCoupon', entry.playerName)
         case 'free-return':
             return t('logFreeReturn', entry.playerName, nameFor(entry.defId, 'product'))
-        case 'tax-insurance':
-            return t('logTaxInsurance', entry.playerName)
-        case 'flash-sale':
-            return t('logFlashSale', entry.playerName)
-        case 'sneak-peek-draw':
-            return t('logSneakPeekDraw', entry.playerName)
-        case 'sneak-peek-decline':
-            return t('logSneakPeekDecline', entry.playerName)
+        case 'shipping-insurance':
+            return t('logShippingInsurance', entry.playerName)
+        case 'extra-pick':
+            return t('logExtraPick', entry.playerName)
+        case 'sneak-peek':
+            return t('logSneakPeek', entry.playerName)
+        case 'sneak-peek-swap':
+            return t('logSneakPeekSwap', entry.playerName)
+        case 'sneak-peek-keep':
+            return t('logSneakPeekKeep', entry.playerName)
         case 'turn-skip':
             return t('logTurnSkip', entry.playerName)
         case 'game-over':

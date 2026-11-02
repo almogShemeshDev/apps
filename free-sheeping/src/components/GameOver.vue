@@ -22,6 +22,9 @@
                         <span>{{ t('diversityBonusLabel') }}</span>
                         <span dir="ltr">+5</span>
                     </div>
+                    <div v-if="p.shippingPenalty" class="penalty-row">
+                        <span>{{ t('shippingPenaltyLabel', p.shippingPenalty) }}</span>
+                    </div>
                     <div class="total-row">
                         <span>{{ t('totalScoreLabel') }}</span>
                         <span dir="ltr">{{ p.score }}</span>
@@ -60,7 +63,8 @@ const ranked = computed(() =>
                 shipped: p.productsWon.length,
                 counts,
                 bonus: hasDiversityBonus(counts),
-                score: endgameScore(p.productsWon),
+                shippingPenalty: p.shippingPenalty,
+                score: endgameScore(p.productsWon) - p.shippingPenalty,
             }
         })
         .sort((a, b) => b.score - a.score || b.shipped - a.shipped)
@@ -174,6 +178,7 @@ function isWinner(p) {
 }
 
 .bonus-row,
+.penalty-row,
 .total-row {
     display: flex;
     justify-content: space-between;
@@ -185,6 +190,11 @@ function isWinner(p) {
 
 .bonus-row {
     color: $teal;
+    font-weight: 700;
+}
+
+.penalty-row {
+    color: $danger;
     font-weight: 700;
 }
 

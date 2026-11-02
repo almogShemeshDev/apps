@@ -1,8 +1,11 @@
 import { ref, watch } from 'vue'
 import { useGameState } from './useGameState.js'
-import { probOverflow, instancePrice } from '../game/probability.js'
+import { probBust, probOverflow, instancePrice, instancePoints } from '../game/probability.js'
+import { categoryCounts, scoreForCategoryProductCount } from '../game/scoring.js'
+import { PRODUCTS_BY_ID } from '../game/products.js'
 
 const DELAY = 650
+const BUST_RISK_THRESHOLD = 0.3
 const OVERFLOW_RISK_THRESHOLD = 0.45
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
@@ -10,30 +13,29 @@ const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
 export function useBotAI() {
   const {
     state,
-    windowStatus,
     effectiveTotal,
     maxLimit,
+    minLimit,
+    effectiveProblemPoints,
+    productCardsInOrder,
+    stopKeepCount,
+    needsKeepSelection,
     canDraw,
     doDraw,
-    canShip,
-    doShip,
-    canStopOrFail,
-    doFail,
+    canStop,
+    doStop,
     canPassEmptyTurn,
     passEmptyTurn,
     canUseCoupon,
     useCoupon,
-    canUseFreeReturn,
-    useFreeReturn,
-    canUseTaxInsurance,
-    useTaxInsurance,
-    canUseFlashSale,
-    useFlashSale,
-    flashSaleEligibleTargets,
+    canUseShippingInsurance,
+    useShippingInsurance,
+    canUseExtraPick,
+    useExtraPick,
     canUseSneakPeek,
     useSneakPeek,
     resolveSneakPeek,
-    peekedCard,
+    peekedCards,
   } = useGameState()
 
   const botBusy = ref(false)
@@ -51,16 +53,16 @@ export function useBotAI() {
     if (state.players[pi]?.isBot) runBotTurn(pi)
   }
 
-  // Each bot turn is a small decision loop: rescue if over the limit, draw while
-  // the risk/reward looks good, otherwise ship or accept failure.
+  // Each bot turn loops: resolve any pending peek, use helpful bonus cards,
+  // then decide whether another draw's reward is worth the added bust/fee risk.
   async function runBotTurn(playerIndex) {
     botBusy.value = true
 
     for (let guard = 0; guard < 60; guard++) {
       await sleep(DELAY)
 
-      if (state.turnEffects.sneakPeekInstanceId) {
-        resolveSneakPeek(playerIndex, decideSneakPeek(playerIndex))
+      if (peekedCards.value) {
+        resolveSneakPeek(playerIndex, decideSneakPeekSwap())
         continue
       }
 
@@ -69,98 +71,107 @@ export function useBotAI() {
         break
       }
 
-      const status = windowStatus.value
-
-      if (status === 'above') {
-        const rescue = chooseRescue(playerIndex)
-        if (rescue) {
-          rescue.perform()
-          continue
-        }
-        if (canShip()) {
-          doShip()
-        } else if (canStopOrFail()) {
-          doFail()
-        }
-        break
-      }
-
-      if (status === 'within') {
-        if (shouldKeepDrawing(playerIndex) && canDraw()) {
-          doDraw()
-          continue
-        }
-        if (canShip()) doShip()
-        break
-      }
-
-      // status === 'below'
-      if (canUseSneakPeek(playerIndex, heldSneakPeekId(playerIndex))) {
-        useSneakPeek(playerIndex, heldSneakPeekId(playerIndex))
+      const bonus = chooseBonusToPlay(playerIndex)
+      if (bonus) {
+        bonus.perform()
         continue
       }
-      if (canDraw()) {
+
+      if (shouldKeepDrawing(playerIndex) && canDraw()) {
         doDraw()
         continue
       }
-      if (canStopOrFail()) doFail()
+
+      if (canStop()) {
+        doStop(needsKeepSelection.value ? chooseProductsToKeep(playerIndex) : undefined)
+      }
       break
     }
 
     botBusy.value = false
   }
 
-  function heldSneakPeekId(playerIndex) {
-    const entry = state.players[playerIndex].specialInventory.find((s) => s.defId === 'S05')
-    return entry?.instanceId
+  // Peek already happened; decide whether to swap the top two deck cards so
+  // the friendlier one is drawn first.
+  function decideSneakPeekSwap() {
+    const ids = peekedCards.value
+    if (!ids || ids.length < 2) return false
+    const cards = ids.map((id) => state.deck.find((c) => c.instanceId === id)).filter(Boolean)
+    if (cards.length < 2) return false
+    return riskOf(cards[1]) < riskOf(cards[0])
   }
 
-  function decideSneakPeek() {
-    // Peek already happened; decide whether the revealed card keeps us in a good spot.
-    const card = peekedCard.value
-    if (!card) return false
-    const nextTotal = effectiveTotal.value + instancePrice(card)
-    return nextTotal <= maxLimit.value
+  function riskOf(card) {
+    if (card.type === 'problem') return 100 + instancePoints(card)
+    return instancePrice(card)
   }
 
-  // Every shipped product helps the endgame collection, so the only real
-  // tradeoff is risk: keep drawing while the odds of overflowing stay low.
+  // Keep drawing while the odds of busting stay low, and while there is
+  // still room below the free-shipping ceiling to make the draw worthwhile.
   function shouldKeepDrawing(playerIndex) {
-    const risk = probOverflow(state.deck, effectiveTotal.value, maxLimit.value)
-    return risk < OVERFLOW_RISK_THRESHOLD
+    const bustRisk = probBust(state.deck, effectiveProblemPoints.value)
+    if (bustRisk >= BUST_RISK_THRESHOLD) return false
+    if (effectiveTotal.value < minLimit.value) return true
+    const overflowRisk = probOverflow(state.deck, effectiveTotal.value, maxLimit.value)
+    return overflowRisk < OVERFLOW_RISK_THRESHOLD
   }
 
-  // Try the specials that can bring an over-the-limit order back into range,
-  // preferring the one that helps the most.
-  function chooseRescue(playerIndex) {
+  // Try the bonus cards that help right now, preferring the one with the
+  // biggest immediate benefit.
+  function chooseBonusToPlay(playerIndex) {
     const player = state.players[playerIndex]
     const candidates = []
 
     for (const entry of player.specialInventory) {
-      if (entry.defId === 'S01' && canUseCoupon(playerIndex, entry.instanceId)) {
-        candidates.push({ gain: 3, perform: () => useCoupon(playerIndex, entry.instanceId) })
-      }
-      if (entry.defId === 'S03' && canUseTaxInsurance(playerIndex, entry.instanceId)) {
-        candidates.push({ gain: 5, perform: () => useTaxInsurance(playerIndex, entry.instanceId) })
-      }
-      if (entry.defId === 'S04' && canUseFlashSale(playerIndex, entry.instanceId)) {
-        const targets = flashSaleEligibleTargets()
-          .slice(0, 2)
-          .map((c) => c.instanceId)
-        if (targets.length) {
+      if (entry.defId === 'S03' && canUseShippingInsurance(playerIndex, entry.instanceId)) {
+        const bustRisk = probBust(state.deck, effectiveProblemPoints.value)
+        if (effectiveProblemPoints.value > 0 && bustRisk >= BUST_RISK_THRESHOLD) {
           candidates.push({
-            gain: targets.length * 2,
-            perform: () => useFlashSale(playerIndex, entry.instanceId, targets),
+            gain: Math.min(2, effectiveProblemPoints.value),
+            perform: () => useShippingInsurance(playerIndex, entry.instanceId),
           })
         }
       }
-      if (entry.defId === 'S02' && canUseFreeReturn(playerIndex, entry.instanceId)) {
-        candidates.push({ gain: 1, perform: () => useFreeReturn(playerIndex, entry.instanceId) })
+      if (entry.defId === 'S01' && canUseCoupon(playerIndex, entry.instanceId)) {
+        if (effectiveTotal.value > maxLimit.value) {
+          candidates.push({ gain: 5, perform: () => useCoupon(playerIndex, entry.instanceId) })
+        }
+      }
+      if (entry.defId === 'S04' && canUseExtraPick(playerIndex, entry.instanceId)) {
+        if (productCardsInOrder.value.length > stopKeepCount.value) {
+          candidates.push({ gain: 4, perform: () => useExtraPick(playerIndex, entry.instanceId) })
+        }
       }
     }
 
     if (!candidates.length) return null
     candidates.sort((a, b) => b.gain - a.gain)
     return candidates[0]
+  }
+
+  // When more products were drawn than can be kept, prefer the ones that add
+  // the most endgame score — new categories and categories close to a tier.
+  function chooseProductsToKeep(playerIndex) {
+    const player = state.players[playerIndex]
+    const runningCounts = categoryCounts(player.productsWon)
+    const keepCount = stopKeepCount.value
+    const remaining = [...productCardsInOrder.value]
+    const chosen = []
+
+    while (chosen.length < keepCount && remaining.length) {
+      remaining.sort((a, b) => marginalValue(b, runningCounts) - marginalValue(a, runningCounts))
+      const [best] = remaining.splice(0, 1)
+      chosen.push(best.instanceId)
+      const category = PRODUCTS_BY_ID[best.defId]?.category
+      if (category) runningCounts[category] = (runningCounts[category] ?? 0) + 1
+    }
+    return chosen
+  }
+
+  function marginalValue(card, counts) {
+    const category = PRODUCTS_BY_ID[card.defId]?.category
+    if (!category) return 0
+    const current = counts[category] ?? 0
+    return scoreForCategoryProductCount(current + 1) - scoreForCategoryProductCount(current)
   }
 }
