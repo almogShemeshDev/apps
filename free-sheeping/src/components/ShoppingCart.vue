@@ -31,8 +31,21 @@
             <span v-if="effectiveProblemPoints === 2" class="problem-warning">{{ t('problemPointsWarning') }}</span>
         </div>
 
+        <div class="tiers-row">
+            <span class="tiers-label">{{ t('keepTiersLabel') }}</span>
+            <span
+                v-for="tier in KEEP_TIERS"
+                :key="tier.keep"
+                class="tier-chip"
+                :class="{ active: isActiveTier(tier) }"
+            >
+                {{ t('keepTierRange', tier.min, tier.max === Infinity ? null : tier.max) }} → {{ tier.keep }}
+            </span>
+        </div>
+
         <div v-if="productCardsInOrder.length" class="keep-row">
-            {{ t('keepPreviewLabel', productCardsInOrder.length, stopKeepCount) }}
+            <span>{{ t('keepPreviewLabel', productCardsInOrder.length, stopKeepCount) }}</span>
+            <span v-if="tierNudge" class="keep-nudge">{{ t('nextTierNudge', tierNudge.nextKeep) }}</span>
         </div>
 
         <div v-if="state.order.cards.length" class="cards">
@@ -56,10 +69,20 @@ import ProblemCard from './ProblemCard.vue'
 import { useGameState } from '../composables/useGameState.js'
 import { useLang } from '../composables/useLang.js'
 import { shippingPenaltyFor } from '../game/windows.js'
+import { KEEP_TIERS, nextKeepTierGap } from '../game/keepTiers.js'
 
 const { state, effectiveTotal, minLimit, maxLimit, windowStatus, effectiveProblemPoints, productCardsInOrder, stopKeepCount } =
     useGameState()
 const { t } = useLang()
+
+function isActiveTier(tier) {
+    const count = productCardsInOrder.value.length
+    return count > 0 && count >= tier.min && count <= tier.max
+}
+const tierNudge = computed(() => {
+    const gap = nextKeepTierGap(productCardsInOrder.value.length)
+    return gap && gap.remaining === 1 ? gap : null
+})
 
 const scaleMax = computed(() => Math.max(40, maxLimit.value + 10))
 function pct(value) {
@@ -219,11 +242,55 @@ const fee = computed(() => shippingPenaltyFor(effectiveTotal.value))
     color: $danger;
 }
 
+.tiers-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.tiers-label {
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: $text-dim;
+}
+
+.tier-chip {
+    background: $surface;
+    border: 1px solid $border;
+    border-radius: 999px;
+    padding: 1px 9px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: $text-dim;
+    transition:
+        background 0.2s,
+        color 0.2s,
+        border-color 0.2s;
+
+    &.active {
+        background: $gold;
+        border-color: transparent;
+        color: $ink;
+    }
+}
+
 .keep-row {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
     text-align: center;
     font-size: 0.78rem;
     font-weight: 700;
     color: $gold;
+}
+
+.keep-nudge {
+    color: $success;
+    font-size: 0.78rem;
 }
 
 .cards {

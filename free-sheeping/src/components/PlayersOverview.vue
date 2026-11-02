@@ -138,12 +138,12 @@ function countsFor(player) {
 .cat-count {
     display: inline-flex;
     align-items: center;
-    gap: 2px;
-    padding: 2px 6px;
+    gap: 3px;
+    padding: 3px 9px;
     border-radius: 999px;
-    background: $surface;
-    border: 1px solid $border;
-    font-size: 0.72rem;
+    background: $bg-panel;
+    border: 2px solid $border;
+    font-size: 0.9rem;
     opacity: 0.55;
     transition:
         opacity 0.2s,
