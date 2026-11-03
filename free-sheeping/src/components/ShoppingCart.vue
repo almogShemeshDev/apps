@@ -15,14 +15,14 @@
                 <div class="marker" :style="{ left: pct(effectiveTotal) + '%' }">{{ effectiveTotal }}</div>
             </div>
             <div class="bar-labels" dir="ltr">
-                <span>0</span>
-                <span>{{ minLimit }}</span>
-                <span>{{ maxLimit }}</span>
-                <span>{{ scaleMax }}+</span>
+                <span class="label-tick start" style="left: 0%">0</span>
+                <span class="label-tick" :style="{ left: pct(minLimit) + '%' }">{{ minLimit }}</span>
+                <span class="label-tick" :style="{ left: pct(maxLimit) + '%' }">{{ maxLimit }}</span>
+                <span class="label-tick end" style="left: 100%">{{ scaleMax }}+</span>
             </div>
             <div class="status-line" :class="statusClass">
                 {{ statusText }}
-                <span v-if="fee && state.order.cards.length" class="fee-chip">{{ t('feeLabel', fee) }}</span>
+                <span v-if="projectedPenalty && state.order.cards.length" class="fee-chip">{{ t('feeLabel', projectedPenalty) }}</span>
             </div>
         </div>
 
@@ -51,7 +51,7 @@
         <div v-if="state.order.cards.length" class="cards">
             <TransitionGroup name="card-fly">
                 <template v-for="c in state.order.cards" :key="c.instanceId">
-                    <ProductCard v-if="c.type === 'product'" :def-id="c.defId" />
+                    <ProductCard v-if="c.type === 'product'" :def-id="c.defId" :tier="c.tier" />
                     <ProblemCard v-else-if="c.type === 'problem'" :def-id="c.defId" />
                     <SpecialCard v-else :def-id="c.defId" />
                 </template>
@@ -68,11 +68,19 @@ import SpecialCard from './SpecialCard.vue'
 import ProblemCard from './ProblemCard.vue'
 import { useGameState } from '../composables/useGameState.js'
 import { useLang } from '../composables/useLang.js'
-import { shippingPenaltyFor } from '../game/windows.js'
 import { KEEP_TIERS, nextKeepTierGap } from '../game/keepTiers.js'
 
-const { state, effectiveTotal, minLimit, maxLimit, windowStatus, effectiveProblemPoints, productCardsInOrder, stopKeepCount } =
-    useGameState()
+const {
+    state,
+    effectiveTotal,
+    minLimit,
+    maxLimit,
+    windowStatus,
+    effectiveProblemPoints,
+    productCardsInOrder,
+    stopKeepCount,
+    projectedPenalty,
+} = useGameState()
 const { t } = useLang()
 
 function isActiveTier(tier) {
@@ -95,7 +103,6 @@ const statusText = computed(() => {
     if (windowStatus.value === 'above') return t('statusAbove')
     return t('statusWithin')
 })
-const fee = computed(() => shippingPenaltyFor(effectiveTotal.value))
 </script>
 
 <style lang="scss" scoped>
@@ -190,10 +197,28 @@ const fee = computed(() => shippingPenaltyFor(effectiveTotal.value))
 }
 
 .bar-labels {
-    display: flex;
-    justify-content: space-between;
+    position: relative;
+    height: 14px;
     font-size: 0.62rem;
     color: $text-dim;
+}
+
+// Positioned at the same pct() offsets as the colored regions above, so the
+// min/max labels always line up with the region boundaries they describe —
+// a plain flex/space-between row drifts out of alignment whenever the free
+// shipping window is a small slice of the 0-scaleMax scale.
+.label-tick {
+    position: absolute;
+    top: 0;
+    transform: translateX(-50%);
+    white-space: nowrap;
+
+    &.start {
+        transform: translateX(0);
+    }
+    &.end {
+        transform: translateX(-100%);
+    }
 }
 
 .status-line {

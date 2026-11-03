@@ -24,6 +24,7 @@
                     </div>
                     <div v-if="p.shippingPenalty" class="penalty-row">
                         <span>{{ t('shippingPenaltyLabel', p.shippingPenalty) }}</span>
+                        <PenaltyCards :count="p.shippingPenalty" />
                     </div>
                     <div class="total-row">
                         <span>{{ t('totalScoreLabel') }}</span>
@@ -46,6 +47,7 @@ import { computed } from 'vue'
 import { useLang } from '../composables/useLang.js'
 import { CATEGORIES } from '../game/categories.js'
 import { categoryCounts, hasDiversityBonus, endgameScore, scoreForCategoryProductCount } from '../game/scoring.js'
+import PenaltyCards from './PenaltyCards.vue'
 
 const props = defineProps({
     players: { type: Array, required: true },
@@ -182,6 +184,8 @@ function isWinner(p) {
 .total-row {
     display: flex;
     justify-content: space-between;
+    align-items: center;
+    gap: 8px;
     font-size: 0.78rem;
     padding-top: 4px;
     margin-top: 2px;

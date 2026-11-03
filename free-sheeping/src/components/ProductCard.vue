@@ -7,6 +7,7 @@
         >
             {{ category.icon }}
         </div>
+        <div v-if="tier" class="tier-badge" :title="`${tier}+ players`">{{ tier === 5 ? '5' : '4+' }}</div>
         <div class="icon">{{ def.icon }}</div>
         <div class="name">{{ cardName(def) }}</div>
         <div class="stats">
@@ -25,6 +26,7 @@ import { useLang } from '../composables/useLang.js'
 const props = defineProps({
     defId: { type: String, required: true },
     clickable: { type: Boolean, default: false },
+    tier: { type: Number, default: null },
 })
 defineEmits(['click'])
 
@@ -104,6 +106,24 @@ const category = computed(() => CATEGORIES_BY_ID[def.value.category])
     align-items: center;
     justify-content: center;
     font-size: 1rem;
+    box-shadow: 0 1px 4px rgba(74, 63, 47, 0.25);
+}
+
+.tier-badge {
+    position: absolute;
+    top: -10px;
+    left: -10px;
+    min-width: 24px;
+    height: 20px;
+    padding: 0 5px;
+    border-radius: 999px;
+    background: $ink;
+    color: $cream;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.6rem;
+    font-weight: 700;
     box-shadow: 0 1px 4px rgba(74, 63, 47, 0.25);
 }
 

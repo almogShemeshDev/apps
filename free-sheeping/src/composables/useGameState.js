@@ -1,8 +1,8 @@
 import { reactive, computed } from 'vue'
 import { buildDeck } from '../game/deck.js'
-import { shippingPenaltyFor, SHIPPING_WINDOW } from '../game/windows.js'
+import { belowMinPenaltyFor, SHIPPING_WINDOW } from '../game/windows.js'
 import { SPECIALS_BY_ID } from '../game/specials.js'
-import { instancePrice, instancePoints } from '../game/probability.js'
+import { instancePrice, instancePoints, taxCardCount } from '../game/probability.js'
 import { baseKeepTier } from '../game/keepTiers.js'
 
 let nextLogId = 1
@@ -58,6 +58,16 @@ const needsKeepSelection = computed(() => productCardsInOrder.value.length > sto
 
 const peekedCards = computed(() => state.turnEffects.sneakPeekCards)
 
+// What stopping right now would cost: a flat fee for finishing below the
+// minimum, plus -1 VP for every positive-price card taxed for exceeding the
+// max (see taxCardCount). Shown live in the cart; recomputed for real at
+// doStop() once the final cart and bonuses are known.
+const projectedPenalty = computed(
+  () =>
+    belowMinPenaltyFor(effectiveTotal.value) +
+    taxCardCount(state.order.cards, state.turnEffects.couponCount, maxLimit.value)
+)
+
 function createPlayer(input) {
   const name = typeof input === 'string' ? input : input.name
   const isBot = typeof input === 'string' ? false : !!input.isBot
@@ -66,7 +76,7 @@ function createPlayer(input) {
 
 function startGame(playerInputs) {
   state.players = playerInputs.map(createPlayer)
-  state.deck = buildDeck()
+  state.deck = buildDeck(playerInputs.length)
   state.discard = []
   state.turnIndex = 0
   state.turnNumber = 1
@@ -173,7 +183,7 @@ function doStop(selectedInstanceIds) {
     }
   }
 
-  const penalty = shippingPenaltyFor(total)
+  const penalty = belowMinPenaltyFor(total) + taxCardCount(state.order.cards, state.turnEffects.couponCount, maxLimit.value)
   player.shippingPenalty += penalty
   pushLog('stop', { playerName: player.name, productCount: keptCount, total, penalty })
   nextTurn()
@@ -299,6 +309,7 @@ export function useGameState() {
     stopKeepCount,
     needsKeepSelection,
     peekedCards,
+    projectedPenalty,
     startGame,
     resetGame,
     canDraw,

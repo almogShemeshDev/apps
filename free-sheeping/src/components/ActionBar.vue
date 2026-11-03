@@ -4,7 +4,7 @@
             <p class="flow-prompt">{{ t('sneakPeekPrompt') }}</p>
             <div class="peek-row">
                 <template v-for="c in peekedCardObjs" :key="c.instanceId">
-                    <ProductCard v-if="c.type === 'product'" :def-id="c.defId" />
+                    <ProductCard v-if="c.type === 'product'" :def-id="c.defId" :tier="c.tier" />
                     <ProblemCard v-else-if="c.type === 'problem'" :def-id="c.defId" />
                     <SpecialCard v-else :def-id="c.defId" />
                 </template>
@@ -25,6 +25,7 @@
                         v-for="c in productCardsInOrder"
                         :key="c.instanceId"
                         :def-id="c.defId"
+                        :tier="c.tier"
                         clickable
                         :class="{ selected: keepSelection.includes(c.instanceId) }"
                         @click="toggleKeep(c.instanceId)"
@@ -51,6 +52,7 @@
                         v-for="c in productCardsInOrder"
                         :key="c.instanceId"
                         :def-id="c.defId"
+                        :tier="c.tier"
                         clickable
                         @click="confirmFreeReturn(c.instanceId)"
                     />

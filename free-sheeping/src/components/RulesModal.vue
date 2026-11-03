@@ -19,10 +19,19 @@
                 <section>
                     <h3>The Deck</h3>
                     <p>
-                        A shared 70-card deck: 45 unique products (9 from each of 5 categories), 15
-                        bonus cards (3 copies each of 5 types), and 10 problem cards (8 worth 1 point,
-                        2 worth 2 points). Product and bonus cards have a price that adds to your order
-                        total when drawn; problem cards cost nothing but add to your problem points.
+                        A shared deck that scales with player count, always split evenly across the 5
+                        categories:
+                    </p>
+                    <ul>
+                        <li>2–3 players → 70 cards (45 products, 15 bonus cards, 10 problem cards)</li>
+                        <li>4 players → 100 cards (65 products, 20 bonus cards, 15 problem cards)</li>
+                        <li>5 players → 120 cards (80 products, 20 bonus cards, 20 problem cards)</li>
+                    </ul>
+                    <p>
+                        The extra copies that join bigger games are marked with a small
+                        <strong>4+</strong> or <strong>5</strong> badge. Product prices range from 1 to
+                        5 and add to your order total when drawn; problem cards cost nothing but add to
+                        your problem points (8 worth 1 point, 2 worth 2 points, scaled the same way).
                     </p>
                 </section>
 
@@ -57,17 +66,26 @@
                 </section>
 
                 <section>
-                    <h3>Shipping Fees</h3>
+                    <h3>Shipping Fees &amp; Taxes</h3>
                     <p>
-                        The free-shipping window is fixed at <strong>15–25</strong> for the whole game.
+                        The free-shipping window is fixed at <strong>8–13</strong> for the whole game.
                         When you stop successfully, your order total is compared against it:
                     </p>
                     <ul>
-                        <li>Below 15 → a flat −2 VP shipping fee.</li>
-                        <li>15–25 → free, no fee.</li>
-                        <li>Above 25 → −1 VP for every 5 units over 25, rounded up.</li>
+                        <li>Below 8 → a flat −2 VP shipping fee.</li>
+                        <li>8–13 → free, no fee.</li>
+                        <li>
+                            Above 13 → every positive-price card that pushed your total over 13, or
+                            that was drawn afterward, is taxed <strong>−1 VP each</strong>. A Discount
+                            Coupon's discount is applied first, so it can shrink or erase the tax.
+                            Zero-price problem cards are never taxed.
+                        </li>
                     </ul>
-                    <p>These fees accumulate across the game and are subtracted from your final score. A canceled order pays no fee — it simply yields nothing.</p>
+                    <p>
+                        These penalties accumulate across the game — shown as face-down cards next to
+                        your name — and are subtracted from your final score. A canceled order pays
+                        nothing; it simply yields no cards.
+                    </p>
                 </section>
 
                 <section>
@@ -140,11 +158,18 @@
 
                 <section>
                     <h3>החבילה</h3>
+                    <p>חבילה משותפת שגודלה תלוי במספר השחקנים, ומתחלקת שווה בשווה בין 5 הקטגוריות:</p>
+                    <ul>
+                        <li>2–3 שחקנים ← 70 קלפים (45 מוצרים, 15 קלפי בונוס, 10 קלפי תקלה)</li>
+                        <li>4 שחקנים ← 100 קלפים (65 מוצרים, 20 קלפי בונוס, 15 קלפי תקלה)</li>
+                        <li>5 שחקנים ← 120 קלפים (80 מוצרים, 20 קלפי בונוס, 20 קלפי תקלה)</li>
+                    </ul>
                     <p>
-                        חבילה משותפת של 70 קלפים: 45 מוצרים ייחודיים (9 מכל אחת מ-5 קטגוריות), 15
-                        קלפי בונוס (3 עותקים מכל אחד מ-5 סוגים), ו-10 קלפי תקלה (8 בשווי נקודה אחת,
-                        2 בשווי שתי נקודות). למוצרים ולקלפי בונוס יש מחיר שמתווסף לסכום ההזמנה כשהם
-                        נשלפים; קלפי תקלה לא עולים כלום אך מוסיפים לנקודות התקלה שלכם.
+                        העותקים הנוספים שמצטרפים במשחקים גדולים יותר מסומנים בתגית קטנה
+                        <strong>4+</strong> או <strong>5</strong>. מחירי המוצרים נעים בין 1 ל-5
+                        ומתווספים לסכום ההזמנה כשהם נשלפים; קלפי תקלה לא עולים כלום אך מוסיפים
+                        לנקודות התקלה שלכם (8 בשווי נקודה אחת, 2 בשווי שתי נקודות, גם הם מתרבים
+                        באותו יחס).
                     </p>
                 </section>
 
@@ -174,19 +199,24 @@
                 </section>
 
                 <section>
-                    <h3>עמלות משלוח</h3>
+                    <h3>עמלות משלוח ומיסים</h3>
                     <p>
-                        טווח המשלוח החינמי קבוע ב-<strong>15–25</strong> לכל אורך המשחק. כשעוצרים
+                        טווח המשלוח החינמי קבוע ב-<strong>8–13</strong> לכל אורך המשחק. כשעוצרים
                         בהצלחה, סכום ההזמנה נבדק מולו:
                     </p>
                     <ul>
-                        <li>מתחת ל-15 ← עמלת משלוח קבועה של -2 נק"ז.</li>
-                        <li>15–25 ← משלוח חינם, בלי עמלה.</li>
-                        <li>מעל 25 ← -1 נק"ז על כל 5 יחידות מעל 25, מעוגל למעלה.</li>
+                        <li>מתחת ל-8 ← עמלת משלוח קבועה של -2 נק"ז.</li>
+                        <li>8–13 ← משלוח חינם, בלי עמלה.</li>
+                        <li>
+                            מעל 13 ← כל קלף בעל מחיר חיובי שהעביר את הסכום את ה-13, או שנשלף
+                            אחריו, ממוסה ב-<strong>1- נק"ז כל אחד</strong>. ההנחה של קופון ההנחה
+                            מחושבת קודם, כך שהיא יכולה להקטין או לבטל את המיסוי. קלפי תקלה בשווי 0
+                            לעולם לא ממוסים.
+                        </li>
                     </ul>
                     <p>
-                        העמלות נצברות במהלך המשחק ומופחתות מהניקוד הסופי. הזמנה שבוטלה לא משלמת
-                        עמלה — היא פשוט לא מזכה בכלום.
+                        העונשים הללו נצברים במהלך המשחק — ומוצגים כקלפים הפוכים לצד שמכם — ומופחתים
+                        מהניקוד הסופי. הזמנה שבוטלה לא משלמת כלום — היא פשוט לא מזכה בקלפים.
                     </p>
                 </section>
 
