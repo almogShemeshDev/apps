@@ -57,3 +57,7 @@ export const SPECIALS = [
 
 export const SPECIALS_BY_ID = Object.fromEntries(SPECIALS.map((s) => [s.id, s]))
 export const COPIES_PER_SPECIAL = 3
+
+// One extra copy of each bonus card joins the deck once there are 4+
+// players (15 -> 20 total); 5-player games use the same 20, no further tier.
+export const SPECIAL_EXTRA_COPIES = SPECIALS.map((s) => ({ defId: s.id, minPlayers: 4 }))

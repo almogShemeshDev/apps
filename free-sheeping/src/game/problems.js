@@ -15,3 +15,19 @@ export const PROBLEMS = [
 ]
 
 export const PROBLEMS_BY_ID = Object.fromEntries(PROBLEMS.map((p) => [p.id, p]))
+
+// Extra copies that join the deck in bigger games, preserving the 4:1 ratio
+// of 1-point to 2-point problem cards: +5 (4 at 1pt, 1 at 2pt) once there
+// are 4+ players (10 -> 15), plus +5 more at 5 players (15 -> 20).
+export const PROBLEM_DUPLICATES = [
+  { defId: 'PR01', minPlayers: 4 },
+  { defId: 'PR02', minPlayers: 4 },
+  { defId: 'PR03', minPlayers: 4 },
+  { defId: 'PR04', minPlayers: 4 },
+  { defId: 'PR09', minPlayers: 4 },
+  { defId: 'PR05', minPlayers: 5 },
+  { defId: 'PR06', minPlayers: 5 },
+  { defId: 'PR07', minPlayers: 5 },
+  { defId: 'PR08', minPlayers: 5 },
+  { defId: 'PR10', minPlayers: 5 },
+]

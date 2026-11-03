@@ -68,3 +68,20 @@ export function probBelowMin(deck, effectiveTotal, minLimit) {
   const n = deck.filter((c) => effectiveTotal + instancePrice(c) < minLimit).length
   return n / deck.length
 }
+
+// Taxes: once the cart's running total exceeds the free-shipping max, every
+// positive-price card from that point on (inclusive) costs -1 VP, even if
+// it was drawn afterward. A Discount Coupon's flat -5 discount shifts the
+// threshold up by 5 per use, since taxes are recalculated at the end of the
+// turn, after bonuses apply. Zero-price problem cards are never taxed.
+export function taxCardCount(orderCards, couponCount, maxLimit) {
+  const threshold = maxLimit + couponCount * 5
+  let cumulative = 0
+  let count = 0
+  for (const card of orderCards) {
+    const price = instancePrice(card)
+    cumulative += price
+    if (price > 0 && cumulative > threshold) count++
+  }
+  return count
+}

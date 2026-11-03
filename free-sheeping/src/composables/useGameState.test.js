@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest'
 import { useGameState } from './useGameState.js'
 import { buildDeck } from '../game/deck.js'
+import { PRODUCTS_BY_ID } from '../game/products.js'
 import { endgameScore } from '../game/scoring.js'
 
 function product(id) {
@@ -24,19 +25,53 @@ beforeEach(() => {
   ])
 })
 
-describe('deck composition', () => {
-  it('has 70 cards: 45 products + 15 bonus (3x5) + 10 problems', () => {
-    const deck = buildDeck()
-    expect(deck.length).toBe(70)
-    expect(deck.filter((c) => c.type === 'product').length).toBe(45)
-    expect(deck.filter((c) => c.type === 'special').length).toBe(15)
-    expect(deck.filter((c) => c.type === 'problem').length).toBe(10)
+describe('deck composition scales with player count', () => {
+  it('2-3 players: 70 cards (45 products, 15 bonus, 10 problems)', () => {
+    for (const n of [2, 3]) {
+      const deck = buildDeck(n)
+      expect(deck.length).toBe(70)
+      expect(deck.filter((c) => c.type === 'product').length).toBe(45)
+      expect(deck.filter((c) => c.type === 'special').length).toBe(15)
+      expect(deck.filter((c) => c.type === 'problem').length).toBe(10)
+    }
+  })
+
+  it('4 players: 100 cards (65 products, 20 bonus, 15 problems)', () => {
+    const deck = buildDeck(4)
+    expect(deck.length).toBe(100)
+    expect(deck.filter((c) => c.type === 'product').length).toBe(65)
+    expect(deck.filter((c) => c.type === 'special').length).toBe(20)
+    expect(deck.filter((c) => c.type === 'problem').length).toBe(15)
+  })
+
+  it('5 players: 120 cards (80 products, 20 bonus, 20 problems)', () => {
+    const deck = buildDeck(5)
+    expect(deck.length).toBe(120)
+    expect(deck.filter((c) => c.type === 'product').length).toBe(80)
+    expect(deck.filter((c) => c.type === 'special').length).toBe(20)
+    expect(deck.filter((c) => c.type === 'problem').length).toBe(20)
+  })
+
+  it('keeps an equal number of products per category at every player count', () => {
+    for (const [n, perCategory] of [
+      [2, 9],
+      [4, 13],
+      [5, 16],
+    ]) {
+      const deck = buildDeck(n)
+      const counts = {}
+      for (const c of deck.filter((c) => c.type === 'product')) {
+        const category = PRODUCTS_BY_ID[c.defId].category
+        counts[category] = (counts[category] ?? 0) + 1
+      }
+      expect(Object.values(counts)).toEqual([perCategory, perCategory, perCategory, perCategory, perCategory])
+    }
   })
 })
 
 describe('stopping and keeping products', () => {
   it('keeps all products when at or under the keep allowance (1-3 -> keep 1)', () => {
-    gs.state.order.cards.push(product('P08')) // price 2
+    gs.state.order.cards.push(product('P08')) // price 1
     gs.doStop()
     expect(gs.state.players[0].productsWon).toEqual(['P08'])
   })
@@ -54,7 +89,7 @@ describe('stopping and keeping products', () => {
   })
 
   it('a shipped bonus card goes to inventory, not the product collection, and is kept regardless of selection', () => {
-    gs.state.order.cards.push(product('P05'), special('S05', 1)) // 7 + 2 = 9, below min -> fee applies but still kept
+    gs.state.order.cards.push(product('P05'), special('S05', 1)) // 4 + 2 = 6, below min -> fee applies but still kept
     gs.doStop()
     expect(gs.state.players[0].productsWon).toEqual(['P05'])
     expect(gs.state.players[0].specialInventory).toEqual([{ instanceId: 'S05-1', defId: 'S05' }])
@@ -65,23 +100,17 @@ describe('stopping and keeping products', () => {
   })
 })
 
-describe('shipping fees (fixed 15-25 window)', () => {
-  it('charges a flat -2 fee below 15', () => {
-    gs.state.order.cards.push(product('P08')) // price 2
+describe('shipping fees (fixed 8-13 window)', () => {
+  it('charges a flat -2 fee below 8', () => {
+    gs.state.order.cards.push(product('P08')) // price 1
     gs.doStop()
     expect(gs.state.players[0].shippingPenalty).toBe(2)
   })
 
-  it('charges no fee within 15-25', () => {
-    gs.state.order.cards.push(product('P05'), product('P11')) // 7 + 8 = 15
+  it('charges no fee within 8-13', () => {
+    gs.state.order.cards.push(product('P05'), product('P11')) // 4 + 4 = 8
     gs.doStop()
     expect(gs.state.players[0].shippingPenalty).toBe(0)
-  })
-
-  it('charges -1 per 5 over 25, rounded up', () => {
-    gs.state.order.cards.push(product('P15'), product('P33'), product('P21')) // 10+10+10 = 30 -> 5 over -> -1
-    gs.doStop()
-    expect(gs.state.players[0].shippingPenalty).toBe(1)
   })
 
   it('fees accumulate across turns', () => {
@@ -91,6 +120,35 @@ describe('shipping fees (fixed 15-25 window)', () => {
     gs.doStop()
     expect(gs.state.players[0].shippingPenalty).toBe(2)
     expect(gs.state.players[1].shippingPenalty).toBe(2)
+  })
+})
+
+describe('taxes (positive-price cards that exceed the max)', () => {
+  it('taxes only the card that pushes the total over 13', () => {
+    gs.state.order.cards.push(product('P15'), product('P33'), product('P21')) // 5+5+5 = 15, crosses 13 on card 3
+    gs.doStop()
+    expect(gs.state.players[0].shippingPenalty).toBe(1)
+  })
+
+  it('also taxes every positive-price card drawn after the one that crossed the line', () => {
+    gs.state.order.cards.push(product('P15'), product('P33'), product('P21'), product('P08')) // 5,10,15,16
+    gs.doStop()
+    expect(gs.state.players[0].shippingPenalty).toBe(2)
+  })
+
+  it('never taxes zero-price problem cards, and they do not shield later cards from tax', () => {
+    gs.state.order.cards.push(product('P15'), product('P33'), product('P21'), problem('PR01')) // 5,10,15,15
+    gs.doStop()
+    expect(gs.state.players[0].shippingPenalty).toBe(1)
+  })
+
+  it('is recalculated at the end of the turn, after a Discount Coupon shifts the threshold up by 5', () => {
+    gs.state.players[0].specialInventory.push({ instanceId: 'TEST-S01', defId: 'S01' })
+    gs.state.order.cards.push(product('P15'), product('P33'), product('P21')) // raw total 15
+    gs.useCoupon(0, 'TEST-S01')
+    expect(gs.effectiveTotal.value).toBe(10) // 15 - 5, back within the 8-13 window
+    gs.doStop()
+    expect(gs.state.players[0].shippingPenalty).toBe(0)
   })
 })
 
@@ -126,7 +184,7 @@ describe('problem cards and busting', () => {
 describe('bonus cards', () => {
   it('Discount Coupon reduces the order total by 5', () => {
     gs.state.players[0].specialInventory.push({ instanceId: 'TEST-S01', defId: 'S01' })
-    gs.state.order.cards.push(product('P21')) // price 10
+    gs.state.order.cards.push(product('P15'), product('P33')) // 5 + 5 = 10
     expect(gs.effectiveTotal.value).toBe(10)
     gs.useCoupon(0, 'TEST-S01')
     expect(gs.effectiveTotal.value).toBe(5)
@@ -134,9 +192,9 @@ describe('bonus cards', () => {
 
   it('Free Return removes a chosen product, including its price and product count', () => {
     gs.state.players[0].specialInventory.push({ instanceId: 'TEST-S02', defId: 'S02' })
-    gs.state.order.cards.push(product('P05'), product('P11')) // 7 + 8 = 15
+    gs.state.order.cards.push(product('P05'), product('P11')) // 4 + 4 = 8
     gs.useFreeReturn(0, 'TEST-S02', 'P05')
-    expect(gs.effectiveTotal.value).toBe(8)
+    expect(gs.effectiveTotal.value).toBe(4)
     expect(gs.productCardsInOrder.value.map((c) => c.defId)).toEqual(['P11'])
     expect(gs.state.discard.some((c) => c.defId === 'P05')).toBe(true)
   })
@@ -163,7 +221,7 @@ describe('bonus cards', () => {
 
 describe('endgame score', () => {
   it('is the collection score minus accumulated shipping fees', () => {
-    gs.state.order.cards.push(product('P08')) // price 2, below min -> -2 fee
+    gs.state.order.cards.push(product('P08')) // price 1, below min -> -2 fee
     gs.doStop()
     const alice = gs.state.players[0]
     expect(endgameScore(alice.productsWon) - alice.shippingPenalty).toBe(0 - 2)
