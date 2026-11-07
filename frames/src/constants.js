@@ -14,7 +14,7 @@ export const TRACKS = {
 }
 
 export const STARTING_TIME_TOKENS = 5
-export const MARKET_SIZE = 4
+export const MARKET_SIZE = 6
 export const TILES_PER_PLAYER = 12
 export const MIN_TILE_DECK = 36
 

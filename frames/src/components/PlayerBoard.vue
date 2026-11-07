@@ -23,11 +23,16 @@
             <span class="strip-label">{{ t('filmStripLabel') }} ({{ player.filmStrip.length }})</span>
             <div class="strip-frames">
                 <div
-                    v-for="photo in player.filmStrip"
+                    v-for="(photo, i) in player.filmStrip"
                     :key="photo.id"
                     class="frame"
                     :style="{ '--c': CATEGORIES[photo.category].color }"
-                    :class="{ developed: photo.developed === true, burned: photo.developed === false }"
+                    :class="{
+                        developed: photo.developed === true,
+                        burned: photo.developed === false,
+                        current: i === currentPhotoIndex,
+                        pending: i === currentPhotoIndex && awaitingDecision,
+                    }"
                 >
                     {{ CATEGORIES[photo.category].icon }}
                 </div>
@@ -44,6 +49,8 @@ import { useLang } from '../composables/useLang.js'
 defineProps({
     player: { type: Object, required: true },
     isActive: { type: Boolean, default: false },
+    currentPhotoIndex: { type: Number, default: -1 },
+    awaitingDecision: { type: Boolean, default: false },
 })
 
 const { t } = useLang()
@@ -175,6 +182,25 @@ const trackKeys = ['creativity', 'equipment', 'efficiency', 'darkroom']
     &.burned {
         opacity: 0.3;
         filter: grayscale(1);
+    }
+
+    &.current {
+        box-shadow: 0 0 0 2px $amber;
+    }
+
+    &.pending {
+        box-shadow: 0 0 0 2px $danger;
+        animation: pending-pulse 1s ease-in-out infinite;
+    }
+}
+
+@keyframes pending-pulse {
+    0%,
+    100% {
+        box-shadow: 0 0 0 2px $danger;
+    }
+    50% {
+        box-shadow: 0 0 0 5px $danger;
     }
 }
 

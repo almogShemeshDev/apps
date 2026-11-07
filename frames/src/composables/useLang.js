@@ -44,6 +44,9 @@ const strings = {
     burned: 'Burned',
     darkroomSaved: 'Saved by the darkroom!',
     darkroomUsesLeft: n => `${n} darkroom use${n !== 1 ? 's' : ''} left`,
+    blackCubeDrawn: 'Black cube drawn!',
+    useDarkroomBtn: n => `Use Darkroom (${n} left)`,
+    skipDarkroomBtn: 'Skip (burn photo)',
     developmentDone: 'Development complete',
     continueButton: 'Continue',
 
@@ -99,6 +102,9 @@ const strings = {
     burned: 'נשרף',
     darkroomSaved: 'ניצל בזכות חדר החושך!',
     darkroomUsesLeft: n => `נותרו ${n} שימושים בחדר החושך`,
+    blackCubeDrawn: 'הוגרלה קובייה שחורה!',
+    useDarkroomBtn: n => `השתמש בחדר חושך (נותרו ${n})`,
+    skipDarkroomBtn: 'דלג (שרוף את התמונה)',
     developmentDone: 'הפיתוח הושלם',
     continueButton: 'המשך',
 

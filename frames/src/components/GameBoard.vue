@@ -91,7 +91,7 @@ const isBotTurn = computed(() => currentPlayer()?.isBot === true)
 
 .market {
     width: 100%;
-    max-width: 900px;
+    max-width: fit-content;
     display: flex;
     flex-direction: column;
     gap: 8px;

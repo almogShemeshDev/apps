@@ -133,36 +133,76 @@ function _startDevelopment() {
     darkroomUsesRemaining: state.players[0].tracks.darkroom,
     lastResult: null,
     playerFinished: state.players[0].filmStrip.length === 0,
+    awaitingDarkroomChoice: false,
+  }
+}
+
+function _finalizePhoto(player, dev, developed, savedByDarkroom) {
+  const photo = player.filmStrip[dev.photoIndex]
+  photo.developed = developed
+  dev.lastResult = {
+    subject: photo.subject,
+    category: photo.category,
+    developed,
+    savedByDarkroom,
+  }
+  dev.awaitingDarkroomChoice = false
+
+  dev.photoIndex++
+  if (dev.photoIndex >= player.filmStrip.length) {
+    dev.playerFinished = true
   }
 }
 
 function developNextPhoto() {
   if (state.phase !== 'development') return
   const dev = state.development
+  if (dev.awaitingDarkroomChoice) return
   const player = state.players[dev.playerIndex]
   const photo = player.filmStrip[dev.photoIndex]
   if (!photo) return
 
-  let usedDarkroom = false
-  let result = drawCube(player.bag)
-  while (result === 'black' && dev.darkroomUsesRemaining > 0) {
-    dev.darkroomUsesRemaining--
-    usedDarkroom = true
-    result = drawCube(player.bag)
+  const result = drawCube(player.bag)
+  if (result === 'white') {
+    _finalizePhoto(player, dev, true, false)
+    return
   }
 
-  photo.developed = result === 'white'
-  dev.lastResult = {
-    subject: photo.subject,
-    category: photo.category,
-    developed: photo.developed,
-    savedByDarkroom: usedDarkroom && photo.developed,
+  if (dev.darkroomUsesRemaining > 0) {
+    dev.awaitingDarkroomChoice = true
+  } else {
+    _finalizePhoto(player, dev, false, false)
+  }
+}
+
+function useDarkroom() {
+  if (state.phase !== 'development') return
+  const dev = state.development
+  if (!dev.awaitingDarkroomChoice) return
+  const player = state.players[dev.playerIndex]
+
+  dev.darkroomUsesRemaining--
+  dev.awaitingDarkroomChoice = false
+
+  const result = drawCube(player.bag)
+  if (result === 'white') {
+    _finalizePhoto(player, dev, true, true)
+    return
   }
 
-  dev.photoIndex++
-  if (dev.photoIndex >= player.filmStrip.length) {
-    dev.playerFinished = true
+  if (dev.darkroomUsesRemaining > 0) {
+    dev.awaitingDarkroomChoice = true
+  } else {
+    _finalizePhoto(player, dev, false, false)
   }
+}
+
+function skipDarkroom() {
+  if (state.phase !== 'development') return
+  const dev = state.development
+  if (!dev.awaitingDarkroomChoice) return
+  const player = state.players[dev.playerIndex]
+  _finalizePhoto(player, dev, false, false)
 }
 
 function continueDevelopment() {
@@ -181,6 +221,7 @@ function continueDevelopment() {
   dev.darkroomUsesRemaining = state.players[dev.playerIndex].tracks.darkroom
   dev.lastResult = null
   dev.playerFinished = state.players[dev.playerIndex].filmStrip.length === 0
+  dev.awaitingDarkroomChoice = false
 }
 
 function _calcSequenceBonus(filmStrip) {
@@ -245,6 +286,8 @@ export function useGameState() {
     buyUpgrade,
     pass,
     developNextPhoto,
+    useDarkroom,
+    skipDarkroom,
     continueDevelopment,
     resetGame,
   }
