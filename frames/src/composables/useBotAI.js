@@ -71,6 +71,18 @@ export function useBotAI() {
       return
     }
 
+    // Risk management: falling behind on black-cube insurance, catch up with Darkroom
+    if (upgradeTiles.length && player.bag.black - player.tracks.darkroom >= 2) {
+      buyUpgrade(cheapest(upgradeTiles).id, 'darkroom')
+      return
+    }
+
+    // Engine building: periodically convert progress into Time income via Efficiency
+    if (upgradeTiles.length && player.tracks.efficiency < Math.floor(player.filmStrip.length / 3)) {
+      buyUpgrade(cheapest(upgradeTiles).id, 'efficiency')
+      return
+    }
+
     if (photoTiles.length) {
       takePhoto(pickPhoto(photoTiles, player).id)
       return

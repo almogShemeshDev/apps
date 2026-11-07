@@ -29,7 +29,7 @@ function startGame(playerInputs) {
     name: typeof p === 'string' ? p : p.name,
     isBot: typeof p === 'string' ? false : !!p.isBot,
     time: STARTING_TIME_TOKENS,
-    tracks: { creativity: 0, equipment: 0, knowledge: 0, darkroom: 0 },
+    tracks: { creativity: 0, equipment: 0, efficiency: 0, darkroom: 0 },
     bag: { white: 0, black: 0 },
     filmStrip: [],
   }))
@@ -57,6 +57,10 @@ function _removeFromMarket(tileId) {
 
 function _advanceTurn() {
   state.currentPlayerIndex = (state.currentPlayerIndex + 1) % state.players.length
+  const player = currentPlayer()
+  if (player.tracks.efficiency > 0) {
+    player.time += player.tracks.efficiency
+  }
 }
 
 function _checkEndCondition() {
@@ -109,10 +113,6 @@ function buyUpgrade(tileId, track) {
 
   player.time -= tile.cost
   player.tracks[track]++
-
-  if (track === 'knowledge' && player.bag.black > 0) {
-    player.bag.black--
-  }
 
   _removeFromMarket(tileId)
   _refillMarket()

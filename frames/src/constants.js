@@ -9,7 +9,7 @@ export const CATEGORIES = {
 export const TRACKS = {
   creativity: { icon: '💡', color: '#d9b04a' },
   equipment: { icon: '📷', color: '#6b8fb0' },
-  knowledge: { icon: '📖', color: '#7fa87f' },
+  efficiency: { icon: '⏱️', color: '#7fa87f' },
   darkroom: { icon: '🌑', color: '#8a6a9a' },
 }
 

@@ -15,7 +15,7 @@ const strings = {
     newGame: 'New Game',
     confirmNewGame: 'Start a new game? Current progress will be lost.',
 
-    trackName: track => ({ creativity: 'Creativity', equipment: 'Equipment', knowledge: 'Knowledge', darkroom: 'Darkroom' }[track] ?? track),
+    trackName: track => ({ creativity: 'Creativity', equipment: 'Equipment', efficiency: 'Efficiency', darkroom: 'Darkroom' }[track] ?? track),
     categoryName: cat => ({ portrait: 'Portrait', landscape: 'Landscape', street: 'Street', stillLife: 'Still Life', abstract: 'Abstract' }[cat] ?? cat),
 
     tilesLeft: n => `${n} tile${n !== 1 ? 's' : ''} left`,
@@ -70,7 +70,7 @@ const strings = {
     newGame: 'משחק חדש',
     confirmNewGame: 'להתחיל משחק חדש? ההתקדמות הנוכחית תאבד.',
 
-    trackName: track => ({ creativity: 'יצירתיות', equipment: 'ציוד', knowledge: 'ידע', darkroom: 'חדר חושך' }[track] ?? track),
+    trackName: track => ({ creativity: 'יצירתיות', equipment: 'ציוד', efficiency: 'יעילות', darkroom: 'חדר חושך' }[track] ?? track),
     categoryName: cat => ({ portrait: 'דיוקן', landscape: 'נוף', street: 'רחוב', stillLife: 'טבע דומם', abstract: 'מופשט' }[cat] ?? cat),
 
     tilesLeft: n => `נותרו ${n} אריחים`,
