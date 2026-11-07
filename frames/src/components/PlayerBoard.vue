@@ -47,7 +47,7 @@ defineProps({
 })
 
 const { t } = useLang()
-const trackKeys = ['creativity', 'equipment', 'knowledge', 'darkroom']
+const trackKeys = ['creativity', 'equipment', 'efficiency', 'darkroom']
 </script>
 
 <style lang="scss" scoped>

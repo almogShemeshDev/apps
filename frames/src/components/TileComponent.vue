@@ -30,7 +30,7 @@
                     :title="t('trackName', key)"
                     @click="$emit('buy-upgrade', tile.id, key)"
                 >
-                    {{ TRACKS[key].icon }}
+                    <span class="track-icon">{{ TRACKS[key].icon }}</span>
                 </button>
             </div>
         </div>
@@ -52,7 +52,7 @@ defineEmits(['take-photo', 'buy-upgrade'])
 
 const { t } = useLang()
 
-const trackKeys = ['creativity', 'equipment', 'knowledge', 'darkroom']
+const trackKeys = ['creativity', 'equipment', 'efficiency', 'darkroom']
 const categoryIcon = computed(() => CATEGORIES[props.tile.category]?.icon ?? '')
 const categoryColor = computed(() => CATEGORIES[props.tile.category]?.color ?? '#888')
 </script>
@@ -177,5 +177,22 @@ const categoryColor = computed(() => CATEGORIES[props.tile.category]?.color ?? '
     &:not(:disabled):hover {
         background: var(--c);
     }
+}
+
+.track-icon {
+    display: inline-block;
+}
+
+.track-btn:nth-child(2) .track-icon {
+    transform: translateY(-4px);
+}
+
+
+.track-btn:nth-child(3) .track-icon {
+    transform: translateY(-1px);
+}
+
+.track-btn:nth-child(4) .track-icon {
+    transform: translateY(-1px);
 }
 </style>

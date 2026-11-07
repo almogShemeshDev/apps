@@ -61,8 +61,8 @@
                             against photo tiles' Equipment requirement.
                         </li>
                         <li>
-                            <strong>📖 Knowledge</strong> — immediately removes 1 black cube from
-                            your bag.
+                            <strong>⏱️ Efficiency</strong> — grants you extra Time tokens equal to
+                            its level at the start of each of your turns.
                         </li>
                         <li>
                             <strong>🌑 Darkroom</strong> — grants one reusable redraw: during
@@ -155,7 +155,8 @@
                             אריחי צילום.
                         </li>
                         <li>
-                            <strong>📖 ידע</strong> — מסיר מיד קובייה שחורה אחת מהשק שלך.
+                            <strong>⏱️ יעילות</strong> — מעניק לך אסימוני זמן נוספים בכמות השווה
+                            לדרגתו, בתחילת כל תור שלך.
                         </li>
                         <li>
                             <strong>🌑 חדר חושך</strong> — מעניק הגרלה חוזרת אחת לשימוש: במהלך
