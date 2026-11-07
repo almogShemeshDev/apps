@@ -3,7 +3,12 @@
         <h1 class="title">{{ t('developmentPhaseTitle') }}</h1>
         <p class="sub">{{ t('developingFor', player.name) }}</p>
 
-        <PlayerBoard :player="player" :is-active="true" />
+        <PlayerBoard
+            :player="player"
+            :is-active="true"
+            :current-photo-index="dev.photoIndex"
+            :awaiting-decision="dev.awaitingDarkroomChoice"
+        />
 
         <div class="darkroom-status">
             {{ t('darkroomUsesLeft', dev.darkroomUsesRemaining) }}
@@ -18,8 +23,19 @@
             </span>
         </div>
 
-        <!-- Bots draw automatically via useBotAI -->
+        <!-- Bots draw and decide automatically via useBotAI -->
         <div v-if="isBot" class="bot-thinking">{{ t('botThinking', player.name) }}</div>
+        <template v-else-if="dev.awaitingDarkroomChoice">
+            <p class="choice-prompt">{{ t('blackCubeDrawn') }}</p>
+            <div class="choice-buttons">
+                <button class="btn-draw" @click="useDarkroom">
+                    {{ t('useDarkroomBtn', dev.darkroomUsesRemaining) }}
+                </button>
+                <button class="btn-skip" @click="skipDarkroom">
+                    {{ t('skipDarkroomBtn') }}
+                </button>
+            </div>
+        </template>
         <button v-else-if="!dev.playerFinished" class="btn-draw" @click="developNextPhoto">
             {{ t('drawNext') }}
         </button>
@@ -36,7 +52,7 @@ import { CATEGORIES } from '../constants.js'
 import { useGameState } from '../composables/useGameState.js'
 import { useLang } from '../composables/useLang.js'
 
-const { state, developNextPhoto, continueDevelopment } = useGameState()
+const { state, developNextPhoto, useDarkroom, skipDarkroom, continueDevelopment } = useGameState()
 const { t } = useLang()
 
 const dev = computed(() => state.development)
@@ -109,9 +125,19 @@ const isBot = computed(() => player.value?.isBot === true)
     letter-spacing: 0.03em;
 }
 
-.btn-draw {
-    background: $amber;
-    color: $bg-dark;
+.choice-prompt {
+    font-size: 0.9rem;
+    color: $text;
+    font-weight: 700;
+}
+
+.choice-buttons {
+    display: flex;
+    gap: 10px;
+}
+
+.btn-draw,
+.btn-skip {
     border: none;
     padding: 12px 32px;
     border-radius: 8px;
@@ -119,9 +145,24 @@ const isBot = computed(() => player.value?.isBot === true)
     font-weight: 700;
     cursor: pointer;
     transition: background 0.15s;
+}
+
+.btn-draw {
+    background: $amber;
+    color: $bg-dark;
 
     &:hover {
         background: $amber-light;
+    }
+}
+
+.btn-skip {
+    background: $bg-panel;
+    color: $text;
+    border: 1px solid $border;
+
+    &:hover {
+        background: rgba(255, 255, 255, 0.08);
     }
 }
 </style>

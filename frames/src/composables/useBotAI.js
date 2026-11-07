@@ -14,6 +14,7 @@ export function useBotAI() {
     buyUpgrade,
     pass,
     developNextPhoto,
+    useDarkroom,
     continueDevelopment,
   } = useGameState()
 
@@ -32,6 +33,7 @@ export function useBotAI() {
       state.development?.playerIndex,
       state.development?.photoIndex,
       state.development?.playerFinished,
+      state.development?.awaitingDarkroomChoice,
     ],
     () => {
       if (state.phase !== 'development') return
@@ -112,7 +114,9 @@ export function useBotAI() {
     const dev = state.development
     if (!state.players[dev.playerIndex]?.isBot) return
 
-    if (!dev.playerFinished) {
+    if (dev.awaitingDarkroomChoice) {
+      useDarkroom()
+    } else if (!dev.playerFinished) {
       developNextPhoto()
     } else {
       continueDevelopment()
