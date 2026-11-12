@@ -12,14 +12,14 @@
                 v-if="interactive"
                 class="btn-action"
                 :disabled="!canPhoto"
-                @click="$emit('take-photo', tile.id)"
+                @click="$emit('take-photo')"
             >
                 {{ t('takePhoto') }}
             </button>
         </div>
 
         <div class="upgrade-row">
-            <div class="upgrade-label">{{ t('buyUpgrade') }}</div>
+            <div class="upgrade-label">{{ t('buyUpgradeCost', upgradeCost) }}</div>
             <div class="track-buttons">
                 <button
                     v-for="key in trackKeys"
@@ -28,7 +28,7 @@
                     :style="{ '--c': TRACKS[key].color }"
                     :disabled="!interactive || !canUpgrade"
                     :title="t('trackName', key)"
-                    @click="$emit('buy-upgrade', tile.id, key)"
+                    @click="$emit('buy-upgrade', key)"
                 >
                     <span class="track-icon">{{ TRACKS[key].icon }}</span>
                 </button>
@@ -47,12 +47,13 @@ const props = defineProps({
     interactive: { type: Boolean, default: false },
     canPhoto: { type: Boolean, default: false },
     canUpgrade: { type: Boolean, default: false },
+    upgradeCost: { type: Number, required: true },
 })
 defineEmits(['take-photo', 'buy-upgrade'])
 
 const { t } = useLang()
 
-const trackKeys = ['creativity', 'equipment', 'efficiency', 'darkroom']
+const trackKeys = ['creativity', 'equipment', 'development', 'darkroom']
 const categoryIcon = computed(() => CATEGORIES[props.tile.category]?.icon ?? '')
 const categoryColor = computed(() => CATEGORIES[props.tile.category]?.color ?? '#888')
 </script>

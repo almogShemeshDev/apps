@@ -3,6 +3,7 @@ import {
   buildTileDeck,
   STARTING_TIME_TOKENS,
   MARKET_SIZE,
+  GAME_END_PHOTO_COUNT,
   POINTS_PER_PHOTO,
   sequenceBonusForLength,
   VARIETY_BONUS_THEMES,
@@ -14,8 +15,11 @@ const state = reactive({
   phase: 'setup', // 'setup' | 'playing' | 'development' | 'game-over'
   players: [],
   market: [],
+  marketTokens: [],
   drawPile: [],
   currentPlayerIndex: 0,
+  roundStartPlayerIndex: 0,
+  endPending: false,
   development: null,
   scores: [],
 })
@@ -29,67 +33,78 @@ function startGame(playerInputs) {
     name: typeof p === 'string' ? p : p.name,
     isBot: typeof p === 'string' ? false : !!p.isBot,
     time: STARTING_TIME_TOKENS,
-    tracks: { creativity: 0, equipment: 0, efficiency: 0, darkroom: 0 },
+    tracks: { creativity: 0, equipment: 0, development: 0, darkroom: 0 },
     bag: { white: 0, black: 0 },
     filmStrip: [],
   }))
 
-  const deck = buildTileDeck(playerInputs.length)
+  const deck = buildTileDeck()
   state.market = deck.splice(0, MARKET_SIZE)
+  state.marketTokens = Array(MARKET_SIZE).fill(0)
   state.drawPile = deck
   state.currentPlayerIndex = Math.floor(Math.random() * playerInputs.length)
+  state.roundStartPlayerIndex = state.currentPlayerIndex
+  state.endPending = false
   state.development = null
   state.scores = []
   state.phase = 'playing'
 }
 
-function _refillMarket() {
-  while (state.market.length < MARKET_SIZE && state.drawPile.length) {
-    state.market.push(state.drawPile.shift())
-  }
+// Position cost/number, 1-indexed from the rightmost slot (index 0).
+function positionCost(idx) {
+  return idx + 1
 }
 
-function _removeFromMarket(tileId) {
-  const idx = state.market.findIndex((t) => t.id === tileId)
-  if (idx === -1) return null
-  return state.market.splice(idx, 1)[0]
+// A tile leaving position idx shifts every tile to its left (higher index)
+// one step right; a fresh tile enters the vacated leftmost slot. Time tokens
+// stay attached to their position and are never moved by this.
+function _removeFromMarketAt(idx) {
+  const tile = state.market[idx]
+  for (let i = idx; i < MARKET_SIZE - 1; i++) {
+    state.market[i] = state.market[i + 1]
+  }
+  state.market[MARKET_SIZE - 1] = state.drawPile.length ? state.drawPile.shift() : null
+  return tile
+}
+
+function _maybeFlagSupplyExhausted() {
+  if (!state.drawPile.length && state.market.every((t) => !t)) {
+    state.endPending = true
+  }
 }
 
 function _advanceTurn() {
   state.currentPlayerIndex = (state.currentPlayerIndex + 1) % state.players.length
-  const player = currentPlayer()
-  if (player.tracks.efficiency > 0) {
-    player.time += player.tracks.efficiency
-  }
-}
-
-function _checkEndCondition() {
-  if (!state.market.length && !state.drawPile.length) {
+  if (state.endPending && state.currentPlayerIndex === state.roundStartPlayerIndex) {
     _startDevelopment()
-    return true
   }
-  return false
 }
 
 function canTakePhoto(tile, player) {
   return (
+    !!tile &&
     player.time >= tile.cost &&
     player.tracks.creativity >= tile.reqCreativity &&
     player.tracks.equipment >= tile.reqEquipment
   )
 }
 
-function canBuyUpgrade(tile, player) {
-  return player.time >= tile.cost
+function canBuyUpgrade(player, idx) {
+  return !!state.market[idx] && player.time >= positionCost(idx)
 }
 
-function takePhoto(tileId) {
+function canCollectTime(idx) {
+  return state.marketTokens[idx] > 0
+}
+
+function takePhoto(idx) {
   if (state.phase !== 'playing') return
   const player = currentPlayer()
-  const tile = state.market.find((t) => t.id === tileId)
+  const tile = state.market[idx]
   if (!tile || !canTakePhoto(tile, player)) return
 
   player.time -= tile.cost
+  state.marketTokens[idx] += tile.cost
   player.filmStrip.push({
     id: tile.id,
     category: tile.category,
@@ -100,33 +115,41 @@ function takePhoto(tileId) {
   player.bag.white++
   player.bag.black++
 
-  _removeFromMarket(tileId)
-  _refillMarket()
-  if (!_checkEndCondition()) _advanceTurn()
+  _removeFromMarketAt(idx)
+  if (player.filmStrip.length >= GAME_END_PHOTO_COUNT) state.endPending = true
+  _maybeFlagSupplyExhausted()
+  _advanceTurn()
 }
 
-function buyUpgrade(tileId, track) {
+function buyUpgrade(idx, track) {
   if (state.phase !== 'playing') return
   const player = currentPlayer()
-  const tile = state.market.find((t) => t.id === tileId)
-  if (!tile || !canBuyUpgrade(tile, player)) return
+  if (!canBuyUpgrade(player, idx)) return
 
-  player.time -= tile.cost
+  const cost = positionCost(idx)
+  player.time -= cost
+  for (let i = 0; i <= idx; i++) state.marketTokens[i] += 1
   player.tracks[track]++
 
-  _removeFromMarket(tileId)
-  _refillMarket()
-  if (!_checkEndCondition()) _advanceTurn()
+  _removeFromMarketAt(idx)
+  _maybeFlagSupplyExhausted()
+  _advanceTurn()
 }
 
-function pass() {
+function collectTime(idx) {
   if (state.phase !== 'playing') return
-  currentPlayer().time++
+  const player = currentPlayer()
+  const amount = state.marketTokens[idx]
+  player.time += amount
+  state.marketTokens[idx] = 0
   _advanceTurn()
 }
 
 function _startDevelopment() {
   state.phase = 'development'
+  for (const p of state.players) {
+    p.bag.white += p.tracks.development
+  }
   state.development = {
     playerIndex: 0,
     photoIndex: 0,
@@ -269,8 +292,11 @@ function resetGame() {
   state.phase = 'setup'
   state.players = []
   state.market = []
+  state.marketTokens = []
   state.drawPile = []
   state.currentPlayerIndex = 0
+  state.roundStartPlayerIndex = 0
+  state.endPending = false
   state.development = null
   state.scores = []
 }
@@ -279,12 +305,14 @@ export function useGameState() {
   return {
     state,
     currentPlayer,
+    positionCost,
     canTakePhoto,
     canBuyUpgrade,
+    canCollectTime,
     startGame,
     takePhoto,
     buyUpgrade,
-    pass,
+    collectTime,
     developNextPhoto,
     useDarkroom,
     skipDarkroom,

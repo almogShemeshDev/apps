@@ -19,9 +19,9 @@
                     <h3>Setup</h3>
                     <p>
                         Each player starts with <strong>5 Time tokens</strong>, an empty player
-                        board, and an empty bag. The tile supply holds
-                        <strong>12 tiles per player</strong> (minimum 36), and 4 of them are
-                        revealed to the shared market.
+                        board, and an empty bag. The tile supply holds <strong>108 tiles</strong>,
+                        split evenly across six categories, and 6 of them fill the market's
+                        <strong>six fixed positions</strong>, numbered right to left.
                     </p>
                     <p>
                         A <strong>random player takes the first turn</strong>; play then proceeds
@@ -31,22 +31,32 @@
 
                 <section>
                     <h3>On Your Turn</h3>
-                    <p>
-                        Every market tile is a photo. Do exactly one of the following with any
-                        market tile:
-                    </p>
+                    <p>Do exactly one of the following:</p>
                     <ul>
                         <li>
-                            <strong>Take Photo</strong> — pay its Time cost (must meet its
-                            Creativity/Equipment requirement), add it to your film strip, and add
-                            1 white + 1 black cube to your bag.
+                            <strong>Photograph</strong> — pick any market tile, pay its printed
+                            Time cost (must meet its Creativity/Equipment requirement), add it to
+                            your film strip and 1 white + 1 black cube to your bag. All paid
+                            tokens land together on that tile's market position.
                         </li>
                         <li>
-                            <strong>Buy Upgrade</strong> — pay the same Time cost and raise
-                            <em>any one track of your choice</em> by one. No requirements needed.
+                            <strong>Upgrade</strong> — pick any market tile and raise
+                            <em>any one track of your choice</em> by one. The cost is the tile's
+                            market position number (1 at the rightmost up to 6 at the leftmost),
+                            paid by placing one token on every position from the rightmost
+                            through the one you chose.
                         </li>
-                        <li><strong>Pass</strong> — leave the tile and gain 1 Time token.</li>
+                        <li>
+                            <strong>Collect Time</strong> — take every Time token currently
+                            sitting on one market position back into your hand. Tokens stay on
+                            their position even as tiles move through the market, so piles build
+                            up over time.
+                        </li>
                     </ul>
+                    <p>
+                        Time never enters or leaves the game — it only moves between players and
+                        the market.
+                    </p>
                 </section>
 
                 <section>
@@ -61,8 +71,8 @@
                             against photo tiles' Equipment requirement.
                         </li>
                         <li>
-                            <strong>⏱️ Efficiency</strong> — grants you extra Time tokens equal to
-                            its level at the start of each of your turns.
+                            <strong>🧪 Development</strong> — grants one extra white cube added to
+                            your bag right before film development begins.
                         </li>
                         <li>
                             <strong>🌑 Darkroom</strong> — grants one reusable redraw: during
@@ -76,11 +86,16 @@
                 <section>
                     <h3>End of Game</h3>
                     <p>
-                        The game ends once the tile supply runs out. Every player then develops
-                        their film, one photo at a time in film order: draw a cube from your bag.
-                        White develops the photo; black burns it — unless you have an unused
-                        Darkroom upgrade, which lets you set the black cube aside and draw again
-                        (each Darkroom upgrade can be used once).
+                        The game ends once a player reaches 16 photographs or the tile supply
+                        (including every visible market tile) runs out. Play finishes the current
+                        round first, so every player takes an equal number of turns.
+                    </p>
+                    <p>
+                        Every player then develops their film, one photo at a time in film order.
+                        First, each player adds one white cube to their bag per Development level.
+                        Then draw a cube from your bag: white develops the photo; black burns it —
+                        unless you have an unused Darkroom upgrade, which lets you set the black
+                        cube aside and draw again (each Darkroom upgrade can be used once).
                     </p>
                 </section>
 
@@ -117,8 +132,9 @@
                     <h3>הכנה</h3>
                     <p>
                         כל שחקן מתחיל עם <strong>5 אסימוני זמן</strong>, לוח שחקן ריק ושק ריק.
-                        מלאי האריחים מכיל <strong>12 אריחים לכל שחקן</strong> (מינימום 36),
-                        ו-4 מהם נחשפים לשוק המשותף.
+                        מלאי האריחים מכיל <strong>108 אריחים</strong>, מחולקים שווה בשווה בין
+                        שש קטגוריות, ו-6 מהם ממלאים את <strong>שש העמדות הקבועות</strong> בשוק,
+                        הממוספרות מימין לשמאל.
                     </p>
                     <p>
                         <strong>שחקן אקראי פותח את המשחק</strong>; מכאן המשחק ממשיך בכיוון
@@ -128,19 +144,27 @@
 
                 <section>
                     <h3>בתורך</h3>
-                    <p>כל אריח בשוק הוא אריח צילום. בצע פעולה אחת בדיוק עם אריח כלשהו מהשוק:</p>
+                    <p>בצע פעולה אחת בדיוק:</p>
                     <ul>
                         <li>
-                            <strong>צלם תמונה</strong> — שלם את עלות הזמן שלו (חייב לעמוד בדרישת
-                            היצירתיות/הציוד שלו), הוסף אותו לסרט הצילום שלך, והוסף קובייה לבנה אחת
-                            וקובייה שחורה אחת לשק שלך.
+                            <strong>צלם</strong> — בחר אריח כלשהו מהשוק, שלם את עלות הזמן המודפסת
+                            שלו (חייב לעמוד בדרישת היצירתיות/הציוד שלו), הוסף אותו לסרט הצילום שלך
+                            וקובייה לבנה אחת וקובייה שחורה אחת לשק שלך. כל האסימונים ששולמו
+                            מונחים יחד על העמדה של אותו אריח.
                         </li>
                         <li>
-                            <strong>קנה שדרוג</strong> — שלם את אותה עלות זמן והעלה
-                            <em>כל מסלול לבחירתך</em> בדרגה אחת. אין דרישות.
+                            <strong>שדרג</strong> — בחר אריח כלשהו מהשוק והעלה
+                            <em>כל מסלול לבחירתך</em> בדרגה אחת. העלות היא מספר העמדה של האריח
+                            בשוק (1 בעמדה הימנית ביותר ועד 6 בשמאלית ביותר), ומשולמת בהנחת אסימון
+                            אחד על כל עמדה מהימנית ביותר ועד העמדה שנבחרה.
                         </li>
-                        <li><strong>ותר</strong> — השאר את האריח וקבל אסימון זמן אחד.</li>
+                        <li>
+                            <strong>אסוף זמן</strong> — קח את כל אסימוני הזמן שמונחים כרגע על עמדה
+                            אחת בשוק חזרה לידך. האסימונים נשארים על העמדה שלהם גם כשהאריחים זזים
+                            בשוק, כך שהערימות מצטברות עם הזמן.
+                        </li>
                     </ul>
+                    <p>הזמן לא נכנס או עוזב את המשחק - הוא רק עובר בין השחקנים לשוק.</p>
                 </section>
 
                 <section>
@@ -155,8 +179,8 @@
                             אריחי צילום.
                         </li>
                         <li>
-                            <strong>⏱️ יעילות</strong> — מעניק לך אסימוני זמן נוספים בכמות השווה
-                            לדרגתו, בתחילת כל תור שלך.
+                            <strong>🧪 פיתוח</strong> — מעניק קובייה לבנה נוספת לשק שלך ממש לפני
+                            תחילת שלב פיתוח הסרט.
                         </li>
                         <li>
                             <strong>🌑 חדר חושך</strong> — מעניק הגרלה חוזרת אחת לשימוש: במהלך
@@ -169,10 +193,16 @@
                 <section>
                     <h3>סוף המשחק</h3>
                     <p>
-                        המשחק מסתיים כאשר מלאי האריחים אוזל. כל שחקן מפתח אז את הסרט שלו, תמונה
-                        אחת בכל פעם לפי סדר הסרט: הגרל קובייה מהשק שלך. לבן מפתח את התמונה; שחור
-                        שורף אותה - אלא אם יש לך שדרוג חדר חושך שלא נוצל, המאפשר לך להניח את
-                        הקובייה השחורה בצד ולהגריל שוב (כל שדרוג חדר חושך ניתן לשימוש פעם אחת).
+                        המשחק מסתיים כאשר שחקן מגיע ל-16 תמונות או כאשר מלאי האריחים (כולל כל
+                        אריחי השוק הנראים) אוזל. המשחק מסיים את הסבב הנוכחי קודם, כך שכל שחקן
+                        מקבל מספר תורות שווה.
+                    </p>
+                    <p>
+                        כל שחקן מפתח אז את הסרט שלו, תמונה אחת בכל פעם לפי סדר הסרט. ראשית, כל
+                        שחקן מוסיף קובייה לבנה אחת לשק שלו על כל דרגת פיתוח. לאחר מכן הגרל קובייה
+                        מהשק שלך: לבן מפתח את התמונה; שחור שורף אותה - אלא אם יש לך שדרוג חדר
+                        חושך שלא נוצל, המאפשר לך להניח את הקובייה השחורה בצד ולהגריל שוב (כל
+                        שדרוג חדר חושך ניתן לשימוש פעם אחת).
                     </p>
                 </section>
 

@@ -12,7 +12,7 @@ export function useBotAI() {
     canBuyUpgrade,
     takePhoto,
     buyUpgrade,
-    pass,
+    collectTime,
     developNextPhoto,
     useDarkroom,
     continueDevelopment,
@@ -43,8 +43,20 @@ export function useBotAI() {
     }
   )
 
-  function cheapest(tiles) {
-    return tiles.reduce((a, b) => (b.cost < a.cost ? b : a))
+  function cheapestSlot(slots) {
+    return slots.reduce((a, b) => (b.tile.cost < a.tile.cost ? b : a))
+  }
+
+  function nearestSlot(slots) {
+    return slots.reduce((a, b) => (b.idx < a.idx ? b : a))
+  }
+
+  function richestPosition() {
+    let best = 0
+    for (let i = 1; i < state.marketTokens.length; i++) {
+      if (state.marketTokens[i] > state.marketTokens[best]) best = i
+    }
+    return best
   }
 
   function doTurn() {
@@ -52,61 +64,74 @@ export function useBotAI() {
     const player = currentPlayer()
     if (!player?.isBot) return
 
-    const photoTiles = state.market.filter((t) => canTakePhoto(t, player))
-    const upgradeTiles = state.market.filter((t) => canBuyUpgrade(t, player))
+    const slots = state.market
+      .map((tile, idx) => ({ tile, idx }))
+      .filter(({ tile }) => tile)
+
+    const photoSlots = slots.filter(({ tile }) => canTakePhoto(tile, player))
+    const upgradeSlots = slots.filter(({ idx }) => canBuyUpgrade(player, idx))
+
+    const richestIdx = richestPosition()
+    const richestTokens = state.marketTokens[richestIdx]
+
+    // Running low on time: collect a worthwhile pile before it strands the player
+    if (player.time <= 1 && richestTokens >= 2) {
+      collectTime(richestIdx)
+      return
+    }
 
     // Every affordable tile is blocked by track requirements — upgrade the track
     // that locks the most tiles to open the market back up
-    if (!photoTiles.length && upgradeTiles.length) {
-      const creBlocked = upgradeTiles.filter((t) => player.tracks.creativity < t.reqCreativity).length
-      const eqBlocked = upgradeTiles.filter((t) => player.tracks.equipment < t.reqEquipment).length
-      buyUpgrade(cheapest(upgradeTiles).id, creBlocked >= eqBlocked ? 'creativity' : 'equipment')
+    if (!photoSlots.length && upgradeSlots.length) {
+      const creBlocked = slots.filter((s) => player.tracks.creativity < s.tile.reqCreativity).length
+      const eqBlocked = slots.filter((s) => player.tracks.equipment < s.tile.reqEquipment).length
+      buyUpgrade(nearestSlot(upgradeSlots).idx, creBlocked >= eqBlocked ? 'creativity' : 'equipment')
       return
     }
 
     // Early-game investment: before the first photo, build up a low track cheaply
     const totalTracks = Object.values(player.tracks).reduce((s, v) => s + v, 0)
-    if (player.filmStrip.length === 0 && totalTracks < 2 && upgradeTiles.length) {
+    if (player.filmStrip.length === 0 && totalTracks < 2 && upgradeSlots.length) {
       const track =
         player.tracks.creativity <= player.tracks.equipment ? 'creativity' : 'equipment'
-      buyUpgrade(cheapest(upgradeTiles).id, track)
+      buyUpgrade(nearestSlot(upgradeSlots).idx, track)
       return
     }
 
     // Risk management: falling behind on black-cube insurance, catch up with Darkroom
-    if (upgradeTiles.length && player.bag.black - player.tracks.darkroom >= 2) {
-      buyUpgrade(cheapest(upgradeTiles).id, 'darkroom')
+    if (upgradeSlots.length && player.bag.black - player.tracks.darkroom >= 2) {
+      buyUpgrade(nearestSlot(upgradeSlots).idx, 'darkroom')
       return
     }
 
-    // Engine building: periodically convert progress into Time income via Efficiency
-    if (upgradeTiles.length && player.tracks.efficiency < Math.floor(player.filmStrip.length / 3)) {
-      buyUpgrade(cheapest(upgradeTiles).id, 'efficiency')
+    // Engine building: periodically convert progress into bonus white cubes via Development
+    if (upgradeSlots.length && player.tracks.development < Math.floor(player.filmStrip.length / 3)) {
+      buyUpgrade(nearestSlot(upgradeSlots).idx, 'development')
       return
     }
 
-    if (photoTiles.length) {
-      takePhoto(pickPhoto(photoTiles, player).id)
+    if (photoSlots.length) {
+      takePhoto(pickPhoto(photoSlots, player).idx)
       return
     }
 
-    pass()
+    collectTime(richestIdx)
   }
 
-  function pickPhoto(tiles, player) {
+  function pickPhoto(slots, player) {
     // Extend the current same-category run for the sequence bonus
     const lastCategory = player.filmStrip[player.filmStrip.length - 1]?.category ?? null
-    const sameCategory = tiles.filter((t) => t.category === lastCategory)
-    if (sameCategory.length) return cheapest(sameCategory)
+    const sameCategory = slots.filter((s) => s.tile.category === lastCategory)
+    if (sameCategory.length) return cheapestSlot(sameCategory)
 
     // Otherwise work toward the variety bonus with an unseen category
     const owned = new Set(player.filmStrip.map((ph) => ph.category))
     if (owned.size < VARIETY_BONUS_THEMES) {
-      const fresh = tiles.filter((t) => !owned.has(t.category))
-      if (fresh.length) return cheapest(fresh)
+      const fresh = slots.filter((s) => !owned.has(s.tile.category))
+      if (fresh.length) return cheapestSlot(fresh)
     }
 
-    return cheapest(tiles)
+    return cheapestSlot(slots)
   }
 
   function doDevelop() {
