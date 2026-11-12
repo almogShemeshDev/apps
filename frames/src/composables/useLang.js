@@ -15,8 +15,8 @@ const strings = {
     newGame: 'New Game',
     confirmNewGame: 'Start a new game? Current progress will be lost.',
 
-    trackName: track => ({ creativity: 'Creativity', equipment: 'Equipment', efficiency: 'Efficiency', darkroom: 'Darkroom' }[track] ?? track),
-    categoryName: cat => ({ portrait: 'Portrait', landscape: 'Landscape', street: 'Street', stillLife: 'Still Life', abstract: 'Abstract' }[cat] ?? cat),
+    trackName: track => ({ creativity: 'Creativity', equipment: 'Equipment', development: 'Development', darkroom: 'Darkroom' }[track] ?? track),
+    categoryName: cat => ({ animals: 'Animals', food: 'Food', people: 'People', landscapes: 'Landscapes', macro: 'Macro', urban: 'Urban' }[cat] ?? cat),
 
     tilesLeft: n => `${n} tile${n !== 1 ? 's' : ''} left`,
     yourTurn: name => `${name}'s turn`,
@@ -28,8 +28,10 @@ const strings = {
     blackCubes: n => `${n} black`,
 
     takePhoto: 'Take Photo',
-    buyUpgrade: 'Buy Upgrade',
-    pass: 'Pass (+1 time)',
+    buyUpgradeCost: n => `Upgrade (${n} time)`,
+    positionLabel: n => `Position ${n}`,
+    emptySlot: 'Empty',
+    collectTimeBtn: n => `Collect Time (${n})`,
     costLabel: n => `Cost: ${n}`,
     reqLabel: (cre, eq) => `Req: 💡${cre} 📷${eq}`,
 
@@ -73,8 +75,8 @@ const strings = {
     newGame: 'משחק חדש',
     confirmNewGame: 'להתחיל משחק חדש? ההתקדמות הנוכחית תאבד.',
 
-    trackName: track => ({ creativity: 'יצירתיות', equipment: 'ציוד', efficiency: 'יעילות', darkroom: 'חדר חושך' }[track] ?? track),
-    categoryName: cat => ({ portrait: 'דיוקן', landscape: 'נוף', street: 'רחוב', stillLife: 'טבע דומם', abstract: 'מופשט' }[cat] ?? cat),
+    trackName: track => ({ creativity: 'יצירתיות', equipment: 'ציוד', development: 'פיתוח', darkroom: 'חדר חושך' }[track] ?? track),
+    categoryName: cat => ({ animals: 'בעלי חיים', food: 'אוכל', people: 'אנשים', landscapes: 'נופים', macro: 'מאקרו', urban: 'עירוני' }[cat] ?? cat),
 
     tilesLeft: n => `נותרו ${n} אריחים`,
     yourTurn: name => `תור ${name}`,
@@ -86,8 +88,10 @@ const strings = {
     blackCubes: n => `${n} שחורים`,
 
     takePhoto: 'צלם תמונה',
-    buyUpgrade: 'קנה שדרוג',
-    pass: 'ותר (+1 זמן)',
+    buyUpgradeCost: n => `שדרג (${n} זמן)`,
+    positionLabel: n => `מיקום ${n}`,
+    emptySlot: 'ריק',
+    collectTimeBtn: n => `אסוף זמן (${n})`,
     costLabel: n => `עלות: ${n}`,
     reqLabel: (cre, eq) => `דרישה: 💡${cre} 📷${eq}`,
 

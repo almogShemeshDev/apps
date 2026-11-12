@@ -1,22 +1,22 @@
 export const CATEGORIES = {
-  portrait: { icon: '🧑', color: '#d97a4a' },
-  landscape: { icon: '🏔️', color: '#5a8a5e' },
-  street: { icon: '🏙️', color: '#5b7a99' },
-  stillLife: { icon: '🍎', color: '#c98a3a' },
-  abstract: { icon: '🌀', color: '#9a6bb0' },
+  animals: { icon: '🐾', color: '#c98a3a' },
+  food: { icon: '🍎', color: '#d97a4a' },
+  people: { icon: '🧑', color: '#5b7a99' },
+  landscapes: { icon: '🏔️', color: '#5a8a5e' },
+  macro: { icon: '🔬', color: '#9a6bb0' },
+  urban: { icon: '🏙️', color: '#6b8fb0' },
 }
 
 export const TRACKS = {
   creativity: { icon: '💡', color: '#d9b04a' },
   equipment: { icon: '📷', color: '#6b8fb0' },
-  efficiency: { icon: '⏱️', color: '#7fa87f' },
+  development: { icon: '🧪', color: '#7fa87f' },
   darkroom: { icon: '🌑', color: '#8a6a9a' },
 }
 
 export const STARTING_TIME_TOKENS = 5
 export const MARKET_SIZE = 6
-export const TILES_PER_PLAYER = 12
-export const MIN_TILE_DECK = 36
+export const GAME_END_PHOTO_COUNT = 16
 
 export const POINTS_PER_PHOTO = 1
 
@@ -35,37 +35,153 @@ export function sequenceBonusForLength(len) {
   return SEQUENCE_BONUS_TABLE[last] + (len - last) * SEQUENCE_BONUS_PER_EXTRA
 }
 
-const PHOTO_TEMPLATES = [
-  { category: 'portrait', subject: 'Golden Hour Portrait', cost: 1, reqCreativity: 0, reqEquipment: 0 },
-  { category: 'portrait', subject: 'Candid Smile', cost: 1, reqCreativity: 0, reqEquipment: 1 },
-  { category: 'portrait', subject: 'Studio Headshot', cost: 2, reqCreativity: 1, reqEquipment: 1 },
-  { category: 'portrait', subject: 'Backlit Silhouette', cost: 3, reqCreativity: 2, reqEquipment: 1 },
-  { category: 'portrait', subject: 'Macro Eye Study', cost: 4, reqCreativity: 2, reqEquipment: 3 },
-
-  { category: 'landscape', subject: 'Misty Valley', cost: 1, reqCreativity: 0, reqEquipment: 0 },
-  { category: 'landscape', subject: 'Sunset Horizon', cost: 2, reqCreativity: 1, reqEquipment: 0 },
-  { category: 'landscape', subject: 'Desert Dunes', cost: 2, reqCreativity: 1, reqEquipment: 1 },
-  { category: 'landscape', subject: 'Mountain Ridge', cost: 3, reqCreativity: 1, reqEquipment: 2 },
-  { category: 'landscape', subject: 'Long Exposure Waterfall', cost: 4, reqCreativity: 2, reqEquipment: 3 },
-
-  { category: 'street', subject: 'Rainy Crosswalk', cost: 1, reqCreativity: 0, reqEquipment: 0 },
-  { category: 'street', subject: 'Market Vendor', cost: 1, reqCreativity: 0, reqEquipment: 1 },
-  { category: 'street', subject: 'Subway Motion Blur', cost: 2, reqCreativity: 2, reqEquipment: 1 },
-  { category: 'street', subject: 'Night Market', cost: 3, reqCreativity: 1, reqEquipment: 2 },
-  { category: 'street', subject: 'Neon Reflection', cost: 4, reqCreativity: 3, reqEquipment: 2 },
-
-  { category: 'stillLife', subject: 'Fruit Bowl', cost: 1, reqCreativity: 0, reqEquipment: 0 },
-  { category: 'stillLife', subject: 'Flowers in a Vase', cost: 2, reqCreativity: 0, reqEquipment: 1 },
-  { category: 'stillLife', subject: 'Vintage Books', cost: 2, reqCreativity: 1, reqEquipment: 0 },
-  { category: 'stillLife', subject: 'Candlelit Table', cost: 3, reqCreativity: 1, reqEquipment: 2 },
-  { category: 'stillLife', subject: 'Broken Watch', cost: 3, reqCreativity: 2, reqEquipment: 1 },
-
-  { category: 'abstract', subject: 'Light Leak', cost: 1, reqCreativity: 1, reqEquipment: 0 },
-  { category: 'abstract', subject: 'Water Ripple', cost: 2, reqCreativity: 2, reqEquipment: 0 },
-  { category: 'abstract', subject: 'Shadow Pattern', cost: 2, reqCreativity: 1, reqEquipment: 1 },
-  { category: 'abstract', subject: 'Prism Refraction', cost: 3, reqCreativity: 2, reqEquipment: 2 },
-  { category: 'abstract', subject: 'Double Exposure', cost: 4, reqCreativity: 3, reqEquipment: 2 },
-]
+// Each row: [time, equipment, creativity]. Every row has exactly 2 copies.
+const CATEGORY_DISTRIBUTIONS = {
+  animals: {
+    subjects: [
+      'Lion Portrait',
+      'Soaring Eagle',
+      'Tiger Stripes',
+      'Elephant Herd',
+      'Owl at Dusk',
+      'Fox in Snow',
+      'Wolf Pack',
+      'Peacock Display',
+      'Panda Close-up',
+    ],
+    rows: [
+      [1, 1, 1],
+      [2, 1, 1],
+      [2, 2, 1],
+      [2, 2, 2],
+      [3, 2, 1],
+      [3, 2, 2],
+      [3, 3, 2],
+      [4, 3, 2],
+      [4, 3, 3],
+    ],
+  },
+  food: {
+    subjects: [
+      'Morning Coffee',
+      'Fresh Bread',
+      'Street Noodles',
+      'Fruit Stand',
+      "Chef's Plate",
+      'Spice Market',
+      'Grilled Skewers',
+      'Dessert Table',
+      'Harvest Basket',
+    ],
+    rows: [
+      [1, 0, 1],
+      [1, 1, 1],
+      [2, 1, 1],
+      [2, 1, 2],
+      [2, 2, 2],
+      [3, 1, 2],
+      [3, 2, 2],
+      [3, 2, 3],
+      [4, 2, 3],
+    ],
+  },
+  people: {
+    subjects: [
+      'Candid Smile',
+      'Crowd at Dusk',
+      'Street Performer',
+      'Market Vendor',
+      'Family Portrait',
+      'Festival Dancer',
+      'Worker at Rest',
+      "Child's Laughter",
+      "Elder's Gaze",
+    ],
+    rows: [
+      [1, 0, 1],
+      [1, 1, 1],
+      [2, 1, 2],
+      [2, 1, 3],
+      [2, 2, 2],
+      [3, 1, 3],
+      [3, 2, 3],
+      [4, 2, 4],
+      [4, 3, 4],
+    ],
+  },
+  landscapes: {
+    subjects: [
+      'Misty Valley',
+      'Sunset Horizon',
+      'Desert Dunes',
+      'Mountain Ridge',
+      'Coastal Cliffs',
+      'Autumn Forest',
+      'Snowy Peak',
+      'Rolling Hills',
+      'Northern Lights',
+    ],
+    rows: [
+      [1, 1, 0],
+      [2, 1, 1],
+      [2, 2, 1],
+      [2, 2, 2],
+      [3, 2, 2],
+      [3, 3, 2],
+      [3, 3, 3],
+      [4, 3, 2],
+      [4, 4, 3],
+    ],
+  },
+  macro: {
+    subjects: [
+      'Dew Drop',
+      'Insect Eye',
+      'Flower Petal',
+      'Leaf Vein',
+      'Butterfly Wing',
+      'Frost Pattern',
+      'Water Droplet',
+      'Pollen Grain',
+      'Spider Web',
+    ],
+    rows: [
+      [1, 1, 1],
+      [2, 2, 1],
+      [2, 2, 2],
+      [3, 2, 2],
+      [3, 3, 2],
+      [3, 3, 3],
+      [4, 3, 3],
+      [4, 4, 2],
+      [4, 4, 3],
+    ],
+  },
+  urban: {
+    subjects: [
+      'Rainy Crosswalk',
+      'Neon Alley',
+      'Rooftop View',
+      'Subway Platform',
+      'Night Market',
+      'Graffiti Wall',
+      'Bridge at Night',
+      'Skyline Silhouette',
+      'Construction Site',
+    ],
+    rows: [
+      [1, 0, 1],
+      [1, 1, 1],
+      [2, 1, 1],
+      [2, 1, 2],
+      [2, 2, 1],
+      [3, 2, 2],
+      [3, 2, 3],
+      [3, 3, 2],
+      [4, 3, 3],
+    ],
+  },
+}
 
 function shuffle(arr) {
   const a = [...arr]
@@ -76,12 +192,22 @@ function shuffle(arr) {
   return a
 }
 
-export function buildTileDeck(playerCount) {
-  const targetCount = Math.max(MIN_TILE_DECK, playerCount * TILES_PER_PLAYER)
+export function buildTileDeck() {
   const tiles = []
-  for (let i = 0; i < targetCount; i++) {
-    const template = PHOTO_TEMPLATES[i % PHOTO_TEMPLATES.length]
-    tiles.push({ id: i, ...template })
+  let id = 0
+  for (const [category, { subjects, rows }] of Object.entries(CATEGORY_DISTRIBUTIONS)) {
+    rows.forEach(([cost, reqEquipment, reqCreativity], rowIndex) => {
+      for (let copy = 0; copy < 2; copy++) {
+        tiles.push({
+          id: id++,
+          category,
+          subject: subjects[rowIndex],
+          cost,
+          reqEquipment,
+          reqCreativity,
+        })
+      }
+    })
   }
   return shuffle(tiles)
 }
