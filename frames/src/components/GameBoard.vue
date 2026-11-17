@@ -4,8 +4,13 @@
             <div class="turn-info">
                 {{ isBotTurn ? t('botThinking', currentPlayer().name) : t('yourTurn', currentPlayer().name) }}
             </div>
-            <div class="tiles-left">
-                {{ t('tilesLeft', state.market.filter((t) => t).length + state.drawPile.length) }}
+            <div class="status-info">
+                <div class="tiles-left">
+                    {{ t('tilesLeft', state.market.filter((t) => t).length + state.drawPile.length) }}
+                </div>
+                <div class="photos-progress">
+                    {{ t('photosProgress', totalPhotos(), photoThreshold()) }}
+                </div>
             </div>
         </div>
 
@@ -22,28 +27,50 @@
             <div class="market-label">{{ t('marketLabel') }}</div>
             <div class="market-row">
                 <div v-for="(tile, idx) in state.market" :key="idx" class="market-slot">
-                    <div class="position-label">{{ t('positionLabel', idx + 1) }}</div>
+                    <div class="position-label">
+                        {{ t('positionLabel', idx + 1) }}
+                        <span v-if="idx === state.equipmentDieIndex" class="die-marker" :title="t('trackName', 'equipment')">🎲📷</span>
+                        <span v-if="idx === state.creativityDieIndex" class="die-marker" :title="t('trackName', 'creativity')">🎲💡</span>
+                    </div>
+                    <button
+                        class="btn-gain above"
+                        :disabled="isBotTurn || !canGainTime('above', idx)"
+                        @click="gainTime('above', idx)"
+                    >
+                        {{ t('gainAboveBtn', state.aboveTokens[idx]) }}
+                    </button>
                     <TileComponent
                         v-if="tile"
                         :tile="tile"
                         interactive
-                        :can-photo="!isBotTurn && canTakePhoto(tile, currentPlayer())"
+                        :can-photo="!isBotTurn && canTakePhoto(tile, currentPlayer(), idx)"
                         :can-upgrade="!isBotTurn && canBuyUpgrade(currentPlayer(), idx)"
-                        :upgrade-cost="positionCost(idx)"
+                        :upgrade-cost="tile.cost"
+                        :upgrade-track="UPGRADE_TRACK_BY_INDEX[idx]"
+                        :has-equipment-die="idx === state.equipmentDieIndex"
+                        :has-creativity-die="idx === state.creativityDieIndex"
                         @take-photo="takePhoto(idx)"
-                        @buy-upgrade="(track) => buyUpgrade(idx, track)"
+                        @buy-upgrade="buyUpgrade(idx)"
                     />
                     <div v-else class="empty-slot">{{ t('emptySlot') }}</div>
                     <button
-                        class="btn-collect"
-                        :disabled="isBotTurn || !canCollectTime(idx)"
-                        @click="collectTime(idx)"
+                        class="btn-gain below"
+                        :disabled="isBotTurn || !canGainTime('below', idx)"
+                        @click="gainTime('below', idx)"
                     >
-                        {{ t('collectTimeBtn', state.marketTokens[idx]) }}
+                        {{ t('gainBelowBtn', state.belowTokens[idx]) }}
                     </button>
                 </div>
             </div>
         </div>
+
+        <button
+            v-if="!isBotTurn && hasNoLegalAction()"
+            class="btn-pass"
+            @click="skipTurn()"
+        >
+            {{ t('passBtn') }}
+        </button>
     </div>
 </template>
 
@@ -53,17 +80,21 @@ import PlayerBoard from './PlayerBoard.vue'
 import TileComponent from './TileComponent.vue'
 import { useGameState } from '../composables/useGameState.js'
 import { useLang } from '../composables/useLang.js'
+import { UPGRADE_TRACK_BY_INDEX } from '../constants.js'
 
 const {
     state,
     currentPlayer,
-    positionCost,
+    totalPhotos,
+    photoThreshold,
     canTakePhoto,
     canBuyUpgrade,
-    canCollectTime,
+    canGainTime,
+    hasNoLegalAction,
     takePhoto,
     buyUpgrade,
-    collectTime,
+    gainTime,
+    skipTurn,
 } = useGameState()
 const { t } = useLang()
 
@@ -97,9 +128,33 @@ const isBotTurn = computed(() => currentPlayer()?.isBot === true)
     color: $amber;
 }
 
-.tiles-left {
+.status-info {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 2px;
+}
+
+.tiles-left,
+.photos-progress {
     font-size: 0.85rem;
     color: $text-dim;
+}
+
+.btn-pass {
+    background: $bg-panel;
+    color: $text;
+    border: 1px solid $border;
+    border-radius: 8px;
+    padding: 8px 16px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s;
+
+    &:hover {
+        background: rgba(255, 255, 255, 0.08);
+    }
 }
 
 .players-panel {
@@ -145,6 +200,13 @@ const isBotTurn = computed(() => currentPlayer()?.isBot === true)
     text-transform: uppercase;
     letter-spacing: 0.06em;
     color: $text-dim;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.die-marker {
+    font-size: 0.75rem;
 }
 
 .empty-slot {
@@ -159,7 +221,7 @@ const isBotTurn = computed(() => currentPlayer()?.isBot === true)
     font-size: 0.75rem;
 }
 
-.btn-collect {
+.btn-gain {
     width: 100%;
     background: $bg-panel;
     color: $text;

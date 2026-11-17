@@ -16,7 +16,19 @@ export const TRACKS = {
 
 export const STARTING_TIME_TOKENS = 5
 export const MARKET_SIZE = 6
-export const GAME_END_PHOTO_COUNT = 16
+export const SHARED_PHOTO_THRESHOLD_PER_PLAYER = 8
+
+// Market position (0-indexed, 0 = rightmost / position 1) to the track an
+// Upgrade taken from that position raises: positions 1-2 Equipment,
+// 3-4 Creativity, 5 Darkroom, 6 Development.
+export const UPGRADE_TRACK_BY_INDEX = [
+  'equipment',
+  'equipment',
+  'creativity',
+  'creativity',
+  'darkroom',
+  'development',
+]
 
 export const POINTS_PER_PHOTO = 1
 
