@@ -6,7 +6,15 @@
             <div class="face-category">{{ t('categoryName', tile.category) }}</div>
             <div class="face-stats">
                 <span>{{ t('costLabel', tile.cost) }}</span>
-                <span>{{ t('reqLabel', tile.reqCreativity, tile.reqEquipment) }}</span>
+                <span class="req-line">
+                    {{ t('reqPrefix') }}
+                    <span class="req-stat" :class="{ boosted: hasCreativityDie }">
+                        {{ TRACKS.creativity.icon }}{{ effectiveCreativity }}<span v-if="hasCreativityDie" class="die-boost" :title="t('dieBoostTitle')">🎲+1</span>
+                    </span>
+                    <span class="req-stat" :class="{ boosted: hasEquipmentDie }">
+                        {{ TRACKS.equipment.icon }}{{ effectiveEquipment }}<span v-if="hasEquipmentDie" class="die-boost" :title="t('dieBoostTitle')">🎲+1</span>
+                    </span>
+                </span>
             </div>
             <button
                 v-if="interactive"
@@ -20,19 +28,15 @@
 
         <div class="upgrade-row">
             <div class="upgrade-label">{{ t('buyUpgradeCost', upgradeCost) }}</div>
-            <div class="track-buttons">
-                <button
-                    v-for="key in trackKeys"
-                    :key="key"
-                    class="track-btn"
-                    :style="{ '--c': TRACKS[key].color }"
-                    :disabled="!interactive || !canUpgrade"
-                    :title="t('trackName', key)"
-                    @click="$emit('buy-upgrade', key)"
-                >
-                    <span class="track-icon">{{ TRACKS[key].icon }}</span>
-                </button>
-            </div>
+            <button
+                class="track-btn"
+                :style="{ '--c': TRACKS[upgradeTrack].color }"
+                :disabled="!interactive || !canUpgrade"
+                :title="t('trackName', upgradeTrack)"
+                @click="$emit('buy-upgrade')"
+            >
+                <span class="track-icon">{{ TRACKS[upgradeTrack].icon }}</span>
+            </button>
         </div>
     </div>
 </template>
@@ -48,14 +52,18 @@ const props = defineProps({
     canPhoto: { type: Boolean, default: false },
     canUpgrade: { type: Boolean, default: false },
     upgradeCost: { type: Number, required: true },
+    upgradeTrack: { type: String, required: true },
+    hasEquipmentDie: { type: Boolean, default: false },
+    hasCreativityDie: { type: Boolean, default: false },
 })
 defineEmits(['take-photo', 'buy-upgrade'])
 
 const { t } = useLang()
 
-const trackKeys = ['creativity', 'equipment', 'development', 'darkroom']
 const categoryIcon = computed(() => CATEGORIES[props.tile.category]?.icon ?? '')
 const categoryColor = computed(() => CATEGORIES[props.tile.category]?.color ?? '#888')
+const effectiveCreativity = computed(() => props.tile.reqCreativity + (props.hasCreativityDie ? 1 : 0))
+const effectiveEquipment = computed(() => props.tile.reqEquipment + (props.hasEquipmentDie ? 1 : 0))
 </script>
 
 <style lang="scss" scoped>
@@ -108,6 +116,22 @@ const categoryColor = computed(() => CATEGORIES[props.tile.category]?.color ?? '
     color: $text-dim;
 }
 
+.req-line {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    justify-content: center;
+}
+
+.req-stat.boosted {
+    color: $text;
+    font-weight: 700;
+}
+
+.die-boost {
+    font-size: 0.65rem;
+}
+
 .btn-action {
     margin-top: 4px;
     width: 100%;
@@ -150,11 +174,6 @@ const categoryColor = computed(() => CATEGORIES[props.tile.category]?.color ?? '
     font-weight: 700;
 }
 
-.track-buttons {
-    display: flex;
-    gap: 6px;
-}
-
 .track-btn {
     width: 30px;
     height: 30px;
@@ -182,18 +201,5 @@ const categoryColor = computed(() => CATEGORIES[props.tile.category]?.color ?? '
 
 .track-icon {
     display: inline-block;
-}
-
-.track-btn:nth-child(2) .track-icon {
-    transform: translateY(-4px);
-}
-
-
-.track-btn:nth-child(3) .track-icon {
-    transform: translateY(-1px);
-}
-
-.track-btn:nth-child(4) .track-icon {
-    transform: translateY(-1px);
 }
 </style>

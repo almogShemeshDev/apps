@@ -24,6 +24,10 @@
                         <strong>six fixed positions</strong>, numbered right to left.
                     </p>
                     <p>
+                        An <strong>Equipment die</strong> and a <strong>Creativity die</strong> are
+                        each rolled onto one of the six positions (both may land on the same one).
+                    </p>
+                    <p>
                         A <strong>random player takes the first turn</strong>; play then proceeds
                         clockwise.
                     </p>
@@ -34,28 +38,48 @@
                     <p>Do exactly one of the following:</p>
                     <ul>
                         <li>
-                            <strong>Photograph</strong> — pick any market tile, pay its printed
-                            Time cost (must meet its Creativity/Equipment requirement), add it to
-                            your film strip and 1 white + 1 black cube to your bag. All paid
-                            tokens land together on that tile's market position.
+                            <strong>Photograph</strong> — pick any market tile and pay its printed
+                            Time cost (must meet its Creativity/Equipment requirement, raised by
+                            +1 for whichever track's die currently sits on that position). All
+                            paid tokens land above that position. Add the tile to your film strip
+                            and 1 white + 1 black cube to your bag.
                         </li>
                         <li>
-                            <strong>Upgrade</strong> — pick any market tile and raise
-                            <em>any one track of your choice</em> by one. The cost is the tile's
-                            market position number (1 at the rightmost up to 6 at the leftmost),
-                            paid by placing one token on every position from the rightmost
-                            through the one you chose.
+                            <strong>Upgrade</strong> — pick any market tile and pay its printed
+                            Time cost. The position decides which track rises by one: positions
+                            1–2 raise Equipment, 3–4 Creativity, 5 Darkroom, 6 Development. Payment
+                            is placed below the market, one token per position starting at the
+                            leftmost position (6) and continuing rightward for as many positions
+                            as the cost.
                         </li>
                         <li>
-                            <strong>Collect Time</strong> — take every Time token currently
-                            sitting on one market position back into your hand. Tokens stay on
-                            their position even as tiles move through the market, so piles build
-                            up over time.
+                            <strong>Gain Time</strong> — pick one market position and one of its
+                            two piles, above or below, and take every Time token sitting there
+                            back into your hand.
+                        </li>
+                        <li>
+                            <strong>Pass</strong> — only when none of the three actions above are
+                            possible: not enough Time or tracks for any tile, and nothing to gain
+                            from any pile.
                         </li>
                     </ul>
                     <p>
-                        Time never enters or leaves the game — it only moves between players and
-                        the market.
+                        After a Photograph or Upgrade, tiles shift one position toward the taken
+                        slot and the market refills from the left with the next tile in the draw
+                        pile. Time tokens stay attached to their fixed positions throughout — they
+                        never move with the tiles, and never enter or leave the game, only moving
+                        between players and the market.
+                    </p>
+                </section>
+
+                <section>
+                    <h3>Requirement Dice</h3>
+                    <p>
+                        While the Equipment die sits on a position, that tile's Equipment
+                        requirement is +1 higher than printed; the Creativity die works the same
+                        way for Creativity. These modifiers apply to Photograph only. A die only
+                        rerolls to a new position once a Photograph (not an Upgrade) is taken from
+                        the position it sits on, after the market has refreshed.
                     </p>
                 </section>
 
@@ -86,16 +110,19 @@
                 <section>
                     <h3>End of Game</h3>
                     <p>
-                        The game ends once a player reaches 16 photographs or the tile supply
-                        (including every visible market tile) runs out. Play finishes the current
-                        round first, so every player takes an equal number of turns.
+                        The game ends once the combined photographs taken by all players reach
+                        <strong>8 × the number of players</strong> (e.g. 32 for 4 players), or the
+                        tile supply (including every visible market tile) runs out. Play finishes
+                        the current round first, so every player takes an equal number of turns.
                     </p>
                     <p>
                         Every player then develops their film, one photo at a time in film order.
                         First, each player adds one white cube to their bag per Development level.
-                        Then draw a cube from your bag: white develops the photo; black burns it —
-                        unless you have an unused Darkroom upgrade, which lets you set the black
-                        cube aside and draw again (each Darkroom upgrade can be used once).
+                        Then draw a cube from your bag — drawn cubes are never returned to the bag:
+                        white develops the photo; black burns it, breaking any scoring sequence in
+                        progress — unless you have an unused Darkroom upgrade, which lets you set
+                        the black cube aside and draw again (each Darkroom upgrade can be used once
+                        across the whole development phase).
                     </p>
                 </section>
 
@@ -137,6 +164,10 @@
                         הממוספרות מימין לשמאל.
                     </p>
                     <p>
+                        <strong>קובית ציוד</strong> ו<strong>קובית יצירתיות</strong> מוגרלות, כל
+                        אחת לעמדה אחת מבין השש (שתיהן יכולות לנחות על אותה עמדה).
+                    </p>
+                    <p>
                         <strong>שחקן אקראי פותח את המשחק</strong>; מכאן המשחק ממשיך בכיוון
                         השעון.
                     </p>
@@ -147,24 +178,44 @@
                     <p>בצע פעולה אחת בדיוק:</p>
                     <ul>
                         <li>
-                            <strong>צלם</strong> — בחר אריח כלשהו מהשוק, שלם את עלות הזמן המודפסת
-                            שלו (חייב לעמוד בדרישת היצירתיות/הציוד שלו), הוסף אותו לסרט הצילום שלך
-                            וקובייה לבנה אחת וקובייה שחורה אחת לשק שלך. כל האסימונים ששולמו
-                            מונחים יחד על העמדה של אותו אריח.
+                            <strong>צלם</strong> — בחר אריח כלשהו מהשוק ושלם את עלות הזמן המודפסת
+                            שלו (חייב לעמוד בדרישת היצירתיות/הציוד שלו, הגבוהה ב-1 אם קובית אותו
+                            מסלול יושבת כרגע על העמדה הזו). כל האסימונים ששולמו מונחים מעל העמדה.
+                            הוסף את האריח לסרט הצילום שלך וקובייה לבנה אחת וקובייה שחורה אחת לשק
+                            שלך.
                         </li>
                         <li>
-                            <strong>שדרג</strong> — בחר אריח כלשהו מהשוק והעלה
-                            <em>כל מסלול לבחירתך</em> בדרגה אחת. העלות היא מספר העמדה של האריח
-                            בשוק (1 בעמדה הימנית ביותר ועד 6 בשמאלית ביותר), ומשולמת בהנחת אסימון
-                            אחד על כל עמדה מהימנית ביותר ועד העמדה שנבחרה.
+                            <strong>שדרג</strong> — בחר אריח כלשהו מהשוק ושלם את עלות הזמן המודפסת
+                            שלו. העמדה קובעת איזה מסלול עולה בדרגה אחת: עמדות 1–2 מעלות ציוד,
+                            3–4 יצירתיות, 5 חדר חושך, 6 פיתוח. התשלום מונח מתחת לשוק, אסימון אחד
+                            על כל עמדה, בהתחלה מהעמדה השמאלית ביותר (6) וממשיך ימינה כמספר העמדות
+                            שהעלות מכסה.
                         </li>
                         <li>
-                            <strong>אסוף זמן</strong> — קח את כל אסימוני הזמן שמונחים כרגע על עמדה
-                            אחת בשוק חזרה לידך. האסימונים נשארים על העמדה שלהם גם כשהאריחים זזים
-                            בשוק, כך שהערימות מצטברות עם הזמן.
+                            <strong>קבל זמן</strong> — בחר עמדה אחת בשוק וערימה אחת שלה, מעל או
+                            מתחת, וקח את כל אסימוני הזמן שמונחים שם חזרה לידך.
+                        </li>
+                        <li>
+                            <strong>דלג</strong> — רק כאשר אף אחת משלוש הפעולות הקודמות אינה
+                            אפשרית: אין מספיק זמן או מסלולים לאף אריח, ואין מה לקבל מאף ערימה.
                         </li>
                     </ul>
-                    <p>הזמן לא נכנס או עוזב את המשחק - הוא רק עובר בין השחקנים לשוק.</p>
+                    <p>
+                        לאחר צילום או שדרוג, האריחים זזים עמדה אחת לכיוון החריץ שהתרוקן והשוק
+                        מתמלא מחדש מצד שמאל מהקלף הבא בחפיסה. אסימוני הזמן נשארים על העמדות
+                        הקבועות שלהם לכל אורך הדרך - הם לא זזים עם האריחים, ולא נכנסים או עוזבים
+                        את המשחק, רק עוברים בין השחקנים לשוק.
+                    </p>
+                </section>
+
+                <section>
+                    <h3>קוביות הדרישה</h3>
+                    <p>
+                        כל עוד קובית הציוד יושבת על עמדה, דרישת הציוד של האריח שבה גבוהה ב-1
+                        מהמודפס; קובית היצירתיות עובדת באותו אופן עבור יצירתיות. השינויים הללו
+                        חלים על פעולת הצילום בלבד. קובייה מוגרלת מחדש לעמדה חדשה רק כאשר מצלמים
+                        (ולא משדרגים) מהעמדה שעליה היא יושבת, אחרי שהשוק התחדש.
+                    </p>
                 </section>
 
                 <section>
@@ -193,16 +244,18 @@
                 <section>
                     <h3>סוף המשחק</h3>
                     <p>
-                        המשחק מסתיים כאשר שחקן מגיע ל-16 תמונות או כאשר מלאי האריחים (כולל כל
-                        אריחי השוק הנראים) אוזל. המשחק מסיים את הסבב הנוכחי קודם, כך שכל שחקן
-                        מקבל מספר תורות שווה.
+                        המשחק מסתיים כאשר סכום התמונות שצולמו על ידי כל השחקנים מגיע ל-
+                        <strong>8 כפול מספר השחקנים</strong> (למשל 32 ב-4 שחקנים), או כאשר מלאי
+                        האריחים (כולל כל אריחי השוק הנראים) אוזל. המשחק מסיים את הסבב הנוכחי
+                        קודם, כך שכל שחקן מקבל מספר תורות שווה.
                     </p>
                     <p>
                         כל שחקן מפתח אז את הסרט שלו, תמונה אחת בכל פעם לפי סדר הסרט. ראשית, כל
                         שחקן מוסיף קובייה לבנה אחת לשק שלו על כל דרגת פיתוח. לאחר מכן הגרל קובייה
-                        מהשק שלך: לבן מפתח את התמונה; שחור שורף אותה - אלא אם יש לך שדרוג חדר
-                        חושך שלא נוצל, המאפשר לך להניח את הקובייה השחורה בצד ולהגריל שוב (כל
-                        שדרוג חדר חושך ניתן לשימוש פעם אחת).
+                        מהשק שלך - קוביות שהוגרלו לא חוזרות לשק: לבן מפתח את התמונה; שחור שורף
+                        אותה ומנתק כל רצף ניקוד בתהליך - אלא אם יש לך שדרוג חדר חושך שלא נוצל,
+                        המאפשר לך להניח את הקובייה השחורה בצד ולהגריל שוב (כל שדרוג חדר חושך ניתן
+                        לשימוש פעם אחת לאורך כל שלב הפיתוח).
                     </p>
                 </section>
 
