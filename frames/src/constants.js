@@ -20,14 +20,14 @@ export const SHARED_PHOTO_THRESHOLD_PER_PLAYER = 8
 
 // Market position (0-indexed, 0 = rightmost / position 1) to the track an
 // Upgrade taken from that position raises: positions 1-2 Equipment,
-// 3-4 Creativity, 5 Darkroom, 6 Development.
+// 3-4 Creativity, 5 Development, 6 Darkroom.
 export const UPGRADE_TRACK_BY_INDEX = [
   'equipment',
   'equipment',
   'creativity',
   'creativity',
-  'darkroom',
   'development',
+  'darkroom',
 ]
 
 export const POINTS_PER_PHOTO = 1

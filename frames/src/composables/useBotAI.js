@@ -79,7 +79,7 @@ export function useBotAI() {
       .map((tile, idx) => ({ tile, idx }))
       .filter(({ tile }) => tile)
 
-    const photoSlots = slots.filter(({ tile, idx }) => canTakePhoto(tile, player, idx))
+    const photoSlots = slots.filter(({ tile }) => canTakePhoto(tile, player))
     const upgradeSlots = slots.filter(({ idx }) => canBuyUpgrade(player, idx))
 
     const richest = richestGain()
