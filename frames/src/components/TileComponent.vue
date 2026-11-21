@@ -5,38 +5,50 @@
             <div class="face-subject">{{ tile.subject }}</div>
             <div class="face-category">{{ t('categoryName', tile.category) }}</div>
             <div class="face-stats">
-                <span>{{ t('costLabel', tile.cost) }}</span>
-                <span class="req-line">
-                    {{ t('reqPrefix') }}
-                    <span class="req-stat" :class="{ boosted: hasCreativityDie }">
-                        {{ TRACKS.creativity.icon }}{{ effectiveCreativity }}<span v-if="hasCreativityDie" class="die-boost" :title="t('dieBoostTitle')">🎲+1</span>
-                    </span>
-                    <span class="req-stat" :class="{ boosted: hasEquipmentDie }">
-                        {{ TRACKS.equipment.icon }}{{ effectiveEquipment }}<span v-if="hasEquipmentDie" class="die-boost" :title="t('dieBoostTitle')">🎲+1</span>
-                    </span>
+                <span class="stat-pill cost-pill" :title="t('costLabel', tile.cost)">
+                    <span v-for="n in tile.cost" :key="n">⏱</span>
                 </span>
+                <span class="stat-pill" :title="t('trackName', 'creativity')">{{ TRACKS.creativity.icon }}{{ tile.reqCreativity }}</span>
+                <span class="stat-pill" :title="t('trackName', 'equipment')">{{ TRACKS.equipment.icon }}{{ tile.reqEquipment }}</span>
             </div>
-            <button
-                v-if="interactive"
-                class="btn-action"
-                :disabled="!canPhoto"
-                @click="$emit('take-photo')"
-            >
-                {{ t('takePhoto') }}
-            </button>
+            <div v-if="interactive" class="action-row">
+                <button class="btn-action" :disabled="!canPhoto" @click="$emit('take-photo')">
+                    {{ t('takePhoto') }}
+                </button>
+                <button
+                    v-if="bonusBelow > 0"
+                    class="gain-chip"
+                    :disabled="!canGainBelow"
+                    :title="t('bonusBelowTitle', bonusBelow)"
+                    @click="$emit('gain-below')"
+                >
+                    +⏱{{ bonusBelow }}
+                </button>
+            </div>
         </div>
 
-        <div class="upgrade-row">
-            <div class="upgrade-label">{{ t('buyUpgradeCost', upgradeCost) }}</div>
-            <button
-                class="track-btn"
-                :style="{ '--c': TRACKS[upgradeTrack].color }"
-                :disabled="!interactive || !canUpgrade"
-                :title="t('trackName', upgradeTrack)"
-                @click="$emit('buy-upgrade')"
-            >
-                <span class="track-icon">{{ TRACKS[upgradeTrack].icon }}</span>
-            </button>
+        <div class="face upgrade-face" :style="{ '--c': TRACKS[upgradeTrack].color }">
+            <div class="face-icon">{{ TRACKS[upgradeTrack].icon }}</div>
+            <div class="face-subject">{{ t('trackName', upgradeTrack) }}</div>
+            <div class="face-stats">
+                <span class="stat-pill cost-pill" :title="t('costLabel', upgradeCost)">
+                    <span v-for="n in upgradeCost" :key="n">⏱</span>
+                </span>
+            </div>
+            <div v-if="interactive" class="action-row">
+                <button class="btn-action" :disabled="!canUpgrade" @click="$emit('buy-upgrade')">
+                    {{ t('upgradeBtn') }}
+                </button>
+                <button
+                    v-if="bonusAbove > 0"
+                    class="gain-chip"
+                    :disabled="!canGainAbove"
+                    :title="t('bonusAboveTitle', bonusAbove)"
+                    @click="$emit('gain-above')"
+                >
+                    +⏱{{ bonusAbove }}
+                </button>
+            </div>
         </div>
     </div>
 </template>
@@ -53,17 +65,17 @@ const props = defineProps({
     canUpgrade: { type: Boolean, default: false },
     upgradeCost: { type: Number, required: true },
     upgradeTrack: { type: String, required: true },
-    hasEquipmentDie: { type: Boolean, default: false },
-    hasCreativityDie: { type: Boolean, default: false },
+    bonusBelow: { type: Number, default: 0 },
+    bonusAbove: { type: Number, default: 0 },
+    canGainBelow: { type: Boolean, default: false },
+    canGainAbove: { type: Boolean, default: false },
 })
-defineEmits(['take-photo', 'buy-upgrade'])
+defineEmits(['take-photo', 'buy-upgrade', 'gain-below', 'gain-above'])
 
 const { t } = useLang()
 
 const categoryIcon = computed(() => CATEGORIES[props.tile.category]?.icon ?? '')
 const categoryColor = computed(() => CATEGORIES[props.tile.category]?.color ?? '#888')
-const effectiveCreativity = computed(() => props.tile.reqCreativity + (props.hasCreativityDie ? 1 : 0))
-const effectiveEquipment = computed(() => props.tile.reqEquipment + (props.hasEquipmentDie ? 1 : 0))
 </script>
 
 <style lang="scss" scoped>
@@ -110,31 +122,34 @@ const effectiveEquipment = computed(() => props.tile.reqEquipment + (props.hasEq
 
 .face-stats {
     display: flex;
-    flex-direction: column;
-    gap: 2px;
-    font-size: 0.72rem;
-    color: $text-dim;
-}
-
-.req-line {
-    display: flex;
     flex-wrap: wrap;
-    gap: 4px;
     justify-content: center;
+    gap: 6px;
 }
 
-.req-stat.boosted {
-    color: $text;
+.stat-pill {
+    font-size: 0.78rem;
     font-weight: 700;
+    color: $text;
 }
 
-.die-boost {
-    font-size: 0.65rem;
+.cost-pill {
+    display: inline-flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 1px;
+}
+
+.action-row {
+    margin-top: 4px;
+    width: 100%;
+    display: flex;
+    gap: 4px;
 }
 
 .btn-action {
-    margin-top: 4px;
-    width: 100%;
+    flex: 1;
+    min-width: 0;
     background: var(--c);
     color: $bg-dark;
     border: none;
@@ -155,51 +170,28 @@ const effectiveEquipment = computed(() => props.tile.reqEquipment + (props.hasEq
     }
 }
 
-.upgrade-row {
-    background: $bg-panel;
-    border: 1px solid $border;
-    border-radius: 10px;
-    padding: 8px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 6px;
-}
-
-.upgrade-label {
+.gain-chip {
+    flex-shrink: 0;
+    background: rgba(217, 122, 74, 0.15);
+    border: 1px solid $amber;
+    color: $amber-light;
+    border-radius: 6px;
+    padding: 6px 7px;
     font-size: 0.65rem;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    color: $text-dim;
     font-weight: 700;
-}
-
-.track-btn {
-    width: 30px;
-    height: 30px;
-    border-radius: 50%;
-    border: 2px solid var(--c);
-    background: rgba(255, 255, 255, 0.04);
-    font-size: 0.9rem;
+    white-space: nowrap;
     cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
     transition:
         background 0.15s,
         opacity 0.15s;
 
+    &:hover:not(:disabled) {
+        background: rgba(217, 122, 74, 0.3);
+    }
+
     &:disabled {
-        opacity: 0.3;
+        opacity: 0.4;
         cursor: not-allowed;
     }
-
-    &:not(:disabled):hover {
-        background: var(--c);
-    }
-}
-
-.track-icon {
-    display: inline-block;
 }
 </style>

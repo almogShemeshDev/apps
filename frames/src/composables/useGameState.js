@@ -20,8 +20,6 @@ const state = reactive({
   // Upgrade) just sit there until a Gain Time action picks a pile to collect.
   aboveTokens: [],
   belowTokens: [],
-  equipmentDieIndex: 0,
-  creativityDieIndex: 0,
   drawPile: [],
   currentPlayerIndex: 0,
   roundStartPlayerIndex: 0,
@@ -42,10 +40,6 @@ function photoThreshold() {
   return state.players.length * SHARED_PHOTO_THRESHOLD_PER_PLAYER
 }
 
-function _rollDie() {
-  return Math.floor(Math.random() * MARKET_SIZE)
-}
-
 function startGame(playerInputs) {
   state.players = playerInputs.map((p) => ({
     name: typeof p === 'string' ? p : p.name,
@@ -60,8 +54,6 @@ function startGame(playerInputs) {
   state.market = deck.splice(0, MARKET_SIZE)
   state.aboveTokens = Array(MARKET_SIZE).fill(0)
   state.belowTokens = Array(MARKET_SIZE).fill(0)
-  state.equipmentDieIndex = _rollDie()
-  state.creativityDieIndex = _rollDie()
   state.drawPile = deck
   state.currentPlayerIndex = Math.floor(Math.random() * playerInputs.length)
   state.roundStartPlayerIndex = state.currentPlayerIndex
@@ -71,23 +63,12 @@ function startGame(playerInputs) {
   state.phase = 'playing'
 }
 
-// A tile leaving position idx shifts every tile to its left (higher index)
-// one step right; a fresh tile enters the vacated leftmost slot. Time tokens
-// stay attached to their position and are never moved by this.
+// A tile leaving position idx is replaced in place by the next tile in the
+// draw pile; every other position is untouched.
 function _removeFromMarketAt(idx) {
   const tile = state.market[idx]
-  for (let i = idx; i < MARKET_SIZE - 1; i++) {
-    state.market[i] = state.market[i + 1]
-  }
-  state.market[MARKET_SIZE - 1] = state.drawPile.length ? state.drawPile.shift() : null
+  state.market[idx] = state.drawPile.length ? state.drawPile.shift() : null
   return tile
-}
-
-// A die sitting on idx only rerolls once a Photograph is taken from that
-// position (not an Upgrade) and the market has refilled.
-function _rerollDieIfPresentAt(idx) {
-  if (idx === state.equipmentDieIndex) state.equipmentDieIndex = _rollDie()
-  if (idx === state.creativityDieIndex) state.creativityDieIndex = _rollDie()
 }
 
 function _maybeFlagSupplyExhausted() {
@@ -103,22 +84,12 @@ function _advanceTurn() {
   }
 }
 
-// The Equipment/Creativity dice each sit above one market position and add
-// +1 to that photo requirement there; they affect Photograph only.
-function effectiveRequirement(tile, idx) {
-  return {
-    creativity: tile.reqCreativity + (idx === state.creativityDieIndex ? 1 : 0),
-    equipment: tile.reqEquipment + (idx === state.equipmentDieIndex ? 1 : 0),
-  }
-}
-
-function canTakePhoto(tile, player, idx) {
+function canTakePhoto(tile, player) {
   if (!tile) return false
-  const req = effectiveRequirement(tile, idx)
   return (
     player.time >= tile.cost &&
-    player.tracks.creativity >= req.creativity &&
-    player.tracks.equipment >= req.equipment
+    player.tracks.creativity >= tile.reqCreativity &&
+    player.tracks.equipment >= tile.reqEquipment
   )
 }
 
@@ -139,11 +110,15 @@ function takePhoto(idx) {
   if (state.phase !== 'playing') return
   const player = currentPlayer()
   const tile = state.market[idx]
-  if (!tile || !canTakePhoto(tile, player, idx)) return
+  if (!tile || !canTakePhoto(tile, player)) return
 
   // Pay the full cost into the pile above this position.
   player.time -= tile.cost
   state.aboveTokens[idx] += tile.cost
+
+  // Collect any Time tokens already waiting below this position.
+  player.time += state.belowTokens[idx]
+  state.belowTokens[idx] = 0
 
   player.filmStrip.push({
     id: tile.id,
@@ -156,7 +131,6 @@ function takePhoto(idx) {
   player.bag.black++
 
   _removeFromMarketAt(idx)
-  _rerollDieIfPresentAt(idx)
 
   if (totalPhotos() >= photoThreshold()) state.endPending = true
   _maybeFlagSupplyExhausted()
@@ -172,10 +146,14 @@ function buyUpgrade(idx) {
   const cost = tile.cost
   const track = UPGRADE_TRACK_BY_INDEX[idx]
 
+  // Pay the full cost into the pile below this position.
   player.time -= cost
-  // Paid tokens pile up below the market, starting from the leftmost position.
-  for (let i = 0; i < cost; i++) state.belowTokens[MARKET_SIZE - 1 - i] += 1
+  state.belowTokens[idx] += cost
   player.tracks[track]++
+
+  // Collect any Time tokens already waiting above this position.
+  player.time += state.aboveTokens[idx]
+  state.aboveTokens[idx] = 0
 
   _removeFromMarketAt(idx)
   _maybeFlagSupplyExhausted()
@@ -196,7 +174,7 @@ function gainTime(pile, idx) {
 function hasNoLegalAction() {
   const player = currentPlayer()
   if (!player) return false
-  const canAnyPhoto = state.market.some((tile, idx) => canTakePhoto(tile, player, idx))
+  const canAnyPhoto = state.market.some((tile) => canTakePhoto(tile, player))
   const canAnyUpgrade = state.market.some((tile, idx) => !!tile && canBuyUpgrade(player, idx))
   const canAnyGain = state.aboveTokens.some((n) => n > 0) || state.belowTokens.some((n) => n > 0)
   return !canAnyPhoto && !canAnyUpgrade && !canAnyGain
@@ -310,21 +288,20 @@ function continueDevelopment() {
   dev.awaitingDarkroomChoice = false
 }
 
+// Burned photos are skipped rather than treated as a break, so a run can
+// continue across one: e.g. A A A B A with B burned still scores as A*4.
 function _calcSequenceBonus(filmStrip) {
   let bonus = 0
   let runLen = 0
   let runCategory = null
   for (const photo of filmStrip) {
-    if (photo.developed && photo.category === runCategory) {
+    if (!photo.developed) continue
+    if (photo.category === runCategory) {
       runLen++
-    } else if (photo.developed) {
+    } else {
       bonus += sequenceBonusForLength(runLen)
       runCategory = photo.category
       runLen = 1
-    } else {
-      bonus += sequenceBonusForLength(runLen)
-      runCategory = null
-      runLen = 0
     }
   }
   bonus += sequenceBonusForLength(runLen)
@@ -357,8 +334,6 @@ function resetGame() {
   state.market = []
   state.aboveTokens = []
   state.belowTokens = []
-  state.equipmentDieIndex = 0
-  state.creativityDieIndex = 0
   state.drawPile = []
   state.currentPlayerIndex = 0
   state.roundStartPlayerIndex = 0

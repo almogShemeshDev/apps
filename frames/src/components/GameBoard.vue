@@ -25,20 +25,11 @@
 
         <div class="market">
             <div class="market-label">{{ t('marketLabel') }}</div>
-            <div class="market-row">
+            <div ref="marketRowEl" class="market-row">
                 <div v-for="(tile, idx) in state.market" :key="idx" class="market-slot">
                     <div class="position-label">
                         {{ t('positionLabel', idx + 1) }}
-                        <span v-if="idx === state.equipmentDieIndex" class="die-marker" :title="t('trackName', 'equipment')">🎲📷</span>
-                        <span v-if="idx === state.creativityDieIndex" class="die-marker" :title="t('trackName', 'creativity')">🎲💡</span>
                     </div>
-                    <button
-                        class="btn-gain above"
-                        :disabled="isBotTurn || !canGainTime('above', idx)"
-                        @click="gainTime('above', idx)"
-                    >
-                        {{ t('gainAboveBtn', state.aboveTokens[idx]) }}
-                    </button>
                     <TileComponent
                         v-if="tile"
                         :tile="tile"
@@ -47,21 +38,22 @@
                         :can-upgrade="!isBotTurn && canBuyUpgrade(currentPlayer(), idx)"
                         :upgrade-cost="tile.cost"
                         :upgrade-track="UPGRADE_TRACK_BY_INDEX[idx]"
-                        :has-equipment-die="idx === state.equipmentDieIndex"
-                        :has-creativity-die="idx === state.creativityDieIndex"
-                        @take-photo="takePhoto(idx)"
-                        @buy-upgrade="buyUpgrade(idx)"
+                        :bonus-below="state.belowTokens[idx]"
+                        :bonus-above="state.aboveTokens[idx]"
+                        :can-gain-below="!isBotTurn && canGainTime('below', idx)"
+                        :can-gain-above="!isBotTurn && canGainTime('above', idx)"
+                        @take-photo="onTakePhoto(idx)"
+                        @buy-upgrade="onBuyUpgrade(idx)"
+                        @gain-below="gainTime('below', idx)"
+                        @gain-above="gainTime('above', idx)"
                     />
                     <div v-else class="empty-slot">{{ t('emptySlot') }}</div>
-                    <button
-                        class="btn-gain below"
-                        :disabled="isBotTurn || !canGainTime('below', idx)"
-                        @click="gainTime('below', idx)"
-                    >
-                        {{ t('gainBelowBtn', state.belowTokens[idx]) }}
-                    </button>
                 </div>
             </div>
+        </div>
+
+        <div class="fly-layer">
+            <span v-for="tok in flyingTokens" :key="tok.id" class="flying-token" :style="tok.style">⏱</span>
         </div>
 
         <button
@@ -75,7 +67,7 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import PlayerBoard from './PlayerBoard.vue'
 import TileComponent from './TileComponent.vue'
 import { useGameState } from '../composables/useGameState.js'
@@ -99,6 +91,56 @@ const {
 const { t } = useLang()
 
 const isBotTurn = computed(() => currentPlayer()?.isBot === true)
+
+const marketRowEl = ref(null)
+const flyingTokens = ref([])
+let flyId = 0
+
+function anchorRect(idx, selector) {
+    const slot = marketRowEl.value?.children[idx]
+    const el = slot?.querySelector(selector) ?? slot?.querySelector('.empty-slot')
+    return el ? el.getBoundingClientRect() : null
+}
+
+function spawnFlight(fromRect, toRect, count) {
+    if (!fromRect || !toRect) return
+    const fromX = fromRect.left + fromRect.width / 2
+    const fromY = fromRect.top + fromRect.height / 2
+    const toX = toRect.left + toRect.width / 2
+    const toY = toRect.top + toRect.height / 2
+    for (let i = 0; i < count; i++) {
+        const id = flyId++
+        const jitterX = (Math.random() - 0.5) * 14
+        const jitterY = (Math.random() - 0.5) * 10
+        flyingTokens.value.push({
+            id,
+            style: {
+                left: `${fromX + jitterX}px`,
+                top: `${fromY + jitterY}px`,
+                '--dx': `${toX - fromX}px`,
+                '--dy': `${toY - fromY}px`,
+                animationDelay: `${i * 70}ms`,
+            },
+        })
+        setTimeout(() => {
+            flyingTokens.value = flyingTokens.value.filter((tok) => tok.id !== id)
+        }, 750 + i * 70)
+    }
+}
+
+// Photograph payment always lands in the pile above this same position.
+function onTakePhoto(idx) {
+    const tile = state.market[idx]
+    if (tile) spawnFlight(anchorRect(idx, '.photo-face'), anchorRect(idx, '.upgrade-face'), tile.cost)
+    takePhoto(idx)
+}
+
+// Upgrade payment always lands in the pile below this same position.
+function onBuyUpgrade(idx) {
+    const tile = state.market[idx]
+    if (tile) spawnFlight(anchorRect(idx, '.upgrade-face'), anchorRect(idx, '.photo-face'), tile.cost)
+    buyUpgrade(idx)
+}
 </script>
 
 <style lang="scss" scoped>
@@ -205,13 +247,9 @@ const isBotTurn = computed(() => currentPlayer()?.isBot === true)
     gap: 4px;
 }
 
-.die-marker {
-    font-size: 0.75rem;
-}
-
 .empty-slot {
     width: 150px;
-    height: 180px;
+    height: 246px;
     border: 2px dashed $border;
     border-radius: 10px;
     display: flex;
@@ -221,25 +259,28 @@ const isBotTurn = computed(() => currentPlayer()?.isBot === true)
     font-size: 0.75rem;
 }
 
-.btn-gain {
-    width: 100%;
-    background: $bg-panel;
-    color: $text;
-    border: 1px solid $border;
-    border-radius: 8px;
-    padding: 6px 10px;
-    font-size: 0.72rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background 0.15s;
+.fly-layer {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 50;
+}
 
-    &:hover:not(:disabled) {
-        background: rgba(255, 255, 255, 0.08);
+.flying-token {
+    position: absolute;
+    font-size: 1rem;
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
+    animation: fly-token 0.7s ease-out forwards;
+}
+
+@keyframes fly-token {
+    0% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 1;
     }
-
-    &:disabled {
-        opacity: 0.4;
-        cursor: default;
+    100% {
+        transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(0.6);
+        opacity: 0;
     }
 }
 </style>

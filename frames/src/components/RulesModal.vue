@@ -24,10 +24,6 @@
                         <strong>six fixed positions</strong>, numbered right to left.
                     </p>
                     <p>
-                        An <strong>Equipment die</strong> and a <strong>Creativity die</strong> are
-                        each rolled onto one of the six positions (both may land on the same one).
-                    </p>
-                    <p>
                         A <strong>random player takes the first turn</strong>; play then proceeds
                         clockwise.
                     </p>
@@ -39,18 +35,17 @@
                     <ul>
                         <li>
                             <strong>Photograph</strong> — pick any market tile and pay its printed
-                            Time cost (must meet its Creativity/Equipment requirement, raised by
-                            +1 for whichever track's die currently sits on that position). All
-                            paid tokens land above that position. Add the tile to your film strip
-                            and 1 white + 1 black cube to your bag.
+                            Time cost (must meet its Creativity/Equipment requirement). All paid
+                            tokens land above that position. You immediately collect any Time
+                            tokens already waiting below that position. Add the tile to your film
+                            strip and 1 white + 1 black cube to your bag.
                         </li>
                         <li>
                             <strong>Upgrade</strong> — pick any market tile and pay its printed
                             Time cost. The position decides which track rises by one: positions
-                            1–2 raise Equipment, 3–4 Creativity, 5 Darkroom, 6 Development. Payment
-                            is placed below the market, one token per position starting at the
-                            leftmost position (6) and continuing rightward for as many positions
-                            as the cost.
+                            1–2 raise Equipment, 3–4 Creativity, 5 Development, 6 Darkroom. All
+                            paid tokens land below that position. You immediately collect any Time
+                            tokens already waiting above that position.
                         </li>
                         <li>
                             <strong>Gain Time</strong> — pick one market position and one of its
@@ -64,22 +59,11 @@
                         </li>
                     </ul>
                     <p>
-                        After a Photograph or Upgrade, tiles shift one position toward the taken
-                        slot and the market refills from the left with the next tile in the draw
-                        pile. Time tokens stay attached to their fixed positions throughout — they
-                        never move with the tiles, and never enter or leave the game, only moving
-                        between players and the market.
-                    </p>
-                </section>
-
-                <section>
-                    <h3>Requirement Dice</h3>
-                    <p>
-                        While the Equipment die sits on a position, that tile's Equipment
-                        requirement is +1 higher than printed; the Creativity die works the same
-                        way for Creativity. These modifiers apply to Photograph only. A die only
-                        rerolls to a new position once a Photograph (not an Upgrade) is taken from
-                        the position it sits on, after the market has refreshed.
+                        After a Photograph or Upgrade, the taken position is refilled directly from
+                        the draw pile — every other position stays exactly where it is. Time tokens
+                        stay attached to their fixed positions throughout — they never move with
+                        the tiles, and never enter or leave the game, only moving between players
+                        and the market.
                     </p>
                 </section>
 
@@ -133,7 +117,8 @@
                         <li>
                             <strong>Film sequences</strong> — bonus for runs of consecutive
                             same-theme developed photos in film order: 2 photos = +2, 3 = +5,
-                            4 = +9, 5 = +14, then +5 per additional photo beyond 5.
+                            4 = +9, 5 = +14, then +5 per additional photo beyond 5. A burned photo
+                            is simply skipped, so a run can continue across it.
                         </li>
                         <li>
                             <strong>Variety bonus</strong> — +5 points if you have successfully
@@ -164,10 +149,6 @@
                         הממוספרות מימין לשמאל.
                     </p>
                     <p>
-                        <strong>קובית ציוד</strong> ו<strong>קובית יצירתיות</strong> מוגרלות, כל
-                        אחת לעמדה אחת מבין השש (שתיהן יכולות לנחות על אותה עמדה).
-                    </p>
-                    <p>
                         <strong>שחקן אקראי פותח את המשחק</strong>; מכאן המשחק ממשיך בכיוון
                         השעון.
                     </p>
@@ -179,17 +160,16 @@
                     <ul>
                         <li>
                             <strong>צלם</strong> — בחר אריח כלשהו מהשוק ושלם את עלות הזמן המודפסת
-                            שלו (חייב לעמוד בדרישת היצירתיות/הציוד שלו, הגבוהה ב-1 אם קובית אותו
-                            מסלול יושבת כרגע על העמדה הזו). כל האסימונים ששולמו מונחים מעל העמדה.
-                            הוסף את האריח לסרט הצילום שלך וקובייה לבנה אחת וקובייה שחורה אחת לשק
-                            שלך.
+                            שלו (חייב לעמוד בדרישת היצירתיות/הציוד שלו). כל האסימונים ששולמו
+                            מונחים מעל העמדה. אתה אוסף מיידית את כל אסימוני הזמן שכבר מונחים מתחת
+                            לעמדה הזו. הוסף את האריח לסרט הצילום שלך וקובייה לבנה אחת וקובייה
+                            שחורה אחת לשק שלך.
                         </li>
                         <li>
                             <strong>שדרג</strong> — בחר אריח כלשהו מהשוק ושלם את עלות הזמן המודפסת
                             שלו. העמדה קובעת איזה מסלול עולה בדרגה אחת: עמדות 1–2 מעלות ציוד,
-                            3–4 יצירתיות, 5 חדר חושך, 6 פיתוח. התשלום מונח מתחת לשוק, אסימון אחד
-                            על כל עמדה, בהתחלה מהעמדה השמאלית ביותר (6) וממשיך ימינה כמספר העמדות
-                            שהעלות מכסה.
+                            3–4 יצירתיות, 5 פיתוח, 6 חדר חושך. כל האסימונים ששולמו מונחים מתחת
+                            לעמדה. אתה אוסף מיידית את כל אסימוני הזמן שכבר מונחים מעל העמדה הזו.
                         </li>
                         <li>
                             <strong>קבל זמן</strong> — בחר עמדה אחת בשוק וערימה אחת שלה, מעל או
@@ -201,20 +181,10 @@
                         </li>
                     </ul>
                     <p>
-                        לאחר צילום או שדרוג, האריחים זזים עמדה אחת לכיוון החריץ שהתרוקן והשוק
-                        מתמלא מחדש מצד שמאל מהקלף הבא בחפיסה. אסימוני הזמן נשארים על העמדות
-                        הקבועות שלהם לכל אורך הדרך - הם לא זזים עם האריחים, ולא נכנסים או עוזבים
-                        את המשחק, רק עוברים בין השחקנים לשוק.
-                    </p>
-                </section>
-
-                <section>
-                    <h3>קוביות הדרישה</h3>
-                    <p>
-                        כל עוד קובית הציוד יושבת על עמדה, דרישת הציוד של האריח שבה גבוהה ב-1
-                        מהמודפס; קובית היצירתיות עובדת באותו אופן עבור יצירתיות. השינויים הללו
-                        חלים על פעולת הצילום בלבד. קובייה מוגרלת מחדש לעמדה חדשה רק כאשר מצלמים
-                        (ולא משדרגים) מהעמדה שעליה היא יושבת, אחרי שהשוק התחדש.
+                        לאחר צילום או שדרוג, העמדה שהתרוקנה מתמלאת ישירות מהקלף הבא בחפיסה - שאר
+                        העמדות נשארות בדיוק כפי שהיו. אסימוני הזמן נשארים על העמדות הקבועות שלהם
+                        לכל אורך הדרך - הם לא זזים עם האריחים, ולא נכנסים או עוזבים את המשחק, רק
+                        עוברים בין השחקנים לשוק.
                     </p>
                 </section>
 
@@ -266,7 +236,8 @@
                         <li>
                             <strong>רצפי סרט</strong> — בונוס עבור רצפים של תמונות שפותחו מאותה
                             קטגוריה ברצף לפי סדר הסרט: 2 תמונות = +2, 3 = +5, 4 = +9, 5 = +14, ואז
-                            +5 לכל תמונה נוספת מעבר ל-5.
+                            +5 לכל תמונה נוספת מעבר ל-5. תמונה שנשרפה פשוט מדולגת, כך שהרצף יכול
+                            להימשך דרכה.
                         </li>
                         <li>
                             <strong>בונוס גיוון</strong> — +5 נקודות אם יש לך תמונות שפותחו
