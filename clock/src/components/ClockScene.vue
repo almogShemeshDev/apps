@@ -41,8 +41,25 @@ function setGlow(type, on) {
 function setNumberGlow(n, on) {
     scene?.setNumberGlow(n, on)
 }
+function enableClockScrub(cb) {
+    scene?.enableClockScrub(cb)
+}
+function disableClockScrub() {
+    scene?.disableClockScrub()
+}
+function setTickHighlight(i) {
+    scene?.setTickHighlight(i)
+}
 
-defineExpose({ celebrate, shake, setGlow, setNumberGlow })
+defineExpose({
+    celebrate,
+    shake,
+    setGlow,
+    setNumberGlow,
+    enableClockScrub,
+    disableClockScrub,
+    setTickHighlight,
+})
 </script>
 
 <template>
