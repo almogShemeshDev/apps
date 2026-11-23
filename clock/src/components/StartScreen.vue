@@ -43,8 +43,8 @@ defineEmits(['select'])
 }
 
 .clock-wrap {
-    width: min(55vw, 60vh, 320px);
-    height: min(55vw, 60vh, 320px);
+    width: min(55vw, 55dvh, 320px);
+    height: min(55vw, 55dvh, 320px);
 }
 
 .menu {

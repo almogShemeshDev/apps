@@ -137,6 +137,7 @@ export function createClock3D(container) {
 
     // tick marks
     const tickMat = new THREE.MeshStandardMaterial({ color: INK })
+    const tickPositions = []
     for (let i = 0; i < 60; i++) {
         const isHour = i % 5 === 0
         const isBig = i % 15 === 0
@@ -145,9 +146,27 @@ export function createClock3D(container) {
         const tick = new THREE.Mesh(new THREE.BoxGeometry(w, h, 0.05), tickMat)
         const angle = (i / 60) * TAU
         const r = RADIUS - 0.26
-        tick.position.set(r * Math.sin(angle), r * Math.cos(angle), 0.14)
+        const pos = [r * Math.sin(angle), r * Math.cos(angle), 0.14]
+        tick.position.set(...pos)
         tick.rotation.z = -angle
         clockGroup.add(tick)
+        tickPositions.push(pos)
+    }
+
+    const tickHighlight = new THREE.Mesh(
+        new THREE.CircleGeometry(0.17, 24),
+        new THREE.MeshBasicMaterial({ color: GOLD, transparent: true, opacity: 0 })
+    )
+    tickHighlight.position.z = 0.17
+    clockGroup.add(tickHighlight)
+    function setTickHighlight(i) {
+        if (i === null || i === undefined) {
+            tickHighlight.material.opacity = 0
+            return
+        }
+        const [x, y] = tickPositions[i]
+        tickHighlight.position.set(x, y, 0.17)
+        tickHighlight.material.opacity = 0.55
     }
 
     // number sprites
@@ -336,6 +355,80 @@ export function createClock3D(container) {
     }
     renderer.domElement.addEventListener('pointerdown', handlePointer)
 
+    // clock-scrub: drag either hand to sweep through hours (0-11) or every single minute tick
+    let scrubCallback = null
+    let scrubActive = false
+    let scrubTarget = null
+    function getCenterScreenPos(rect) {
+        const v = new THREE.Vector3(0, 0, 0)
+        clockGroup.updateMatrixWorld()
+        v.applyMatrix4(clockGroup.matrixWorld)
+        v.project(camera)
+        return {
+            x: (v.x * 0.5 + 0.5) * rect.width + rect.left,
+            y: (1 - (v.y * 0.5 + 0.5)) * rect.height + rect.top,
+        }
+    }
+    function getScreenScale(rect) {
+        const center = getCenterScreenPos(rect)
+        const v = new THREE.Vector3(RADIUS, 0, 0)
+        clockGroup.updateMatrixWorld()
+        v.applyMatrix4(clockGroup.matrixWorld)
+        v.project(camera)
+        const edge = {
+            x: (v.x * 0.5 + 0.5) * rect.width + rect.left,
+            y: (1 - (v.y * 0.5 + 0.5)) * rect.height + rect.top,
+        }
+        return Math.hypot(edge.x - center.x, edge.y - center.y) / RADIUS
+    }
+    function updateScrub(ev) {
+        const rect = renderer.domElement.getBoundingClientRect()
+        const center = getCenterScreenPos(rect)
+        const dx = ev.clientX - center.x
+        const dy = ev.clientY - center.y
+        if (Math.abs(dx) < 2 && Math.abs(dy) < 2) return
+        let angle = Math.atan2(dx, -dy)
+        if (angle < 0) angle += TAU
+        if (scrubTarget === 'hour') {
+            setTickHighlight(null)
+            const hourIndex = Math.round((angle / TAU) * 12) % 12
+            scrubCallback?.('hour', hourIndex === 0 ? 12 : hourIndex)
+        } else {
+            const minuteIndex = Math.round((angle / TAU) * 60) % 60
+            setTickHighlight(minuteIndex)
+            scrubCallback?.('minute', minuteIndex)
+        }
+    }
+    function handleScrubDown(ev) {
+        if (!scrubCallback) return
+        const rect = renderer.domElement.getBoundingClientRect()
+        const center = getCenterScreenPos(rect)
+        const scale = getScreenScale(rect)
+        const dist = Math.hypot(ev.clientX - center.x, ev.clientY - center.y)
+        scrubTarget = dist < 1.3 * scale ? 'hour' : 'minute'
+        scrubActive = true
+        updateScrub(ev)
+    }
+    function handleScrubMove(ev) {
+        if (!scrubActive) return
+        updateScrub(ev)
+    }
+    function handleScrubUp() {
+        scrubActive = false
+    }
+    renderer.domElement.addEventListener('pointerdown', handleScrubDown)
+    window.addEventListener('pointermove', handleScrubMove)
+    window.addEventListener('pointerup', handleScrubUp)
+
+    function enableClockScrub(cb) {
+        scrubCallback = cb
+    }
+    function disableClockScrub() {
+        scrubCallback = null
+        scrubActive = false
+        setTickHighlight(null)
+    }
+
     function setGlow(type, on) {
         if (type === 'hour') hourGlow.material.opacity = on ? 0.35 : 0
         if (type === 'minute') minuteGlow.material.opacity = on ? 0.3 : 0
@@ -405,6 +498,9 @@ export function createClock3D(container) {
         cancelAnimationFrame(rafId)
         resizeObserver.disconnect()
         renderer.domElement.removeEventListener('pointerdown', handlePointer)
+        renderer.domElement.removeEventListener('pointerdown', handleScrubDown)
+        window.removeEventListener('pointermove', handleScrubMove)
+        window.removeEventListener('pointerup', handleScrubUp)
         renderer.dispose()
         if (renderer.domElement.parentElement === container) {
             container.removeChild(renderer.domElement)
@@ -416,8 +512,11 @@ export function createClock3D(container) {
         celebrate,
         shake,
         onPick,
+        enableClockScrub,
+        disableClockScrub,
         setGlow,
         setNumberGlow,
+        setTickHighlight,
         resize,
         dispose,
     }

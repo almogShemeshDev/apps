@@ -26,7 +26,7 @@ function choose(i) {
         streak.value += 1
         feedbackLine.value = TXT.correct[Math.floor(Math.random() * TXT.correct.length)]
         clockRef.value?.celebrate()
-        if (streak.value >= 5 && level.value < 3) {
+        if (streak.value >= 5 && level.value < 4) {
             level.value += 1
             streak.value = 0
             levelUpFlash.value = true
@@ -53,7 +53,7 @@ function next() {
             <button class="icon-btn" @click="emit('home')">{{ TXT.home }}</button>
             <div class="score">⭐ {{ score }}</div>
             <div class="level-dots">
-                <span v-for="i in 3" :key="i" class="dot" :class="{ active: i <= level }"></span>
+                <span v-for="i in 4" :key="i" class="dot" :class="{ active: i <= level }"></span>
             </div>
         </div>
 
@@ -95,7 +95,7 @@ function next() {
     display: flex;
     flex-direction: column;
     height: 100%;
-    padding: 0.6rem 1rem 1rem;
+    padding: 0.6rem 1rem calc(1rem + env(safe-area-inset-bottom, 0px));
 }
 
 .top-bar {
@@ -157,11 +157,14 @@ function next() {
     justify-content: center;
     gap: 1.2rem;
     flex-wrap: wrap;
+    min-height: 0;
+    overflow-y: auto;
 }
 
 .clock-wrap {
-    width: min(50vw, 55vh, 300px);
-    height: min(50vw, 55vh, 300px);
+    width: min(50vw, 48dvh, 300px);
+    height: min(50vw, 48dvh, 300px);
+    flex-shrink: 0;
 }
 
 .panel {
