@@ -65,6 +65,11 @@ jobs:
       - run: npm run build
         working-directory: free-sheeping
 
+      - run: npm ci
+        working-directory: clock
+      - run: npm run build
+        working-directory: clock
+
       - name: Arrange site structure
         run: |
           mkdir -p _site/mage-knight-player-aid
@@ -76,6 +81,7 @@ jobs:
           mkdir -p _site/park
           mkdir -p _site/potions
           mkdir -p _site/free-sheeping
+          mkdir -p _site/clock
           cp -r mage-knight-player-aid/dist/. _site/mage-knight-player-aid/
           cp -r milky-way/dist/. _site/milky-way/
           cp -r one-two-tree/dist/. _site/one-two-tree/
@@ -85,6 +91,7 @@ jobs:
           cp -r park/dist/. _site/park/
           cp -r potions/dist/. _site/potions/
           cp -r free-sheeping/dist/. _site/free-sheeping/
+          cp -r clock/dist/. _site/clock/
 
       - uses: actions/upload-pages-artifact@v3
         with:

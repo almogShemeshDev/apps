@@ -1,0 +1,73 @@
+:root {
+    --sky-top: #6ec6ff;
+    --sky-bottom: #bde8ff;
+    --sun: #ffd76a;
+    --orange: #ff8c42;
+    --pink: #ff6f91;
+    --purple: #7a5cff;
+    --green: #3ddc97;
+    --ink: #2b2b52;
+    --card: #ffffff;
+    font-family: 'Rubik', system-ui, sans-serif;
+}
+
+* {
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+}
+
+html,
+body {
+    margin: 0;
+    height: 100%;
+    overflow: hidden;
+    background: linear-gradient(180deg, var(--sky-top) 0%, var(--sky-bottom) 70%);
+    color: var(--ink);
+    user-select: none;
+}
+
+#app {
+    width: 100vw;
+    height: 100vh;
+    position: relative;
+}
+
+button {
+    font-family: inherit;
+    border: none;
+    cursor: pointer;
+    outline: none;
+}
+
+.btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4em;
+    font-weight: 700;
+    border-radius: 999px;
+    box-shadow: 0 6px 0 rgba(0, 0, 0, 0.12);
+    transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+
+.btn:active {
+    transform: translateY(4px);
+    box-shadow: 0 2px 0 rgba(0, 0, 0, 0.12);
+}
+
+.icon-btn {
+    width: 3.2rem;
+    height: 3.2rem;
+    border-radius: 50%;
+    background: var(--card);
+    font-size: 1.6rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 0 rgba(0, 0, 0, 0.12);
+}
+
+.icon-btn:active {
+    transform: translateY(3px);
+    box-shadow: 0 1px 0 rgba(0, 0, 0, 0.12);
+}
